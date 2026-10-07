@@ -1,0 +1,6 @@
+{
+  "name": "ParkControl — Sistema Inteligente de Parqueadero",
+  "description": "Sistema integral de gestión de parqueadero con mapa interactivo en tiempo real, control de acceso basado en roles (RBAC), registro de entradas y salidas, cálculo automático de tarifas y auditoría operativa.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

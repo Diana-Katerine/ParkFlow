@@ -1,0 +1,111 @@
+// Prisma Schema para ParkControl — Sistema Inteligente de Parqueadero
+// Cumple con el modelo ERD del Documento de Requisitos Técnicos (TRD)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  nombre      String   @unique // 'Administrador' | 'Operador' | 'Cliente'
+  descripcion String
+  users       User[]
+}
+
+model User {
+  id           String     @id @default(uuid())
+  nombre       String
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  roleId       String     @map("role_id")
+  role         Role       @relation(fields: [roleId], references: [id])
+  activo       Boolean    @default(true)
+  placaCliente String?    @map("placa_cliente")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  auditLogs    AuditLog[]
+}
+
+model Vehicle {
+  id           String       @id @default(uuid())
+  placa        String       @unique
+  tipoVehiculo String       @map("tipo_vehiculo") // 'AUTOMOVIL' | 'MOTOCICLETA' | 'CAMIONETA' | 'ELECTRICO'
+  propietario  String?
+  createdAt    DateTime     @default(now()) @map("created_at")
+  parkingLogs  ParkingLog[]
+}
+
+model ParkingSpot {
+  id                String       @id @default(uuid())
+  codigoEspacio     String       @unique @map("codigo_espacio")
+  zona              String
+  tipoPermitido     String       @map("tipo_permitido")
+  estado            String       @default("DISPONIBLE") // 'DISPONIBLE' | 'OCUPADO' | 'MANTENIMIENTO'
+  placaActual       String?      @map("placa_actual")
+  horaIngresoActual DateTime?    @map("hora_ingreso_actual")
+  parkingLogs       ParkingLog[]
+}
+
+model Rate {
+  id                  String   @id @default(uuid())
+  tipoVehiculo        String   @unique @map("tipo_vehiculo")
+  valorPorMinuto      Float    @map("valor_por_minuto")
+  valorPorHora        Float    @map("valor_por_hora")
+  tarifaPlenaDia      Float    @map("tarifa_plena_dia")
+  tiempoGraciaMinutos Int      @default(5) @map("tiempo_gracia_minutos")
+  updatedAt           DateTime @updatedAt @map("updated_at")
+}
+
+model ParkingLog {
+  id              String      @id @default(uuid())
+  ticketNumero    String      @unique @map("ticket_numero")
+  vehicleId       String      @map("vehicle_id")
+  vehicle         Vehicle     @relation(fields: [vehicleId], references: [id])
+  placa           String
+  tipoVehiculo    String      @map("tipo_vehiculo")
+  spotId          String      @map("spot_id")
+  spot            ParkingSpot @relation(fields: [spotId], references: [id])
+  codigoEspacio   String      @map("codigo_espacio")
+  fechaIngreso    DateTime    @default(now()) @map("fecha_ingreso")
+  fechaSalida     DateTime?   @map("fecha_salida")
+  minutosTotales  Int?        @map("minutos_totales")
+  valorPagado     Float?      @map("valor_pagado")
+  metodoPago      String?     @map("metodo_pago")
+  estadoRegistro  String      @default("ACTIVO") @map("estado_registro") // 'ACTIVO' | 'FINALIZADO' | 'ANULADO'
+  operadorEntrada String      @map("operador_entrada")
+  operadorSalida  String?     @map("operador_salida")
+  observaciones   String?
+  ticket          Ticket?
+}
+
+model Ticket {
+  id             String     @id @default(uuid())
+  numeroTicket   String     @unique @map("numero_ticket")
+  parkingLogId   String     @unique @map("parking_log_id")
+  parkingLog     ParkingLog @relation(fields: [parkingLogId], references: [id])
+  placa          String
+  tipoVehiculo   String     @map("tipo_vehiculo")
+  codigoEspacio  String     @map("codigo_espacio")
+  zona           String
+  fechaIngreso   DateTime   @map("fecha_ingreso")
+  tarifaAplicada Float      @map("tarifa_aplicada")
+  codigoVerif    String     @map("codigo_verif")
+  estado         String     @default("ACTIVO")
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  usuarioId     String   @map("usuario_id")
+  user          User     @relation(fields: [usuarioId], references: [id])
+  usuarioNombre String   @map("usuario_nombre")
+  usuarioRol    String   @map("usuario_rol")
+  accion        String
+  modulo        String
+  detalle       String
+  ip            String
+  timestamp     DateTime @default(now())
+}

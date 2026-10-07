@@ -1,0 +1,37 @@
+version: '3.9'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: parkcontrol_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: parkcontrol_db
+      MYSQL_USER: parkcontrol_user
+      MYSQL_PASSWORD: parkcontrol_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 5
+
+  app:
+    build: .
+    container_name: parkcontrol_app
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: mysql://parkcontrol_user:parkcontrol_password@mysql:3306/parkcontrol_db
+      JWT_SECRET: parkcontrol-production-jwt-secret-key
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
