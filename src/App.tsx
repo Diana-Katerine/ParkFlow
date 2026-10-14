@@ -3,8 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState } from 'react';
-import { LogOut, ShieldAlert, CheckCircle2, X, UserCheck } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LogOut, ShieldAlert, CheckCircle2, X, UserCheck, Database, RefreshCw } from 'lucide-react';
 import {
   AuditLog,
   ParkingLog,
@@ -26,17 +26,24 @@ import { LoginView } from './components/LoginView';
 import { OperatorWorkspace } from './components/OperatorWorkspace';
 import { ClientPortal } from './components/ClientPortal';
 import { AdminDashboard } from './components/AdminDashboard';
+import { XamppStatusModal } from './components/XamppStatusModal';
+import { parkFlowApi, BackendStatus } from './services/api';
 import operatorAvatarImg from './assets/images/operator_profile_avatar_1791411155955.jpg';
 
 type ActiveModuleView = 'PANEL_OPERATIVO' | 'PANEL_ADMINISTRATIVO' | 'PORTAL_CLIENTE';
 
 export default function App() {
-  // Application State (Persisted in memory with realistic initial telemetry)
+  // Application State (Persisted in MySQL via XAMPP and memory cache)
   const [users, setUsers] = useState<UserAccount[]>(INITIAL_USERS);
   const [spots, setSpots] = useState<ParkingSpot[]>(INITIAL_SPOTS);
   const [rates, setRates] = useState<RateConfig[]>(INITIAL_RATES);
   const [logs, setLogs] = useState<ParkingLog[]>(INITIAL_LOGS);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(INITIAL_AUDIT_LOGS);
+
+  // XAMPP & MySQL live status state
+  const [backendStatus, setBackendStatus] = useState<BackendStatus | null>(null);
+  const [showDbModal, setShowDbModal] = useState<boolean>(false);
+  const [isSyncing, setIsSyncing] = useState<boolean>(false);
 
   // Auth & RBAC State: Starts on LoginView as mandated by User Flow Section 1
   const [currentUser, setCurrentUser] = useState<UserAccount | null>(null);
@@ -48,6 +55,37 @@ export default function App() {
   } | null>(null);
   const [avatarFailed, setAvatarFailed] = useState<boolean>(false);
 
+  // Cargar datos sincronizados desde XAMPP (Apache + PHP + MySQL)
+  const refreshBackendData = async () => {
+    setIsSyncing(true);
+    try {
+      const status = await parkFlowApi.getStatus();
+      setBackendStatus(status);
+      if (status.connected) {
+        const [spotsData, ratesData, ticketsData, usersData, auditData] = await Promise.all([
+          parkFlowApi.getSpots(),
+          parkFlowApi.getRates(),
+          parkFlowApi.getTickets(),
+          parkFlowApi.getUsers(),
+          parkFlowApi.getAuditLogs(),
+        ]);
+        if (spotsData.length > 0) setSpots(spotsData);
+        if (ratesData.length > 0) setRates(ratesData);
+        if (ticketsData.length > 0) setLogs(ticketsData);
+        if (usersData.length > 0) setUsers(usersData);
+        if (auditData.length > 0) setAuditLogs(auditData);
+      }
+    } catch (e) {
+      console.warn('Conexión con PHP XAMPP no disponible en este momento:', e);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshBackendData();
+  }, []);
+
   const appendAuditLog = (
     accion: string,
     modulo: AuditLog['modulo'],
@@ -56,6 +94,7 @@ export default function App() {
     overrideUser?: UserAccount
   ) => {
     const actor = overrideUser || currentUser;
+    const timestamp = new Date().toLocaleString('es-CO');
     const newEntry: AuditLog = {
       id: `AUD-${9005 + auditLogs.length}`,
       usuarioEmail: actor ? actor.email : 'anonimo@visitante.co',
@@ -63,10 +102,21 @@ export default function App() {
       accion,
       modulo,
       detalle,
-      timestamp: new Date().toLocaleString('es-CO'),
+      timestamp,
       resultado,
     };
     setAuditLogs((prev) => [newEntry, ...prev]);
+
+    // Persistir auditoría en MySQL
+    parkFlowApi.logAudit({
+      usuarioEmail: newEntry.usuarioEmail,
+      rol: newEntry.rol,
+      accion,
+      modulo,
+      detalle,
+      timestamp,
+      resultado,
+    }).catch(() => {});
   };
 
   // Login & Role-based Automatic Redirect (User Flow 1)
@@ -74,6 +124,9 @@ export default function App() {
     setCurrentUser(user);
     setUnauthorizedRedirectMsg(null);
     setRbacForbiddenBanner(null);
+
+    // Actualizar último acceso en MySQL
+    parkFlowApi.loginUser(user.email).catch(() => {});
 
     if (user.rol === 'Cliente') {
       setActiveView('PORTAL_CLIENTE');
@@ -225,6 +278,18 @@ export default function App() {
       'OK'
     );
 
+    // Persistir entrada en MySQL a través de XAMPP
+    parkFlowApi.registerEntry({
+      placa,
+      tipoVehiculo,
+      spotCodigo,
+      operadorEntrada: currentUser?.nombre || 'Operador de Turno',
+      operadorEmail: currentUser?.email,
+      propietarioNombre,
+    }).then(() => {
+      parkFlowApi.getStatus().then(setBackendStatus);
+    }).catch((err) => console.warn('Sync con MySQL:', err));
+
     return { ok: true, createdLog };
   };
 
@@ -283,6 +348,20 @@ export default function App() {
       'OK'
     );
 
+    // Persistir cobro y liberación en MySQL a través de XAMPP
+    parkFlowApi.registerExit({
+      logId,
+      metodoPago,
+      valorPagado,
+      minutosTranscurridos,
+      cruzoMedianoche,
+      fechaSalidaISO,
+      operadorSalida: currentUser?.nombre || 'Operador de Turno',
+      operadorEmail: currentUser?.email,
+    }).then(() => {
+      parkFlowApi.getStatus().then(setBackendStatus);
+    }).catch((err) => console.warn('Sync con MySQL:', err));
+
     return { ok: true, completedLog };
   };
 
@@ -303,6 +382,9 @@ export default function App() {
       `Ajuste de marca temporal (-${hoursBack}h) en registro ${logId} para validación de cruce de medianoche`,
       'OK'
     );
+
+    // Persistir ajuste en MySQL
+    parkFlowApi.shiftEntryTimeForMidnight(logId, hoursBack, currentUser?.email).catch(() => {});
   };
 
   // Admin: Update Rate
@@ -314,6 +396,9 @@ export default function App() {
       `Tarifa actualizada para ${updated.tipoVehiculo}: $${updated.tarifaPorHora}/h · $${updated.tarifaPorMinuto}/min`,
       'OK'
     );
+
+    // Persistir tarifa en MySQL
+    parkFlowApi.updateRate(updated).catch((err) => console.warn('Sync tarifa MySQL:', err));
   };
 
   // Admin: Toggle Spot Maintenance
@@ -330,6 +415,9 @@ export default function App() {
       `Bahía ${target.codigo} cambiada a estado ${nextState} por el Administrador`,
       'OK'
     );
+
+    // Persistir estado de espacio en MySQL
+    parkFlowApi.toggleSpotMaintenance(spotId).catch((err) => console.warn('Sync espacio MySQL:', err));
   };
 
   // Admin: Create User
@@ -361,6 +449,12 @@ export default function App() {
       `Nuevo usuario ${created.email} creado con rol ${created.rol}`,
       'OK'
     );
+
+    // Persistir usuario en MySQL
+    parkFlowApi.createUser(newUser, currentUser?.email).then(() => {
+      parkFlowApi.getStatus().then(setBackendStatus);
+    }).catch((err) => console.warn('Sync usuario MySQL:', err));
+
     return { ok: true };
   };
 
@@ -377,6 +471,9 @@ export default function App() {
       `Rol del usuario ${userId} actualizado a ${newRole}`,
       'OK'
     );
+
+    // Persistir rol en MySQL
+    parkFlowApi.updateUserRole(userId, newRole).catch(() => {});
   };
 
   const handleToggleUserActive = (userId: string) => {
@@ -389,6 +486,9 @@ export default function App() {
       `Cambio de estado activo/inactivo para cuenta ${userId}`,
       'OK'
     );
+
+    // Persistir activo/inactivo en MySQL
+    parkFlowApi.toggleUserActive(userId).catch(() => {});
   };
 
   const availableSpotsCount = spots.filter((s) => s.estado === 'DISPONIBLE').length;
@@ -396,13 +496,23 @@ export default function App() {
   // If no user is authenticated, render Direct Login Screen (/login)
   if (!currentUser) {
     return (
-      <LoginView
-        users={users}
-        onLoginSuccess={handleLoginSuccess}
-        unauthorizedRedirectMsg={unauthorizedRedirectMsg}
-        totalSpots={spots.length}
-        availableSpots={availableSpotsCount}
-      />
+      <>
+        <LoginView
+          users={users}
+          onLoginSuccess={handleLoginSuccess}
+          unauthorizedRedirectMsg={unauthorizedRedirectMsg}
+          totalSpots={spots.length}
+          availableSpots={availableSpotsCount}
+          backendStatus={backendStatus}
+          onOpenDbModal={() => setShowDbModal(true)}
+        />
+        <XamppStatusModal
+          isOpen={showDbModal}
+          onClose={() => setShowDbModal(false)}
+          status={backendStatus}
+          onRefresh={refreshBackendData}
+        />
+      </>
     );
   }
 
@@ -461,8 +571,30 @@ export default function App() {
           </button>
         </nav>
 
-        {/* Zone 3: 1-2 Primary Actions (Role Switcher + Logout) */}
-        <div className="flex items-center gap-3">
+        {/* Zone 3: 1-2 Primary Actions (XAMPP Status + Role Switcher + Logout) */}
+        <div className="flex items-center gap-2 sm:gap-3">
+          {/* XAMPP & MySQL Status Chip */}
+          <button
+            type="button"
+            onClick={() => setShowDbModal(true)}
+            title="Diagnóstico de Conexión XAMPP & MySQL"
+            className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+              backendStatus?.connected
+                ? 'bg-[#10b981]/15 text-[#34d399] border-[#10b981]/30 hover:bg-[#10b981]/25'
+                : 'bg-[#ef4444]/15 text-[#f87171] border-[#ef4444]/30 hover:bg-[#ef4444]/25'
+            }`}
+          >
+            <Database className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">
+              XAMPP {backendStatus?.connected ? 'MySQL' : 'Offline'}
+            </span>
+            <span
+              className={`w-2 h-2 rounded-full ${
+                backendStatus?.connected ? 'bg-[#10b981] animate-pulse' : 'bg-[#ef4444]'
+              }`}
+            />
+          </button>
+
           <div className="flex items-center gap-2">
             <div className="w-7 h-7 rounded-full overflow-hidden border border-[#00f5ff]/40 bg-[#0f172a] shrink-0">
               {!avatarFailed ? (
@@ -659,6 +791,14 @@ export default function App() {
           </button>
         </div>
       </footer>
+
+      {/* Modal de Conexión y Diagnóstico de XAMPP / MySQL */}
+      <XamppStatusModal
+        isOpen={showDbModal}
+        onClose={() => setShowDbModal(false)}
+        status={backendStatus}
+        onRefresh={refreshBackendData}
+      />
     </div>
   );
 }

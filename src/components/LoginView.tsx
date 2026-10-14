@@ -4,12 +4,16 @@ import { RoleType, UserAccount } from '../types/parking';
 import heroFacilityImg from '../assets/images/smart_parking_facility_hero_1791411135286.jpg';
 import sensorBayImg from '../assets/images/isometric_parking_sensor_bay_1791411145619.jpg';
 
+import { BackendStatus } from '../services/api';
+
 interface LoginViewProps {
   users: UserAccount[];
   onLoginSuccess: (user: UserAccount) => void;
   unauthorizedRedirectMsg: string | null;
   totalSpots: number;
   availableSpots: number;
+  backendStatus?: BackendStatus | null;
+  onOpenDbModal?: () => void;
 }
 
 export const LoginView: React.FC<LoginViewProps> = ({
@@ -18,6 +22,8 @@ export const LoginView: React.FC<LoginViewProps> = ({
   unauthorizedRedirectMsg,
   totalSpots,
   availableSpots,
+  backendStatus,
+  onOpenDbModal,
 }) => {
   const [email, setEmail] = useState('operador@parkpulse.co');
   const [password, setPassword] = useState('••••••••••••');
@@ -88,6 +94,28 @@ export const LoginView: React.FC<LoginViewProps> = ({
         </nav>
 
         <div className="flex items-center gap-3">
+          {onOpenDbModal && (
+            <button
+              type="button"
+              onClick={onOpenDbModal}
+              title="Ver estado de conexión con XAMPP & MySQL"
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all border ${
+                backendStatus?.connected
+                  ? 'bg-[#10b981]/15 text-[#34d399] border-[#10b981]/30 hover:bg-[#10b981]/25'
+                  : 'bg-[#ef4444]/15 text-[#f87171] border-[#ef4444]/30 hover:bg-[#ef4444]/25'
+              }`}
+            >
+              <span
+                className={`w-2 h-2 rounded-full ${
+                  backendStatus?.connected ? 'bg-[#10b981] animate-pulse' : 'bg-[#ef4444]'
+                }`}
+              />
+              <span>
+                {backendStatus?.connected ? 'XAMPP · MySQL OK' : 'XAMPP Desconectado'}
+              </span>
+            </button>
+          )}
+
           <button
             type="button"
             onClick={() => handleQuickRoleSelect('Operador')}
