@@ -1,0 +1,6 @@
+{
+  "name": "ParkPulse — Sistema Inteligente de Parqueadero",
+  "description": "Plataforma de gestión inteligente de parqueaderos con control de ocupación en tiempo real, registro vehicular, cálculo automático de tarifas, RBAC y auditoría.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
