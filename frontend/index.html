@@ -32,11 +32,19 @@
             <form id="authLoginForm" onsubmit="handleAuthSubmit(event)">
                 <div class="auth-form-group">
                     <label class="auth-label">Correo Electrónico</label>
-                    <input type="email" id="authInputEmail" class="auth-input" placeholder="ejemplo@parkpulse.co" required autocomplete="email">
+                    <input type="email" id="authInputEmail" class="auth-input" placeholder="Cualquier correo (ej: tu_nombre@correo.com)" required autocomplete="email">
+                </div>
+                                <div class="auth-form-group">
+                    <label class="auth-label">Rol con el que deseas ingresar</label>
+                    <select id="authInputRole" class="auth-input" style="cursor:pointer; background:var(--bg-surface-elevated); color:var(--text-heading);">
+                        <option value="Administrador">👑 Administrador (Acceso Total y Configuración)</option>
+                        <option value="Operador">👷 Operador (Entradas, Salidas y Bahías)</option>
+                        <option value="Cliente">👤 Cliente / Conductor (Portal Ciudadano)</option>
+                    </select>
                 </div>
                 <div class="auth-form-group">
                     <label class="auth-label">Contraseña</label>
-                    <input type="password" id="authInputPassword" class="auth-input" placeholder="••••••••••••" required autocomplete="current-password">
+                    <input type="password" id="authInputPassword" class="auth-input" placeholder="Cualquier contraseña (ej: 123456)" required autocomplete="current-password">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem; padding:0.75rem;">
                     Iniciar Sesión en ParkFlow →

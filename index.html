@@ -1196,11 +1196,19 @@
             <form id="authLoginForm" onsubmit="handleAuthSubmit(event)">
                 <div class="auth-form-group">
                     <label class="auth-label">Correo Electrónico</label>
-                    <input type="email" id="authInputEmail" class="auth-input" placeholder="ejemplo@parkpulse.co" required autocomplete="email">
+                    <input type="email" id="authInputEmail" class="auth-input" placeholder="Cualquier correo (ej: tu_nombre@correo.com)" required autocomplete="email">
+                </div>
+                                <div class="auth-form-group">
+                    <label class="auth-label">Rol con el que deseas ingresar</label>
+                    <select id="authInputRole" class="auth-input" style="cursor:pointer; background:var(--bg-surface-elevated); color:var(--text-heading);">
+                        <option value="Administrador">👑 Administrador (Acceso Total y Configuración)</option>
+                        <option value="Operador">👷 Operador (Entradas, Salidas y Bahías)</option>
+                        <option value="Cliente">👤 Cliente / Conductor (Portal Ciudadano)</option>
+                    </select>
                 </div>
                 <div class="auth-form-group">
                     <label class="auth-label">Contraseña</label>
-                    <input type="password" id="authInputPassword" class="auth-input" placeholder="••••••••••••" required autocomplete="current-password">
+                    <input type="password" id="authInputPassword" class="auth-input" placeholder="Cualquier contraseña (ej: 123456)" required autocomplete="current-password">
                 </div>
                 <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem; padding:0.75rem;">
                     Iniciar Sesión en ParkFlow →
@@ -1992,7 +2000,7 @@
 <!-- LOGICA CLIENTE EN JAVASCRIPT CONEXIÓN A API PHP REST             -->
 <!-- ================================================================= -->
     <script>
-    // =========================================================================
+        // =========================================================================
     // Sistema de Autenticación y Control de Sesión
     // =========================================================================
     const REGISTERED_ACCOUNTS = [
@@ -2030,8 +2038,7 @@
                     currentAuthSession = parsed;
                     saasState.currentRole = parsed.rol;
                     hideAuthScreen();
-                    checkAuthSession();
-        applyRbacToUI();
+                    applyRbacToUI();
                     const config = RBAC_RULES[parsed.rol] || RBAC_RULES['Administrador'];
                     switchSaasView(config.defaultView);
                     return true;
@@ -2059,33 +2066,49 @@
     }
 
     function handleAuthSubmit(event) {
-        event.preventDefault();
-        const email = document.getElementById('authInputEmail').value.trim().toLowerCase();
-        const pass = document.getElementById('authInputPassword').value.trim();
-        const err = document.getElementById('authErrorMsg');
+        if (event) event.preventDefault();
+        const emailInput = document.getElementById('authInputEmail');
+        const passInput = document.getElementById('authInputPassword');
+        const roleSelect = document.getElementById('authInputRole');
 
-        // Buscar cuenta
-        const match = REGISTERED_ACCOUNTS.find(a => a.email.toLowerCase() === email);
-        if (!match) {
-            err.style.display = 'block';
-            err.textContent = '❌ Correo no registrado. Usa admin@parkpulse.co, operador@parkpulse.co o cliente@parkpulse.co';
+        const email = emailInput ? emailInput.value.trim() : 'usuario@parkflow.com';
+        const pass = passInput ? passInput.value.trim() : '123';
+        const chosenRole = roleSelect ? roleSelect.value : 'Administrador';
+
+        // 1. Si coincide con una cuenta demo predefinida:
+        const match = REGISTERED_ACCOUNTS.find(a => a.email.toLowerCase() === email.toLowerCase());
+        if (match) {
+            loginUserSuccess(match);
             return;
         }
 
-        // Simulación o verificación de clave (permite clave correcta o demo)
-        if (pass.length < 3) {
-            err.style.display = 'block';
-            err.textContent = '❌ La contraseña debe tener al menos 3 caracteres.';
-            return;
-        }
+        // 2. Si es CUALQUIER otro correo o contraseña (no necesitan ser reales):
+        // Obtenemos un nombre amigable a partir del correo
+        const namePart = email.includes('@') ? email.split('@')[0] : email;
+        const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
 
-        loginUserSuccess(match);
+        const customUser = {
+            email: email || 'usuario@parkflow.com',
+            password: pass || '123456',
+            nombre: formattedName,
+            rol: chosenRole,
+            placa: (chosenRole === 'Cliente') ? 'KLM-456' : null
+        };
+
+        loginUserSuccess(customUser);
     }
 
     function quickLogin(email) {
         const match = REGISTERED_ACCOUNTS.find(a => a.email.toLowerCase() === email.toLowerCase());
         if (match) {
             loginUserSuccess(match);
+        } else {
+            loginUserSuccess({
+                email: email,
+                password: '123',
+                nombre: 'Usuario ParkFlow',
+                rol: 'Administrador'
+            });
         }
     }
 
@@ -2097,23 +2120,22 @@
         } catch (e) {}
 
         hideAuthScreen();
-        checkAuthSession();
         applyRbacToUI();
 
-        // Si es cliente y tiene placa, pre-cargar en el buscador del portal
-        if (account.rol === 'Cliente' && account.placa) {
+        // Si es cliente, pre-cargar placa en el portal
+        if (account.rol === 'Cliente') {
             const plateInput = document.getElementById('saasClientPlateSearch');
-            if (plateInput) plateInput.value = account.placa;
+            if (plateInput) plateInput.value = account.placa || 'KLM-456';
         }
 
         const config = RBAC_RULES[account.rol] || RBAC_RULES['Administrador'];
         switchSaasView(config.defaultView);
 
-        // Actualizar selector de rol del sidebar para reflejar el usuario logeado
+        // Actualizar selector de rol del sidebar
         const selector = document.getElementById('saasRoleSelector');
         if (selector) selector.value = account.rol;
 
-        showRbacToast(`Bienvenido/a <strong>${account.nombre}</strong>. Has ingresado como <strong>${account.rol}</strong>.`, false);
+        showRbacToast(`¡Bienvenido/a <strong>${account.nombre}</strong>! Has ingresado con rol <strong>${account.rol}</strong>.`, false);
     }
 
     function handleLogout() {
@@ -2122,6 +2144,15 @@
         try {
             localStorage.removeItem('parkflow_auth_session');
         } catch (e) {}
+
+        const emailInput = document.getElementById('authInputEmail');
+        const passInput = document.getElementById('authInputPassword');
+        if (emailInput) emailInput.value = '';
+        if (passInput) passInput.value = '';
+
+        showAuthScreen();
+        showRbacToast('Sesión cerrada. Acceso al sistema bloqueado.', true);
+    } catch (e) {}
 
         // Limpiar inputs
         const emailInput = document.getElementById('authInputEmail');
@@ -2383,7 +2414,6 @@
     // Cambio de Rol RBAC
     function handleRoleChange(role) {
         saasState.currentRole = role;
-        checkAuthSession();
         applyRbacToUI();
 
         const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
