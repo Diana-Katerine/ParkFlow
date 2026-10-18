@@ -1171,6 +1171,85 @@
     background: rgba(244, 63, 94, 0.25);
     border-color: var(--rose);
 }
+
+/* ========================================================================= */
+/* Client Map & Reservations System Styles                                   */
+/* ========================================================================= */
+.bay-reservado {
+    border-color: rgba(245, 158, 11, 0.45) !important;
+    background: rgba(245, 158, 11, 0.08) !important;
+    color: var(--amber) !important;
+}
+.bay-reservado .bay-state-tag {
+    background: var(--amber-subtle) !important;
+    color: var(--amber) !important;
+}
+.bay-selected-target {
+    border-color: var(--primary) !important;
+    background: rgba(0, 245, 255, 0.16) !important;
+    box-shadow: 0 0 16px var(--primary-glow) !important;
+    transform: scale(1.03) !important;
+}
+.category-tab-btn {
+    padding: 0.5rem 0.95rem;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-body);
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-family: inherit;
+}
+.category-tab-btn:hover {
+    border-color: var(--primary);
+    color: var(--text-heading);
+}
+.category-tab-btn.active {
+    background: rgba(0, 245, 255, 0.12);
+    border-color: var(--primary);
+    color: var(--primary);
+    font-weight: 700;
+    box-shadow: 0 0 12px rgba(0, 245, 255, 0.2);
+}
+.client-mode-tab {
+    flex: 1;
+    padding: 0.65rem 1rem;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.84rem;
+    cursor: pointer;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-body);
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.client-mode-tab.active {
+    background: linear-gradient(135deg, rgba(0, 245, 255, 0.15), rgba(99, 102, 241, 0.15));
+    border-color: var(--primary);
+    color: var(--text-heading);
+}
+.reservation-card-item {
+    background: var(--bg-surface-elevated);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-radius: var(--radius-md);
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: all 0.2s;
+}
+.reservation-card-item:hover {
+    border-color: var(--amber);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
 </style>
 </head>
 <body>
@@ -1757,34 +1836,44 @@
             <!-- ======================================================== -->
             <!-- 7. VIEW: PORTAL DEL CLIENTE                              -->
             <!-- ======================================================== -->
+                        <!-- ======================================================== -->
+            <!-- 7. VIEW: PORTAL CIUDADANO / CLIENTE                      -->
+            <!-- ======================================================== -->
             <div id="view-client-portal" class="view-panel">
-                <div style="max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:1.5rem;">
-                    <!-- Tarjeta de Registro de Vehículo para el Cliente -->
-                    <div class="saas-card" style="border:1px solid rgba(0, 245, 255, 0.3); background:linear-gradient(180deg, rgba(11, 17, 32, 0.95), rgba(17, 26, 46, 0.9)); box-shadow:0 8px 30px rgba(0,245,255,0.08);">
-                        <div class="card-header-flex" style="margin-bottom:1.25rem;">
+                <div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:1.75rem;">
+
+                    <!-- Pestañas de Modo: Entrada Inmediata vs Reserva Anticipada -->
+                    <div style="display:flex; gap:0.75rem;">
+                        <button type="button" class="client-mode-tab active" id="tabModeEntry" onclick="switchClientActionTab('entry')">
+                            🚗 Registrar Entrada Inmediata
+                        </button>
+                        <button type="button" class="client-mode-tab" id="tabModeReserve" onclick="switchClientActionTab('reserve')">
+                            📅 Realizar Reserva Anticipada (Horas, Días, Noches)
+                        </button>
+                    </div>
+
+                    <!-- Panel A: Entrada Inmediata de Vehículo -->
+                    <div id="clientActionPanelEntry" class="saas-card" style="border:1px solid rgba(0, 245, 255, 0.3); background:linear-gradient(180deg, rgba(11, 17, 32, 0.95), rgba(17, 26, 46, 0.9));">
+                        <div class="card-header-flex" style="margin-bottom:1rem;">
                             <div style="display:flex; align-items:center; gap:0.75rem;">
-                                <div style="width:42px; height:42px; border-radius:var(--radius-md); background:linear-gradient(135deg, var(--primary), var(--indigo)); color:#060911; display:flex; align-items:center; justify-content:center; font-size:1.35rem; font-weight:800; box-shadow:0 0 15px var(--primary-glow);">
+                                <div style="width:40px; height:40px; border-radius:var(--radius-md); background:linear-gradient(135deg, var(--primary), var(--indigo)); color:#060911; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">
                                     🚗
                                 </div>
                                 <div>
-                                    <h3 class="card-heading-title" style="color:var(--text-heading); font-size:1.15rem; font-weight:800;">Registrar Ingreso de mi Vehículo</h3>
-                                    <p class="card-heading-sub">Registra la llegada de tu vehículo, selecciona o recibe una bahía y obtén tu ticket digital al instante</p>
+                                    <h3 class="card-heading-title" style="color:var(--text-heading); font-size:1.1rem; font-weight:800;">Registrar Entrada de mi Vehículo</h3>
+                                    <p class="card-heading-sub">Elige tu bahía en el mapa interactivo de abajo o selecciónala en el menú desplegable</p>
                                 </div>
                             </div>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="openSaasModal('modalCheckIn')">
-                                <span>📋</span> Formulario Completo
-                            </button>
                         </div>
 
-                        <!-- Formulario de Registro Rápido de Cliente -->
-                        <form onsubmit="handleClientSelfEntrySubmit(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) 170px; gap:1rem; align-items:flex-end;">
+                        <form onsubmit="handleClientSelfEntrySubmit(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) 160px; gap:0.85rem; align-items:flex-end;">
                             <div class="form-row" style="margin-bottom:0;">
-                                <label class="form-label-saas" style="font-weight:700; color:var(--text-heading);">Placa de tu Vehículo</label>
-                                <input type="text" id="clientSelfPlate" class="form-control-saas" placeholder="Ej: KLM-456 o ABC-123" required style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700; font-size:1.05rem; letter-spacing:0.05em;">
+                                <label class="form-label-saas" style="font-weight:700;">Placa del Vehículo</label>
+                                <input type="text" id="clientSelfPlate" class="form-control-saas" placeholder="Ej: KLM-456" required style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700; font-size:1rem;">
                             </div>
                             <div class="form-row" style="margin-bottom:0;">
-                                <label class="form-label-saas" style="font-weight:700; color:var(--text-heading);">Tipo de Vehículo</label>
-                                <select id="clientSelfType" class="form-control-saas" onchange="filterAvailableBaysForClientSelf()" style="font-weight:600;">
+                                <label class="form-label-saas" style="font-weight:700;">Tipo de Vehículo</label>
+                                <select id="clientSelfType" class="form-control-saas" onchange="onClientVehicleTypeChange(this.value)">
                                     <option value="Automóvil">Automóvil (Zona A)</option>
                                     <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
                                     <option value="Motocicleta">Motocicleta (Zona C)</option>
@@ -1792,22 +1881,161 @@
                                 </select>
                             </div>
                             <div class="form-row" style="margin-bottom:0;">
-                                <label class="form-label-saas" style="font-weight:700; color:var(--text-heading);">Bahía de Parqueo</label>
-                                <select id="clientSelfBay" class="form-control-saas" required style="font-weight:600;">
+                                <label class="form-label-saas" style="font-weight:700;">Bahía Seleccionada</label>
+                                <select id="clientSelfBay" class="form-control-saas" required>
                                     <option value="">Cargando bahías disponibles...</option>
                                 </select>
                             </div>
-                            <button type="submit" id="btnSubmitClientSelf" class="btn btn-primary" style="height:44px; font-weight:800; font-size:0.9rem; width:100%; box-shadow:0 4px 15px rgba(0,245,255,0.25);">
+                            <button type="submit" id="btnSubmitClientSelf" class="btn btn-primary" style="height:42px; font-weight:800; width:100%;">
                                 <span>🚀</span> Registrar Entrada
                             </button>
                         </form>
                     </div>
 
+                    <!-- Panel B: Reserva Anticipada (Horas, Días, Noches) -->
+                    <div id="clientActionPanelReserve" class="saas-card" style="display:none; border:1px solid rgba(245, 158, 11, 0.4); background:linear-gradient(180deg, rgba(11, 17, 32, 0.95), rgba(28, 20, 10, 0.9));">
+                        <div class="card-header-flex" style="margin-bottom:1rem;">
+                            <div style="display:flex; align-items:center; gap:0.75rem;">
+                                <div style="width:40px; height:40px; border-radius:var(--radius-md); background:linear-gradient(135deg, var(--amber), #ea580c); color:#060911; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">
+                                    📅
+                                </div>
+                                <div>
+                                    <h3 class="card-heading-title" style="color:var(--text-heading); font-size:1.1rem; font-weight:800;">Reserva Anticipada de Bahía</h3>
+                                    <p class="card-heading-sub">Asegura tu lugar con antelación por horas, noche completa o múltiples días</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <form onsubmit="handleClientReservationSubmit(event)">
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:1rem;">
+                                <div class="form-row" style="margin-bottom:0;">
+                                    <label class="form-label-saas" style="font-weight:700;">Placa del Vehículo</label>
+                                    <input type="text" id="reservePlate" class="form-control-saas" placeholder="Ej: KLM-456" required style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700; font-size:1rem;">
+                                </div>
+                                <div class="form-row" style="margin-bottom:0;">
+                                    <label class="form-label-saas" style="font-weight:700;">Tipo de Vehículo</label>
+                                    <select id="reserveType" class="form-control-saas" onchange="onClientVehicleTypeChange(this.value)">
+                                        <option value="Automóvil">Automóvil (Zona A)</option>
+                                        <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
+                                        <option value="Motocicleta">Motocicleta (Zona C)</option>
+                                        <option value="Camioneta">Camioneta / SUV (Zona D)</option>
+                                    </select>
+                                </div>
+                                <div class="form-row" style="margin-bottom:0;">
+                                    <label class="form-label-saas" style="font-weight:700;">Bahía a Reservar</label>
+                                    <select id="reserveBay" class="form-control-saas" required onchange="calculateReservationCost()">
+                                        <option value="">Selecciona una bahía...</option>
+                                    </select>
+                                </div>
+                                <div class="form-row" style="margin-bottom:0;">
+                                    <label class="form-label-saas" style="font-weight:700;">Modalidad de Reserva</label>
+                                    <select id="reserveModality" class="form-control-saas" onchange="onReservationModalityChange()" style="font-weight:700; color:var(--amber);">
+                                        <option value="HORAS">⏱️ Por Horas (Tarifa horaria)</option>
+                                        <option value="NOCHE">🌙 Noche Completa (7:00 PM - 7:00 AM)</option>
+                                        <option value="DIA">☀️ Día Completo (Tarifa Plena 24h)</option>
+                                        <option value="DIAS">📅 Múltiples Días (Estadía prolongada)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; align-items:center; background:rgba(0,0,0,0.3); padding:0.85rem 1rem; border-radius:var(--radius-md); border:1px solid rgba(255,255,255,0.06); margin-bottom:1.25rem;">
+                                <div id="reserveDurationWrap" class="form-row" style="margin-bottom:0;">
+                                    <label class="form-label-saas" id="reserveDurationLabel">Cantidad de Horas</label>
+                                    <select id="reserveDurationUnits" class="form-control-saas" onchange="calculateReservationCost()">
+                                        <option value="1">1 Hora</option>
+                                        <option value="2" selected>2 Horas</option>
+                                        <option value="3">3 Horas</option>
+                                        <option value="4">4 Horas</option>
+                                        <option value="6">6 Horas</option>
+                                        <option value="8">8 Horas</option>
+                                        <option value="12">12 Horas</option>
+                                    </select>
+                                </div>
+                                <div class="form-row" style="margin-bottom:0;">
+                                    <label class="form-label-saas">Fecha & Hora de Inicio</label>
+                                    <input type="datetime-local" id="reserveStartTime" class="form-control-saas" required onchange="calculateReservationCost()">
+                                </div>
+                                <div style="display:flex; flex-direction:column; justify-content:center;">
+                                    <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Total Estimado de Reserva:</span>
+                                    <span id="reserveCostEstimate" style="font-size:1.4rem; font-weight:800; color:var(--amber); font-family:'JetBrains Mono';">.600 COP</span>
+                                </div>
+                            </div>
+
+                            <button type="submit" id="btnSubmitReservation" class="btn btn-primary" style="width:100%; height:46px; font-weight:800; font-size:0.95rem; background:linear-gradient(135deg, var(--amber), #ea580c); color:#060911;">
+                                <span>📅</span> Confirmar Reserva de Bahía →
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- MAPA DE DISPONIBILIDAD CATEGORIZADO POR TIPO DE VEHÍCULO -->
+                    <div class="saas-card" style="border:1px solid var(--border-strong);">
+                        <div class="card-header-flex" style="flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
+                            <div>
+                                <h3 class="card-heading-title" style="font-size:1.15rem; font-weight:800; display:flex; align-items:center; gap:0.5rem;">
+                                    <span>🗺️</span> Disponibilidad de Espacios en Tiempo Real
+                                </h3>
+                                <p class="card-heading-sub">Haz clic en una bahía libre para seleccionarla y ubicar tu vehículo o reservar</p>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:1rem; font-size:0.75rem;">
+                                <span style="display:flex; align-items:center; gap:0.35rem; color:var(--emerald); font-weight:700;">
+                                    <span style="width:10px; height:10px; border-radius:50%; background:var(--emerald); display:inline-block;"></span> Disponible
+                                </span>
+                                <span style="display:flex; align-items:center; gap:0.35rem; color:var(--rose); font-weight:700;">
+                                    <span style="width:10px; height:10px; border-radius:50%; background:var(--rose); display:inline-block;"></span> Ocupado
+                                </span>
+                                <span style="display:flex; align-items:center; gap:0.35rem; color:var(--amber); font-weight:700;">
+                                    <span style="width:10px; height:10px; border-radius:50%; background:var(--amber); display:inline-block;"></span> Reservado
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Filtro por Tipo de Vehículo -->
+                        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; margin-bottom:1.25rem; border-bottom:1px solid var(--border); padding-bottom:1rem;">
+                            <button type="button" class="category-tab-btn active" id="catBtnAll" onclick="filterClientBaysByCategory('ALL')">
+                                <span>🌐</span> Todos los Espacios (<span id="catCountAll">0</span>)
+                            </button>
+                            <button type="button" class="category-tab-btn" id="catBtnAuto" onclick="filterClientBaysByCategory('Automóvil')">
+                                <span>🚗</span> Automóvil (<span id="catCountAuto">0</span>)
+                            </button>
+                            <button type="button" class="category-tab-btn" id="catBtnEV" onclick="filterClientBaysByCategory('Eléctrico EV')">
+                                <span>⚡</span> Eléctrico EV (<span id="catCountEV">0</span>)
+                            </button>
+                            <button type="button" class="category-tab-btn" id="catBtnMoto" onclick="filterClientBaysByCategory('Motocicleta')">
+                                <span>🏍️</span> Motocicleta (<span id="catCountMoto">0</span>)
+                            </button>
+                            <button type="button" class="category-tab-btn" id="catBtnSUV" onclick="filterClientBaysByCategory('Camioneta')">
+                                <span>🚙</span> Camioneta / SUV (<span id="catCountSUV">0</span>)
+                            </button>
+                        </div>
+
+                        <!-- Matriz de Bahías Categorizada -->
+                        <div id="clientCategorizedBaysContainer" class="bays-matrix" style="grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap:0.85rem;">
+                            <!-- Inyectado dinámicamente con las bahías -->
+                        </div>
+                    </div>
+
+                    <!-- MIS RESERVAS ACTIVAS -->
+                    <div class="saas-card" id="clientReservationsSection">
+                        <div class="card-header-flex" style="margin-bottom:1rem;">
+                            <div>
+                                <h3 class="card-heading-title" style="font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:0.45rem;">
+                                    <span>📋</span> Mis Reservas Confirmadas
+                                </h3>
+                                <p class="card-heading-sub">Bahías reservadas con anticipación para tu vehículo</p>
+                            </div>
+                            <span class="role-badge-tag pill-emerald" id="clientReservationsCountBadge">0 Activas</span>
+                        </div>
+                        <div id="clientReservationsList" style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <!-- Inyectado dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Tarjeta de Consulta por Placa -->
                     <div class="saas-card">
                         <div class="card-header-flex">
                             <div>
-                                <h3 class="card-heading-title">📱 Portal de Consulta Ciudadana</h3>
-                                <p class="card-heading-sub">Consulta el estado, tiempo transcurrido y tarifa de tu vehículo en tiempo real</p>
+                                <h3 class="card-heading-title">🔍 Consulta de Estancia en Curso</h3>
+                                <p class="card-heading-sub">Consulta el estado, tiempo transcurrido y tarifa acumulada de tu vehículo en tiempo real</p>
                             </div>
                         </div>
                         <div style="display:flex; gap:0.75rem; margin-bottom:1rem;">
@@ -1837,15 +2065,16 @@
                                         <th>Minutos</th>
                                         <th>Valor Pagado</th>
                                         <th>Método</th>
-                                        <th>Fecha Salida</th>
+                                        <th>Fecha</th>
                                     </tr>
                                 </thead>
-                                <tbody id="saasCompletedTableBody">
+                                <tbody id="clientHistoryTableBody">
                                     <!-- Inyectado dinámicamente -->
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
                 </div>
             </div>
 
@@ -2293,7 +2522,8 @@
             badgeClass: 'pill-primary',
             defaultView: 'view-client-portal',
             allowedViews: [
-                'view-client-portal'
+                'view-client-portal',
+                'view-matrix'
             ],
             canCheckIn: true,
             canCheckOut: false,

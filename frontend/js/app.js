@@ -247,7 +247,8 @@
             badgeClass: 'pill-primary',
             defaultView: 'view-client-portal',
             allowedViews: [
-                'view-client-portal'
+                'view-client-portal',
+                'view-matrix'
             ],
             canCheckIn: true,
             canCheckOut: false,
