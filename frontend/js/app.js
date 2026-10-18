@@ -493,6 +493,9 @@
         renderOverviewTable();
         renderOperationsTable();
         renderBayMatrix();
+        renderClientCategorizedMap();
+        renderClientReservations();
+        filterAvailableBaysForReservation();
         renderRatesTable();
         renderUsersTable();
         renderAuditTable();
@@ -894,6 +897,448 @@
         }
     }
 
+        // =========================================================================
+    // MAPA CATEGORIZADO POR TIPO DE VEHÍCULO Y RESERVAS ANTICIPADAS (CLIENTE)
+    // =========================================================================
+    let currentClientCategoryFilter = 'ALL';
+    let selectedClientBayCode = null;
+
+    function switchClientActionTab(tab) {
+        const btnEntry = document.getElementById('tabModeEntry');
+        const btnReserve = document.getElementById('tabModeReserve');
+        const panelEntry = document.getElementById('clientActionPanelEntry');
+        const panelReserve = document.getElementById('clientActionPanelReserve');
+
+        if (tab === 'entry') {
+            if (btnEntry) btnEntry.classList.add('active');
+            if (btnReserve) btnReserve.classList.remove('active');
+            if (panelEntry) panelEntry.style.display = 'block';
+            if (panelReserve) panelReserve.style.display = 'none';
+        } else {
+            if (btnEntry) btnEntry.classList.remove('active');
+            if (btnReserve) btnReserve.classList.add('active');
+            if (panelEntry) panelEntry.style.display = 'none';
+            if (panelReserve) panelReserve.style.display = 'block';
+            calculateReservationCost();
+        }
+    }
+
+    function onClientVehicleTypeChange(type) {
+        const selfType = document.getElementById('clientSelfType');
+        const resType = document.getElementById('reserveType');
+        if (selfType) selfType.value = type;
+        if (resType) resType.value = type;
+
+        filterClientBaysByCategory(type);
+        filterAvailableBaysForClientSelf();
+        filterAvailableBaysForReservation();
+        calculateReservationCost();
+    }
+
+    function filterClientBaysByCategory(category) {
+        currentClientCategoryFilter = category;
+
+        const btns = {
+            'ALL': 'catBtnAll',
+            'Automóvil': 'catBtnAuto',
+            'Eléctrico EV': 'catBtnEV',
+            'Motocicleta': 'catBtnMoto',
+            'Camioneta': 'catBtnSUV'
+        };
+
+        Object.entries(btns).forEach(([cat, btnId]) => {
+            const btn = document.getElementById(btnId);
+            if (btn) {
+                if (cat === category) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            }
+        });
+
+        renderClientCategorizedMap();
+    }
+
+    function renderClientCategorizedMap() {
+        const container = document.getElementById('clientCategorizedBaysContainer');
+        if (!container) return;
+
+        let spotsList = saasState.spots || [];
+        if (currentClientCategoryFilter !== 'ALL') {
+            spotsList = spotsList.filter(s => s.tipoPermitido === currentClientCategoryFilter);
+        }
+
+        const countAll = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE').length;
+        const countAuto = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === 'Automóvil').length;
+        const countEV = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === 'Eléctrico EV').length;
+        const countMoto = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === 'Motocicleta').length;
+        const countSUV = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === 'Camioneta').length;
+
+        const elAll = document.getElementById('catCountAll'); if (elAll) elAll.textContent = countAll;
+        const elAuto = document.getElementById('catCountAuto'); if (elAuto) elAuto.textContent = countAuto;
+        const elEV = document.getElementById('catCountEV'); if (elEV) elEV.textContent = countEV;
+        const elMoto = document.getElementById('catCountMoto'); if (elMoto) elMoto.textContent = countMoto;
+        const elSUV = document.getElementById('catCountSUV'); if (elSUV) elSUV.textContent = countSUV;
+
+        if (spotsList.length === 0) {
+            container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:2rem; color:var(--text-muted);">No hay bahías registradas para esta categoría.</div>`;
+            return;
+        }
+
+        container.innerHTML = spotsList.map(s => {
+            const isAvailable = (s.estado === 'DISPONIBLE');
+            const isReserved = (s.estado === 'RESERVADO');
+            const isOccupied = (s.estado === 'OCUPADO');
+
+            const stateClass = isAvailable ? 'bay-disponible' : isReserved ? 'bay-reservado' : 'bay-ocupado';
+            const isSelected = (selectedClientBayCode === s.codigo);
+
+            const icon = s.tipoPermitido === 'Automóvil' ? '🚗' : s.tipoPermitido === 'Eléctrico EV' ? '⚡' : s.tipoPermitido === 'Motocicleta' ? '🏍️' : '🚙';
+            const stateLabel = isAvailable ? 'Libre' : isReserved ? 'Reservado' : 'Ocupado';
+
+            return `
+                <div class="bay-cell ${stateClass} ${isSelected ? 'bay-selected-target' : ''}" 
+                     onclick="selectBayForClient('${s.codigo}', '${s.tipoPermitido}', '${s.estado}')"
+                     style="cursor:pointer;"
+                     title="${s.codigo} · ${s.zona} (${s.estado})">
+                    <div style="font-size:0.9rem; margin-bottom:0.2rem;">${icon}</div>
+                    <div class="bay-code">${s.codigo}</div>
+                    <div class="bay-plate-text">${s.placaActual || (isReserved ? 'RESERVA' : s.tipoPermitido)}</div>
+                    <span class="bay-state-tag">${stateLabel}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function selectBayForClient(codigo, tipo, estado) {
+        if (estado === 'OCUPADO') {
+            alert(`La bahía ${codigo} está actualmente ocupada por otro vehículo. Por favor selecciona una bahía libre (verde).`);
+            return;
+        }
+
+        if (estado === 'BLOQUEADO') {
+            alert(`La bahía ${codigo} se encuentra en mantenimiento.`);
+            return;
+        }
+
+        selectedClientBayCode = codigo;
+
+        // Auto-seleccionar en formulario de entrada
+        const selfBay = document.getElementById('clientSelfBay');
+        const selfType = document.getElementById('clientSelfType');
+        if (selfType) selfType.value = tipo;
+        filterAvailableBaysForClientSelf();
+        if (selfBay) {
+            let exists = Array.from(selfBay.options).some(o => o.value === codigo);
+            if (!exists) {
+                const opt = document.createElement('option');
+                opt.value = codigo;
+                opt.textContent = `${codigo} (${tipo})`;
+                selfBay.appendChild(opt);
+            }
+            selfBay.value = codigo;
+        }
+
+        // Auto-seleccionar en formulario de reserva
+        const resBay = document.getElementById('reserveBay');
+        const resType = document.getElementById('reserveType');
+        if (resType) resType.value = tipo;
+        filterAvailableBaysForReservation();
+        if (resBay) {
+            let exists = Array.from(resBay.options).some(o => o.value === codigo);
+            if (!exists) {
+                const opt = document.createElement('option');
+                opt.value = codigo;
+                opt.textContent = `${codigo} (${tipo})`;
+                resBay.appendChild(opt);
+            }
+            resBay.value = codigo;
+        }
+
+        renderClientCategorizedMap();
+        calculateReservationCost();
+
+        showRbacToast(`📍 Bahía <strong>${codigo}</strong> (${tipo}) seleccionada en tu formulario.`, false);
+    }
+
+    function filterAvailableBaysForReservation() {
+        const typeSelect = document.getElementById('reserveType');
+        const baySelect = document.getElementById('reserveBay');
+        if (!typeSelect || !baySelect) return;
+
+        const selectedType = typeSelect.value;
+        const available = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === selectedType);
+
+        baySelect.innerHTML = '';
+        if (available.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = `No hay bahías libres para ${selectedType}`;
+            baySelect.appendChild(opt);
+            return;
+        }
+
+        available.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.codigo;
+            opt.textContent = `${b.codigo} (${b.zona} · ${b.nivel})`;
+            baySelect.appendChild(opt);
+        });
+
+        if (selectedClientBayCode) {
+            baySelect.value = selectedClientBayCode;
+        }
+    }
+
+    function onReservationModalityChange() {
+        const modality = document.getElementById('reserveModality')?.value || 'HORAS';
+        const wrap = document.getElementById('reserveDurationWrap');
+        const label = document.getElementById('reserveDurationLabel');
+        const select = document.getElementById('reserveDurationUnits');
+
+        if (!wrap || !select) return;
+
+        if (modality === 'HORAS') {
+            wrap.style.display = 'block';
+            label.textContent = 'Cantidad de Horas';
+            select.innerHTML = `
+                <option value="1">1 Hora</option>
+                <option value="2" selected>2 Horas</option>
+                <option value="3">3 Horas</option>
+                <option value="4">4 Horas</option>
+                <option value="6">6 Horas</option>
+                <option value="8">8 Horas</option>
+                <option value="12">12 Horas</option>
+            `;
+        } else if (modality === 'NOCHE') {
+            wrap.style.display = 'block';
+            label.textContent = 'Horario Nocturno';
+            select.innerHTML = `
+                <option value="1" selected>1 Noche (7:00 PM a 7:00 AM)</option>
+                <option value="2">2 Noches Consecutivas</option>
+                <option value="3">3 Noches Consecutivas</option>
+            `;
+        } else if (modality === 'DIA') {
+            wrap.style.display = 'none';
+        } else if (modality === 'DIAS') {
+            wrap.style.display = 'block';
+            label.textContent = 'Cantidad de Días';
+            select.innerHTML = `
+                <option value="2" selected>2 Días Continuos</option>
+                <option value="3">3 Días Continuos</option>
+                <option value="4">4 Días Continuos</option>
+                <option value="5">5 Días Continuos</option>
+                <option value="7">1 Semana Completa (7 Días)</option>
+            `;
+        }
+
+        calculateReservationCost();
+    }
+
+    function calculateReservationCost() {
+        const type = document.getElementById('reserveType')?.value || 'Automóvil';
+        const modality = document.getElementById('reserveModality')?.value || 'HORAS';
+        const units = parseInt(document.getElementById('reserveDurationUnits')?.value || '1', 10);
+        const costEl = document.getElementById('reserveCostEstimate');
+
+        if (!costEl) return;
+
+        const hourlyRates = { 'Automóvil': 5800, 'Eléctrico EV': 5000, 'Motocicleta': 3400, 'Camioneta': 7200 };
+        const dailyRates = { 'Automóvil': 42000, 'Eléctrico EV': 38000, 'Motocicleta': 24000, 'Camioneta': 52000 };
+        const nightRates = { 'Automóvil': 28000, 'Eléctrico EV': 25000, 'Motocicleta': 16000, 'Camioneta': 34000 };
+
+        let total = 0;
+        if (modality === 'HORAS') {
+            total = (hourlyRates[type] || 5800) * units;
+        } else if (modality === 'NOCHE') {
+            total = (nightRates[type] || 28000) * units;
+        } else if (modality === 'DIA') {
+            total = (dailyRates[type] || 42000);
+        } else if (modality === 'DIAS') {
+            total = (dailyRates[type] || 42000) * units;
+        }
+
+        costEl.textContent = `$${total.toLocaleString('es-CO')} COP`;
+    }
+
+    function handleClientReservationSubmit(e) {
+        if (e) e.preventDefault();
+        const plateInput = document.getElementById('reservePlate');
+        const typeSelect = document.getElementById('reserveType');
+        const baySelect = document.getElementById('reserveBay');
+        const modalitySelect = document.getElementById('reserveModality');
+        const startInput = document.getElementById('reserveStartTime');
+        const costText = document.getElementById('reserveCostEstimate')?.textContent || '$0 COP';
+        const owner = currentAuthSession?.nombre || 'Cliente Registrado';
+
+        const plate = plateInput ? plateInput.value.trim().toUpperCase() : '';
+        const type = typeSelect ? typeSelect.value : 'Automóvil';
+        const bay = baySelect ? baySelect.value : '';
+        const modality = modalitySelect ? modalitySelect.value : 'HORAS';
+        const startTime = startInput && startInput.value ? startInput.value : new Date().toISOString();
+
+        if (!plate) { alert('Por favor ingresa la placa del vehículo.'); return; }
+        if (!bay) { alert('Por favor selecciona una bahía de parqueo disponible.'); return; }
+
+        const spot = (saasState.spots || []).find(s => s.codigo === bay);
+        if (!spot || spot.estado !== 'DISPONIBLE') {
+            alert(`La bahía ${bay} no está disponible para reserva.`);
+            return;
+        }
+
+        spot.estado = 'RESERVADO';
+        spot.placaActual = plate;
+
+        const resCode = 'RES-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+        const reservation = {
+            id: 'R-' + Date.now(),
+            codigo: resCode,
+            placa: plate,
+            tipoVehiculo: type,
+            spotCodigo: bay,
+            modalidad: modality,
+            inicio: startTime,
+            costo: costText,
+            clienteNombre: owner,
+            creadaEn: new Date().toISOString()
+        };
+
+        let storedRes = [];
+        try {
+            storedRes = JSON.parse(localStorage.getItem('parkflow_reservations') || '[]');
+        } catch (err) {}
+        storedRes.unshift(reservation);
+        localStorage.setItem('parkflow_reservations', JSON.stringify(storedRes));
+
+        renderClientCategorizedMap();
+        renderBayMatrix();
+        renderClientReservations();
+        filterAvailableBaysForClientSelf();
+        filterAvailableBaysForReservation();
+
+        showReservationReceipt(reservation);
+        showRbacToast(`🎉 ¡Reserva <strong>${resCode}</strong> confirmada en bahía <strong>${bay}</strong>!`, false);
+    }
+
+    function showReservationReceipt(res) {
+        document.getElementById('saasReceiptHeaderTitle').textContent = 'Comprobante de Reserva Anticipada';
+        const html = `
+            <div class="saas-receipt" style="border: 2px dashed #f59e0b;">
+                <div class="receipt-brand" style="color:#f59e0b;">PARKFLOW RESERVAS</div>
+                <div class="receipt-sub">RESERVA CONFIRMADA · CONTROL DE ACCESO</div>
+                <div class="receipt-line"><span>CÓDIGO RESERVA:</span><strong style="color:#f59e0b; font-size:1.1rem;">${res.codigo}</strong></div>
+                <div class="receipt-line"><span>PLACA:</span><strong style="color:#0284c7; font-size:1.1rem;">${res.placa}</strong></div>
+                <div class="receipt-line"><span>VEHÍCULO:</span><span>${res.tipoVehiculo}</span></div>
+                <div class="receipt-line"><span>BAHÍA ASIGNADA:</span><strong style="color:#10b981; font-size:1.15rem;">${res.spotCodigo}</strong></div>
+                <div class="receipt-line"><span>FECHA & HORA INICIO:</span><span>${new Date(res.inicio).toLocaleString('es-CO')}</span></div>
+                <div class="receipt-line"><span>MODALIDAD:</span><strong>${res.modalidad}</strong></div>
+                <div class="receipt-line"><span>TITULAR:</span><span>${res.clienteNombre}</span></div>
+                <div class="receipt-line" style="border-top:1px dashed #cbd5e1; padding-top:0.5rem; margin-top:0.5rem;">
+                    <span>VALOR APROBADO:</span><strong style="color:#f59e0b; font-size:1.15rem;">${res.costo}</strong>
+                </div>
+                <div style="text-align:center; margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
+                    <div style="font-family:'JetBrains Mono'; font-size:1.5rem; letter-spacing:4px; margin-bottom:0.4rem;">|||| | ||||| || |||</div>
+                    <div style="font-size:0.7rem; color:#64748b;">Presenta este código al ingresar a las instalaciones</div>
+                </div>
+            </div>
+        `;
+        document.getElementById('saasReceiptBody').innerHTML = html;
+        openSaasModal('modalReceipt');
+    }
+
+    function cancelClientReservation(resId) {
+        if (!confirm('¿Deseas cancelar esta reserva y liberar la bahía?')) return;
+
+        let storedRes = [];
+        try {
+            storedRes = JSON.parse(localStorage.getItem('parkflow_reservations') || '[]');
+        } catch (err) {}
+
+        const res = storedRes.find(r => r.id === resId);
+        if (res) {
+            const spot = (saasState.spots || []).find(s => s.codigo === res.spotCodigo);
+            if (spot && spot.estado === 'RESERVADO') {
+                spot.estado = 'DISPONIBLE';
+                spot.placaActual = null;
+            }
+        }
+
+        storedRes = storedRes.filter(r => r.id !== resId);
+        localStorage.setItem('parkflow_reservations', JSON.stringify(storedRes));
+
+        renderClientCategorizedMap();
+        renderBayMatrix();
+        renderClientReservations();
+        filterAvailableBaysForClientSelf();
+        filterAvailableBaysForReservation();
+
+        showRbacToast('Reserva cancelada. La bahía ha sido liberada a disponible.', true);
+    }
+
+    function renderClientReservations() {
+        const container = document.getElementById('clientReservationsList');
+        const badge = document.getElementById('clientReservationsCountBadge');
+        if (!container) return;
+
+        let storedRes = [];
+        try {
+            storedRes = JSON.parse(localStorage.getItem('parkflow_reservations') || '[]');
+        } catch (err) {}
+
+        if (badge) badge.textContent = `${storedRes.length} Activas`;
+
+        if (storedRes.length === 0) {
+            container.innerHTML = `
+                <div style="text-align:center; padding:1.5rem; color:var(--text-muted); font-size:0.85rem; background:rgba(0,0,0,0.2); border-radius:var(--radius-md);">
+                    No tienes reservas activas en este momento. Selecciona una bahía en el mapa para reservar con anticipación.
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = storedRes.map(r => `
+            <div class="reservation-card-item">
+                <div style="display:flex; align-items:center; gap:0.85rem;">
+                    <div style="width:38px; height:38px; border-radius:var(--radius-md); background:rgba(245,158,11,0.15); color:var(--amber); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                        📅
+                    </div>
+                    <div>
+                        <div style="display:flex; align-items:center; gap:0.5rem;">
+                            <span class="plate-pill">${r.placa}</span>
+                            <span style="font-weight:800; color:var(--amber); font-family:'JetBrains Mono';">${r.codigo}</span>
+                        </div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-top:0.2rem;">
+                            Bahía: <strong style="color:var(--emerald);">${r.spotCodigo}</strong> · Modalidad: <strong>${r.modalidad}</strong> · Inicio: <strong>${new Date(r.inicio).toLocaleString('es-CO')}</strong>
+                        </div>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:0.65rem;">
+                    <span style="font-weight:800; color:var(--text-heading); font-family:'JetBrains Mono'; font-size:0.9rem;">${r.costo}</span>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick='showReservationReceipt(${JSON.stringify(r)})' title="Ver Comprobante">
+                        Ver Ticket
+                    </button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="cancelClientReservation('${r.id}')" title="Cancelar Reserva">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    window.switchClientActionTab = switchClientActionTab;
+    window.onClientVehicleTypeChange = onClientVehicleTypeChange;
+    window.filterClientBaysByCategory = filterClientBaysByCategory;
+    window.renderClientCategorizedMap = renderClientCategorizedMap;
+    window.selectBayForClient = selectBayForClient;
+    window.filterAvailableBaysForReservation = filterAvailableBaysForReservation;
+    window.onReservationModalityChange = onReservationModalityChange;
+    window.calculateReservationCost = calculateReservationCost;
+    window.handleClientReservationSubmit = handleClientReservationSubmit;
+    window.showReservationReceipt = showReservationReceipt;
+    window.cancelClientReservation = cancelClientReservation;
+    window.renderClientReservations = renderClientReservations;
+
     // Renderizar Matriz 2D de Bahías
     function renderBayMatrix() {
         const zones = {
@@ -939,6 +1384,20 @@
     }
 
     async function handleBayClick(id, code, state) {
+        if (saasState.currentRole === 'Cliente') {
+            const spot = (saasState.spots || []).find(s => s.codigo === code);
+            if (state === 'DISPONIBLE') {
+                selectBayForClient(code, spot ? spot.tipoPermitido : 'Automóvil', state);
+                switchSaasView('view-client-portal');
+                showRbacToast(`📍 Bahía <strong>${code}</strong> seleccionada. Elige 'Registrar Entrada' o 'Reservar'.`, false);
+            } else if (state === 'OCUPADO') {
+                alert(`La bahía ${code} está actualmente ocupada por otro vehículo.`);
+            } else {
+                alert(`La bahía ${code} se encuentra en estado: ${state}.`);
+            }
+            return;
+        }
+
         if (state === 'OCUPADO') {
             const ticket = saasState.tickets.find(t => t.spotCodigo === code && t.estado === 'ACTIVO');
             if (ticket) openCheckOutModal(ticket.id);
