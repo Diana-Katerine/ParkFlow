@@ -1193,12 +1193,8 @@
             </div>
 
             <!-- Login Form -->
-            <form id="authLoginForm" onsubmit="handleAuthSubmit(event)">
+            <form id="authLoginForm" onsubmit="event.preventDefault(); handleAuthSubmit(event);">
                 <div class="auth-form-group">
-                    <label class="auth-label">Correo Electrónico</label>
-                    <input type="email" id="authInputEmail" class="auth-input" placeholder="Cualquier correo (ej: tu_nombre@correo.com)" required autocomplete="email">
-                </div>
-                                <div class="auth-form-group">
                     <label class="auth-label">Rol con el que deseas ingresar</label>
                     <select id="authInputRole" class="auth-input" style="cursor:pointer; background:var(--bg-surface-elevated); color:var(--text-heading);">
                         <option value="Administrador">👑 Administrador (Acceso Total y Configuración)</option>
@@ -1207,42 +1203,46 @@
                     </select>
                 </div>
                 <div class="auth-form-group">
-                    <label class="auth-label">Contraseña</label>
-                    <input type="password" id="authInputPassword" class="auth-input" placeholder="Cualquier contraseña (ej: 123456)" required autocomplete="current-password">
+                    <label class="auth-label">Usuario o Correo (Cualquiera)</label>
+                    <input type="text" id="authInputEmail" class="auth-input" placeholder="Escribe cualquier nombre o correo (ej: Diana)">
                 </div>
-                <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem; padding:0.75rem;">
-                    Iniciar Sesión en ParkFlow →
+                <div class="auth-form-group">
+                    <label class="auth-label">Contraseña (Opcional)</label>
+                    <input type="password" id="authInputPassword" class="auth-input" placeholder="Cualquier clave (ej: 123)">
+                </div>
+                <button type="button" class="btn btn-primary" onclick="handleAuthSubmit(event)" style="width:100%; margin-top:0.5rem; padding:0.75rem; font-size:0.9rem;">
+                    🚀 Ingresar al Sistema ParkFlow →
                 </button>
             </form>
 
             <!-- Quick Demo Login Selection by Role -->
             <div class="auth-quick-cards">
-                <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:0.05em; margin-bottom:0.25rem;">
-                    ⚡ Acceso Rápido por Perfil (Demo RBAC):
+                <div style="font-size:0.75rem; color:var(--primary); text-transform:uppercase; font-weight:700; letter-spacing:0.05em; margin-bottom:0.35rem;">
+                    ⚡ O entra con 1 solo clic en un perfil:
                 </div>
 
-                <button type="button" class="quick-role-btn" onclick="quickLogin('admin@parkpulse.co')">
+                <button type="button" class="quick-role-btn" onclick="quickLogin('Administrador')">
                     <div>
-                        <div style="font-weight:700; color:var(--primary);">👑 Administrador</div>
-                        <div style="font-size:0.7rem; color:var(--text-muted);">admin@parkpulse.co · Acceso Total</div>
+                        <div style="font-weight:700; color:var(--primary); font-size:0.88rem;">👑 Ingresar como Administrador</div>
+                        <div style="font-size:0.72rem; color:var(--text-muted);">Acceso total: Métricas, Operaciones, Tarifas, Usuarios y Auditoría</div>
                     </div>
-                    <span class="role-badge-tag pill-emerald" style="font-size:0.65rem;">Total</span>
+                    <span class="role-badge-tag pill-emerald" style="font-size:0.7rem;">Entrar →</span>
                 </button>
 
-                <button type="button" class="quick-role-btn" onclick="quickLogin('operador@parkpulse.co')">
+                <button type="button" class="quick-role-btn" onclick="quickLogin('Operador')">
                     <div>
-                        <div style="font-weight:700; color:var(--emerald);">👷 Operador</div>
-                        <div style="font-size:0.7rem; color:var(--text-muted);">operador@parkpulse.co · Entradas, Salidas y Bahías</div>
+                        <div style="font-weight:700; color:var(--emerald); font-size:0.88rem;">👷 Ingresar como Operador</div>
+                        <div style="font-size:0.72rem; color:var(--text-muted);">Acceso operativo: Entradas, Salidas, Cobros de Tickets y Bahías</div>
                     </div>
-                    <span class="role-badge-tag pill-primary" style="font-size:0.65rem;">Operativo</span>
+                    <span class="role-badge-tag pill-primary" style="font-size:0.7rem;">Entrar →</span>
                 </button>
 
-                <button type="button" class="quick-role-btn" onclick="quickLogin('cliente@parkpulse.co')">
+                <button type="button" class="quick-role-btn" onclick="quickLogin('Cliente')">
                     <div>
-                        <div style="font-weight:700; color:#38bdf8;">👤 Cliente / Conductor</div>
-                        <div style="font-size:0.7rem; color:var(--text-muted);">cliente@parkpulse.co · Portal Ciudadano (Placa: KLM-456)</div>
+                        <div style="font-weight:700; color:#38bdf8; font-size:0.88rem;">👤 Ingresar como Cliente / Conductor</div>
+                        <div style="font-size:0.72rem; color:var(--text-muted);">Acceso ciudadano: Consulta de estancias, tiempos y tarifas</div>
                     </div>
-                    <span class="role-badge-tag" style="background:rgba(56,189,248,0.15); color:#38bdf8; font-size:0.65rem;">Cliente</span>
+                    <span class="role-badge-tag" style="background:rgba(56,189,248,0.15); color:#38bdf8; font-size:0.7rem;">Entrar →</span>
                 </button>
             </div>
         </div>
@@ -2098,18 +2098,41 @@
         loginUserSuccess(customUser);
     }
 
-    function quickLogin(email) {
-        const match = REGISTERED_ACCOUNTS.find(a => a.email.toLowerCase() === email.toLowerCase());
-        if (match) {
-            loginUserSuccess(match);
+    function quickLogin(roleOrEmail) {
+        let account = null;
+        if (roleOrEmail === 'Administrador' || roleOrEmail.includes('admin')) {
+            account = {
+                email: 'admin@parkpulse.co',
+                password: 'admin',
+                nombre: 'Alejandro Vargas (Admin)',
+                rol: 'Administrador',
+                placa: null
+            };
+        } else if (roleOrEmail === 'Operador' || roleOrEmail.includes('operador')) {
+            account = {
+                email: 'operador@parkpulse.co',
+                password: 'oper',
+                nombre: 'Camila Mendoza (Operador)',
+                rol: 'Operador',
+                placa: null
+            };
+        } else if (roleOrEmail === 'Cliente' || roleOrEmail.includes('cliente')) {
+            account = {
+                email: 'cliente@parkpulse.co',
+                password: 'cliente',
+                nombre: 'Diana K. Pérez (Cliente)',
+                rol: 'Cliente',
+                placa: 'KLM-456'
+            };
         } else {
-            loginUserSuccess({
-                email: email,
+            account = {
+                email: roleOrEmail || 'usuario@parkflow.com',
                 password: '123',
                 nombre: 'Usuario ParkFlow',
                 rol: 'Administrador'
-            });
+            };
         }
+        loginUserSuccess(account);
     }
 
     function loginUserSuccess(account) {
@@ -2152,17 +2175,16 @@
 
         showAuthScreen();
         showRbacToast('Sesión cerrada. Acceso al sistema bloqueado.', true);
-    } catch (e) {}
-
-        // Limpiar inputs
-        const emailInput = document.getElementById('authInputEmail');
-        const passInput = document.getElementById('authInputPassword');
-        if (emailInput) emailInput.value = '';
-        if (passInput) passInput.value = '';
-
-        showAuthScreen();
-        showRbacToast('Sesión cerrada. Acceso al sistema bloqueado.', true);
     }
+
+    // Exponer funciones globales al objeto window para llamadas inline
+    window.quickLogin = quickLogin;
+    window.handleAuthSubmit = handleAuthSubmit;
+    window.handleLogout = handleLogout;
+    window.loginUserSuccess = loginUserSuccess;
+    window.checkAuthSession = checkAuthSession;
+    window.hideAuthScreen = hideAuthScreen;
+    window.showAuthScreen = showAuthScreen;
 
     const API_BASE = (window.location.protocol === 'file:')
         ? 'http://localhost/parkflow/api'
@@ -2419,11 +2441,6 @@
         const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
         switchSaasView(config.defaultView);
         showRbacToast(`Sesión cambiada a: <strong>${role}</strong> (${config.badge}). Permisos ajustados.`, false);
-    } else if (role === 'Operador') {
-            switchSaasView('view-operations');
-        } else {
-            switchSaasView('view-overview');
-        }
     }
 
     // 1. Sincronización completa con MySQL vía API PHP
@@ -3049,6 +3066,7 @@
 
     // Inicializar al cargar el DOM
     window.addEventListener('DOMContentLoaded', () => {
+        checkAuthSession();
         syncAllFromDatabase();
         // Polling cada 12 segundos para actualizar métricas en vivo
         setInterval(syncAllFromDatabase, 12000);

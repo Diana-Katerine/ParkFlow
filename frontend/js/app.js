@@ -96,18 +96,41 @@
         loginUserSuccess(customUser);
     }
 
-    function quickLogin(email) {
-        const match = REGISTERED_ACCOUNTS.find(a => a.email.toLowerCase() === email.toLowerCase());
-        if (match) {
-            loginUserSuccess(match);
+    function quickLogin(roleOrEmail) {
+        let account = null;
+        if (roleOrEmail === 'Administrador' || roleOrEmail.includes('admin')) {
+            account = {
+                email: 'admin@parkpulse.co',
+                password: 'admin',
+                nombre: 'Alejandro Vargas (Admin)',
+                rol: 'Administrador',
+                placa: null
+            };
+        } else if (roleOrEmail === 'Operador' || roleOrEmail.includes('operador')) {
+            account = {
+                email: 'operador@parkpulse.co',
+                password: 'oper',
+                nombre: 'Camila Mendoza (Operador)',
+                rol: 'Operador',
+                placa: null
+            };
+        } else if (roleOrEmail === 'Cliente' || roleOrEmail.includes('cliente')) {
+            account = {
+                email: 'cliente@parkpulse.co',
+                password: 'cliente',
+                nombre: 'Diana K. Pérez (Cliente)',
+                rol: 'Cliente',
+                placa: 'KLM-456'
+            };
         } else {
-            loginUserSuccess({
-                email: email,
+            account = {
+                email: roleOrEmail || 'usuario@parkflow.com',
                 password: '123',
                 nombre: 'Usuario ParkFlow',
                 rol: 'Administrador'
-            });
+            };
         }
+        loginUserSuccess(account);
     }
 
     function loginUserSuccess(account) {
@@ -150,17 +173,16 @@
 
         showAuthScreen();
         showRbacToast('Sesión cerrada. Acceso al sistema bloqueado.', true);
-    } catch (e) {}
-
-        // Limpiar inputs
-        const emailInput = document.getElementById('authInputEmail');
-        const passInput = document.getElementById('authInputPassword');
-        if (emailInput) emailInput.value = '';
-        if (passInput) passInput.value = '';
-
-        showAuthScreen();
-        showRbacToast('Sesión cerrada. Acceso al sistema bloqueado.', true);
     }
+
+    // Exponer funciones globales al objeto window para llamadas inline
+    window.quickLogin = quickLogin;
+    window.handleAuthSubmit = handleAuthSubmit;
+    window.handleLogout = handleLogout;
+    window.loginUserSuccess = loginUserSuccess;
+    window.checkAuthSession = checkAuthSession;
+    window.hideAuthScreen = hideAuthScreen;
+    window.showAuthScreen = showAuthScreen;
 
     const API_BASE = (window.location.protocol === 'file:')
         ? 'http://localhost/parkflow/api'
@@ -417,11 +439,6 @@
         const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
         switchSaasView(config.defaultView);
         showRbacToast(`Sesión cambiada a: <strong>${role}</strong> (${config.badge}). Permisos ajustados.`, false);
-    } else if (role === 'Operador') {
-            switchSaasView('view-operations');
-        } else {
-            switchSaasView('view-overview');
-        }
     }
 
     // 1. Sincronización completa con MySQL vía API PHP
@@ -1047,6 +1064,7 @@
 
     // Inicializar al cargar el DOM
     window.addEventListener('DOMContentLoaded', () => {
+        checkAuthSession();
         syncAllFromDatabase();
         // Polling cada 12 segundos para actualizar métricas en vivo
         setInterval(syncAllFromDatabase, 12000);
