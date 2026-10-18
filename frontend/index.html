@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ParkFlow SaaS — Enterprise Smart Parking Cloud</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+        <link rel="stylesheet" href="css/dashboard.css">
+</head>
+<body>
+
+<div class="saas-layout">
+
+    <!-- SaaS Sidebar -->
+    <aside class="saas-sidebar" id="saasSidebar">
+        <!-- Brand -->
+        <div class="sidebar-brand">
+            <a href="#dashboard" class="brand-logo-wrap">
+                <div class="brand-icon">P</div>
+                <div class="brand-text">
+                    <span class="brand-name">ParkFlow</span>
+                    <span class="brand-plan">SaaS Enterprise</span>
+                </div>
+            </a>
+            <button type="button" class="btn btn-secondary btn-sm mobile-toggle" onclick="toggleMobileSidebar()">✕</button>
+        </div>
+
+        <!-- Navigation Menu -->
+        <div class="sidebar-nav">
+            <div class="nav-group-label">Vistas del Sistema</div>
+
+            <button type="button" class="nav-item-btn active" onclick="switchSaasView('view-overview', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">📊</span>
+                    <span>Dashboard General</span>
+                </div>
+                <span class="nav-pill-badge pill-emerald">En Vivo</span>
+            </button>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-operations', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">🚗</span>
+                    <span>Flujo & Estancias</span>
+                </div>
+                <span class="nav-pill-badge pill-primary" id="sidebarActiveStaysBadge">0</span>
+            </button>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-matrix', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">🗺️</span>
+                    <span>Telemetría de Bahías</span>
+                </div>
+            </button>
+
+            <div class="nav-group-label">Administración</div>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-rates', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">💰</span>
+                    <span>Matriz Tarifaria</span>
+                </div>
+            </button>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-users', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">👥</span>
+                    <span>Cuentas & RBAC</span>
+                </div>
+            </button>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-audit', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">🛡️</span>
+                    <span>Seguridad & Logs</span>
+                </div>
+            </button>
+
+            <div class="nav-group-label">Servicios</div>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-client-portal', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">📱</span>
+                    <span>Portal Ciudadano</span>
+                </div>
+            </button>
+        </div>
+
+        <!-- User Profile Card in Sidebar -->
+        <div class="sidebar-footer">
+            <div class="user-profile-card">
+                <div class="user-avatar" id="sidebarAvatar">A</div>
+                <div class="user-info">
+                    <div class="user-name" id="sidebarUserName">Diana Katerine</div>
+                    <select class="user-role-select" id="saasRoleSelector" onchange="handleRoleChange(this.value)">
+                        <option value="Administrador">Rol: Administrador</option>
+                        <option value="Operador">Rol: Operador</option>
+                        <option value="Cliente">Rol: Cliente</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main SaaS Area -->
+    <div class="saas-main">
+
+        <!-- SaaS Topbar -->
+        <header class="saas-topbar">
+            <div class="topbar-left">
+                <button type="button" class="mobile-toggle" onclick="toggleMobileSidebar()">☰</button>
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item">ParkFlow</span>
+                    <span class="breadcrumb-sep">/</span>
+                    <span class="breadcrumb-active" id="currentViewBreadcrumb">Dashboard General</span>
+                </div>
+            </div>
+
+            <!-- Global Live Filter Search -->
+            <div class="topbar-search">
+                <span class="search-icon-abs">🔍</span>
+                <input type="text" id="globalSearchInput" placeholder="Buscar placa, ticket o bahía..." oninput="handleGlobalSearch(this.value)">
+            </div>
+
+            <div class="topbar-right">
+                <!-- Server Status Chip -->
+                <div id="saasDbBadge" class="heartbeat-badge hb-connected" onclick="openSaasModal('modalXamppDiagnostics')">
+                    <span class="status-dot"></span>
+                    <span id="saasDbStatusText">XAMPP MySQL: 3306</span>
+                </div>
+
+                <!-- Primary Action -->
+                <button type="button" class="btn btn-primary btn-sm" onclick="openSaasModal('modalCheckIn')">
+                    <span>+</span> Registrar Entrada
+                </button>
+            </div>
+        </header>
+
+        <!-- Main SaaS Workspace Content -->
+        <main class="saas-content">
+
+            <!-- ======================================================== -->
+            <!-- 1. VIEW: DASHBOARD GENERAL (SaaS Overview & Analytics)   -->
+            <!-- ======================================================== -->
+            <div id="view-overview" class="view-panel active">
+                
+                <!-- KPI Stat Cards -->
+                <div class="kpi-grid">
+                    <!-- KPI 1: Ingresos Totales -->
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Recaudo Acumulado</span>
+                            <div class="kpi-icon-badge" style="background:var(--emerald-subtle); color:var(--emerald);">💵</div>
+                        </div>
+                        <div class="kpi-value" id="kpiTotalRevenue">$0</div>
+                        <div class="kpi-bottom">
+                            <span class="trend-chip trend-up">↑ +14.8%</span>
+                            <span style="color:var(--text-muted);">vs periodo anterior</span>
+                        </div>
+                    </div>
+
+                    <!-- KPI 2: Ocupación en Tiempo Real -->
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Ocupación Actual</span>
+                            <div class="kpi-icon-badge" style="background:rgba(0,245,255,0.15); color:var(--primary);">🅿️</div>
+                        </div>
+                        <div class="kpi-value" id="kpiOccupancyPct">0%</div>
+                        <div class="kpi-bottom" style="flex-direction:column; align-items:flex-start; width:100%;">
+                            <div style="display:flex; justify-content:space-between; width:100%; font-size:0.75rem; color:var(--text-muted);">
+                                <span id="kpiOccupiedSpotsText">0 ocupados</span>
+                                <span id="kpiFreeSpotsText">24 disponibles</span>
+                            </div>
+                            <div class="progress-track">
+                                <div class="progress-bar-fill" id="kpiOccupancyBar" style="width:0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- KPI 3: Vehículos Activos -->
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Estancias Activas</span>
+                            <div class="kpi-icon-badge" style="background:var(--indigo-subtle); color:var(--indigo);">🚘</div>
+                        </div>
+                        <div class="kpi-value" id="kpiActiveVehicles">0</div>
+                        <div class="kpi-bottom">
+                            <span class="status-badge badge-active-live">En parqueadero</span>
+                            <span id="kpiMidnightCount" style="color:var(--amber); font-weight:700;">0 nocturnos</span>
+                        </div>
+                    </div>
+
+                    <!-- KPI 4: Telemetría Sensores IoT -->
+                    <div class="kpi-card">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Salud de Red IoT</span>
+                            <div class="kpi-icon-badge" style="background:rgba(245,158,11,0.15); color:var(--amber);">📡</div>
+                        </div>
+                        <div class="kpi-value" id="kpiSensorHealth">99.8%</div>
+                        <div class="kpi-bottom">
+                            <span class="trend-chip trend-up">✓ Nominal</span>
+                            <span style="color:var(--text-muted);">24 nodos activos</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SaaS Interactive Charts Row -->
+                <div class="analytics-grid">
+                    <!-- Curva de Tráfico y Flujo (SVG Bezier Graph) -->
+                    <div class="saas-card">
+                        <div class="card-header-flex">
+                            <div>
+                                <h3 class="card-heading-title">📈 Flujo Vehicular & Ingresos por Franja Horaria</h3>
+                                <p class="card-heading-sub">Monitoreo de afluencia de vehículos en las últimas 24 horas</p>
+                            </div>
+                            <div style="display:flex; gap:0.5rem;">
+                                <span class="nav-pill-badge pill-primary">Tiempo Real</span>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <svg viewBox="0 0 700 180" style="width:100%; height:100%; overflow:visible;">
+                                <defs>
+                                    <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#00f5ff" stop-opacity="0.35"/>
+                                        <stop offset="100%" stop-color="#00f5ff" stop-opacity="0.0"/>
+                                    </linearGradient>
+                                </defs>
+                                <!-- Grid lines -->
+                                <line x1="0" y1="30" x2="700" y2="30" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4"/>
+                                <line x1="0" y1="80" x2="700" y2="80" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4"/>
+                                <line x1="0" y1="130" x2="700" y2="130" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4"/>
+                                <!-- Area fill -->
+                                <path d="M 0,160 Q 70,140 140,90 T 280,60 T 420,110 T 560,40 T 700,80 L 700,170 L 0,170 Z" fill="url(#chartGradient)" />
+                                <!-- Spline Stroke -->
+                                <path d="M 0,160 Q 70,140 140,90 T 280,60 T 420,110 T 560,40 T 700,80" fill="none" stroke="#00f5ff" stroke-width="3" stroke-linecap="round" />
+                                <!-- Highlights -->
+                                <circle cx="280" cy="60" r="5" fill="#00f5ff" stroke="#060911" stroke-width="2" />
+                                <circle cx="560" cy="40" r="5" fill="#00f5ff" stroke="#060911" stroke-width="2" />
+                                <text x="280" y="45" fill="#00f5ff" font-size="11" font-family="'JetBrains Mono'" text-anchor="middle" font-weight="700">Pico 14:00 (18 autos)</text>
+                                <text x="560" y="25" fill="#00f5ff" font-size="11" font-family="'JetBrains Mono'" text-anchor="middle" font-weight="700">Pico 19:30 (22 autos)</text>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <!-- Donut Distribution of Fleet -->
+                    <div class="saas-card">
+                        <div class="card-header-flex">
+                            <div>
+                                <h3 class="card-heading-title">🚗 Distribución por Flota</h3>
+                                <p class="card-heading-sub">Proporción por tipo de vehículo</p>
+                            </div>
+                        </div>
+                        <div style="display:flex; align-items:center; justify-content:center; height:120px;">
+                            <svg viewBox="0 0 100 100" style="width:120px; height:120px; transform:rotate(-90deg);">
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#0f172a" stroke-width="12"/>
+                                <!-- Autos: 45% -->
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#00f5ff" stroke-width="12" stroke-dasharray="107 239" stroke-dashoffset="0"/>
+                                <!-- Motos: 25% -->
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#6366f1" stroke-width="12" stroke-dasharray="60 239" stroke-dashoffset="-107"/>
+                                <!-- EV: 15% -->
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="36 239" stroke-dashoffset="-167"/>
+                                <!-- Camionetas: 15% -->
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="36 239" stroke-dashoffset="-203"/>
+                            </svg>
+                        </div>
+                        <div class="donut-legend">
+                            <div class="legend-row">
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#00f5ff;"></div><span>Automóviles</span></div>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distAutoCount">45%</span>
+                            </div>
+                            <div class="legend-row">
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#6366f1;"></div><span>Motocicletas</span></div>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distMotoCount">25%</span>
+                            </div>
+                            <div class="legend-row">
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#10b981;"></div><span>Eléctricos EV</span></div>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distEvCount">15%</span>
+                            </div>
+                            <div class="legend-row">
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#f59e0b;"></div><span>Camionetas / SUV</span></div>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distSuvCount">15%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Active Stays Quick Table -->
+                <div class="table-card">
+                    <div class="table-toolbar">
+                        <div>
+                            <h3 style="font-size:0.95rem; font-weight:700; color:var(--text-heading);">Vehículos en Estancia Activa</h3>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">Sincronizado en tiempo real con MySQL</p>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="switchSaasView('view-operations')">
+                            Ver Todas las Operaciones →
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="saas-table">
+                            <thead>
+                                <tr>
+                                    <th>Ticket</th>
+                                    <th>Placa</th>
+                                    <th>Tipo Vehículo</th>
+                                    <th>Bahía</th>
+                                    <th>Hora Entrada</th>
+                                    <th>Estado</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="overviewActiveTableBody">
+                                <tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:1.5rem;">Cargando estancias desde MySQL...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- 2. VIEW: OPERACIONES Y FLUJO VEHICULAR                   -->
+            <!-- ======================================================== -->
+            <div id="view-operations" class="view-panel">
+                <div class="table-card">
+                    <div class="table-toolbar">
+                        <div style="display:flex; align-items:center; gap:1rem;">
+                            <h3 style="font-size:1rem; font-weight:700; color:var(--text-heading);">Control de Flujo Vehicular</h3>
+                            <div class="table-search-box">
+                                <span class="search-icon-abs">🔍</span>
+                                <input type="text" id="operationsFilterInput" placeholder="Filtrar por placa o bahía..." oninput="filterOperationsTable(this.value)">
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:0.5rem;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="syncAllFromDatabase()">
+                                <span>🔄</span> Actualizar
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="openSaasModal('modalCheckIn')">
+                                <span>+</span> Registrar Entrada
+                            </button>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="saas-table">
+                            <thead>
+                                <tr>
+                                    <th>Ticket ID</th>
+                                    <th>Placa</th>
+                                    <th>Tipo</th>
+                                    <th>Bahía Asignada</th>
+                                    <th>Hora Ingreso</th>
+                                    <th>Cruce Medianoche</th>
+                                    <th>Estado</th>
+                                    <th style="text-align:right;">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody id="operationsFullTableBody">
+                                <!-- Inyectado dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- 3. VIEW: TELEMETRÍA DE BAHÍAS (MAPA 2D INTERACTIVO)     -->
+            <!-- ======================================================== -->
+            <div id="view-matrix" class="view-panel">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                    <div>
+                        <h2 style="font-size:1.15rem; font-weight:800; color:var(--text-heading);">Matriz de Ocupación por Zonas</h2>
+                        <p style="font-size:0.75rem; color:var(--text-muted);">Haz clic en cualquier bahía para cambiar su disponibilidad o inspeccionar el vehículo</p>
+                    </div>
+                    <div style="display:flex; gap:0.75rem; font-size:0.75rem;">
+                        <span style="color:var(--emerald);">● Disponible</span>
+                        <span style="color:var(--rose);">● Ocupado</span>
+                        <span style="color:#94a3b8;">● Bloqueado</span>
+                    </div>
+                </div>
+
+                <div class="bay-grid-container" id="saasZonesContainer">
+                    <!-- Inyectado dinámicamente -->
+                </div>
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- 4. VIEW: MATRIZ TARIFARIA                                -->
+            <!-- ======================================================== -->
+            <div id="view-rates" class="view-panel">
+                <div class="table-card" style="max-width:960px; margin:0 auto;">
+                    <div class="table-toolbar">
+                        <div>
+                            <h3 style="font-size:1rem; font-weight:700; color:var(--text-heading);">Configuración de Tarifas y Cobro</h3>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">Valores en Pesos Colombianos (COP) sincronizados con tabla `tarifas` en MySQL</p>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="saas-table">
+                            <thead>
+                                <tr>
+                                    <th>Tipo de Vehículo</th>
+                                    <th>Por Minuto</th>
+                                    <th>Por Hora</th>
+                                    <th>Día Pleno</th>
+                                    <th>Fracción Gracia</th>
+                                    <th>Último Cambio</th>
+                                    <th style="text-align:right;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="saasRatesTableBody">
+                                <!-- Inyectado dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- 5. VIEW: GESTIÓN DE USUARIOS Y RBAC                      -->
+            <!-- ======================================================== -->
+            <div id="view-users" class="view-panel">
+                <div class="table-card">
+                    <div class="table-toolbar">
+                        <div>
+                            <h3 style="font-size:1rem; font-weight:700; color:var(--text-heading);">Cuentas y Matriz RBAC</h3>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">Control de privilegios por roles (`Administrador`, `Operador`, `Cliente`)</p>
+                        </div>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openSaasModal('modalNewUser')">
+                            + Crear Usuario
+                        </button>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="saas-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Nombre Completo</th>
+                                    <th>Correo Electrónico</th>
+                                    <th>Rol Asignado</th>
+                                    <th>Estado</th>
+                                    <th>Último Acceso</th>
+                                    <th style="text-align:right;">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="saasUsersTableBody">
+                                <!-- Inyectado dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- 6. VIEW: BITÁCORA DE AUDITORÍA Y SEGURIDAD              -->
+            <!-- ======================================================== -->
+            <div id="view-audit" class="view-panel">
+                <div class="table-card">
+                    <div class="table-toolbar">
+                        <div>
+                            <h3 style="font-size:1rem; font-weight:700; color:var(--text-heading);">Bitácora Inmutable de Auditoría</h3>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">Registro cronológico de eventos en tabla `auditoria` de MySQL</p>
+                        </div>
+                        <span class="nav-pill-badge pill-emerald">Integridad Verificada</span>
+                    </div>
+                    <div class="table-responsive" style="max-height:550px; overflow-y:auto;">
+                        <table class="saas-table">
+                            <thead>
+                                <tr>
+                                    <th>Fecha / Hora</th>
+                                    <th>Usuario</th>
+                                    <th>Rol</th>
+                                    <th>Módulo</th>
+                                    <th>Acción</th>
+                                    <th>Detalle</th>
+                                    <th>Resultado</th>
+                                </tr>
+                            </thead>
+                            <tbody id="saasAuditTableBody">
+                                <!-- Inyectado dinámicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================== -->
+            <!-- 7. VIEW: PORTAL DEL CLIENTE                              -->
+            <!-- ======================================================== -->
+            <div id="view-client-portal" class="view-panel">
+                <div style="max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:1.5rem;">
+                    <div class="saas-card">
+                        <div class="card-header-flex">
+                            <div>
+                                <h3 class="card-heading-title">📱 Portal de Consulta Ciudadana</h3>
+                                <p class="card-heading-sub">Consulta el estado, tiempo transcurrido y tarifa de tu vehículo en tiempo real</p>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:0.75rem; margin-bottom:1rem;">
+                            <input type="text" id="saasClientPlateSearch" class="form-control-saas" placeholder="Ingresa tu placa (Ej: KLM-456, BGT-902, SUV-779)" style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700; font-size:1rem;">
+                            <button type="button" class="btn btn-primary" onclick="handleSaasClientSearch()">
+                                Consultar
+                            </button>
+                        </div>
+
+                        <div id="saasClientResultCard" style="display:none; background:var(--bg-surface-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:1.25rem;">
+                            <!-- Inyectado dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Completed Stays History -->
+                    <div class="table-card">
+                        <div class="table-toolbar">
+                            <h3 style="font-size:0.95rem; font-weight:700; color:var(--text-heading);">Historial de Estancias Finalizadas</h3>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="saas-table">
+                                <thead>
+                                    <tr>
+                                        <th>Ticket</th>
+                                        <th>Placa</th>
+                                        <th>Bahía</th>
+                                        <th>Minutos</th>
+                                        <th>Valor Pagado</th>
+                                        <th>Método</th>
+                                        <th>Fecha Salida</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="saasCompletedTableBody">
+                                    <!-- Inyectado dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- MODALES INTERACTIVOS (SAAS STYLE)                                -->
+<!-- ================================================================= -->
+
+<!-- Modal: Registrar Entrada Vehicular -->
+<div id="modalCheckIn" class="modal-backdrop">
+    <div class="modal-container">
+        <div class="modal-header-saas">
+            <h3 class="modal-title-saas"><span>🎟️</span> Registrar Entrada de Vehículo</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalCheckIn')">✕</button>
+        </div>
+        <form onsubmit="handleSaasEntrySubmit(event)">
+            <div class="modal-body-saas">
+                <div class="form-row">
+                    <label class="form-label-saas">Placa del Vehículo</label>
+                    <input type="text" id="checkInPlate" class="form-control-saas" placeholder="ABC-123 o XRT-82A" required style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700;">
+                </div>
+                <div class="form-row">
+                    <label class="form-label-saas">Tipo de Vehículo</label>
+                    <select id="checkInType" class="form-control-saas" onchange="filterAvailableBaysForCheckIn()">
+                        <option value="Automóvil">Automóvil (Zona A)</option>
+                        <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
+                        <option value="Motocicleta">Motocicleta (Zona C)</option>
+                        <option value="Camioneta">Camioneta / SUV (Zona D)</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label class="form-label-saas">Bahía de Parqueo Asignada</label>
+                    <select id="checkInBay" class="form-control-saas" required>
+                        <option value="">Cargando bahías disponibles...</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label class="form-label-saas">Nombre del Propietario / Conductor</label>
+                    <input type="text" id="checkInOwner" class="form-control-saas" placeholder="Cliente Visitante">
+                </div>
+            </div>
+            <div class="modal-footer-saas">
+                <button type="button" class="btn btn-secondary" onclick="closeSaasModal('modalCheckIn')">Cancelar</button>
+                <button type="submit" id="btnSubmitCheckIn" class="btn btn-primary">Registrar en MySQL</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal: Cobro y Liquidación de Salida -->
+<div id="modalCheckOut" class="modal-backdrop">
+    <div class="modal-container">
+        <div class="modal-header-saas">
+            <h3 class="modal-title-saas"><span>💳</span> Liquidación de Estancia & Cobro</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalCheckOut')">✕</button>
+        </div>
+        <div class="modal-body-saas">
+            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1.25rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+                    <span style="color:var(--text-muted); font-size:0.8rem;">Vehículo & Placa:</span>
+                    <span class="plate-pill" id="coPlateDisplay">---</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
+                    <span style="color:var(--text-muted);">Bahía Asignada:</span>
+                    <span style="color:var(--primary); font-weight:700;" id="coBayDisplay">---</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
+                    <span style="color:var(--text-muted);">Tiempo Transcurrido:</span>
+                    <span style="font-weight:700; color:var(--text-heading);" id="coDurationDisplay">0 mins</span>
+                </div>
+                <div style="display:flex; justify-content:space-between; font-size:1.25rem; font-weight:800; border-top:1px dashed var(--border); padding-top:0.75rem; margin-top:0.75rem;">
+                    <span>Total a Pagar:</span>
+                    <span style="color:var(--emerald);" id="coTotalAmountDisplay">$0</span>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <label class="form-label-saas">Método de Pago</label>
+                <select id="coPaymentMethod" class="form-control-saas">
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Tarjeta">Tarjeta Débito / Crédito</option>
+                    <option value="QR Digital">QR Digital (Bancolombia / Nequi)</option>
+                </select>
+            </div>
+        </div>
+        <div class="modal-footer-saas">
+            <button type="button" class="btn btn-secondary" onclick="closeSaasModal('modalCheckOut')">Cancelar</button>
+            <button type="button" class="btn btn-primary" onclick="confirmCheckOutPayment()">
+                Confirmar Cobro y Liberar Bahía
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Factura / Recibo Oficial -->
+<div id="modalReceiptSaas" class="modal-backdrop">
+    <div class="modal-container" style="max-width:440px;">
+        <div class="modal-header-saas">
+            <h3 class="modal-title-saas" id="saasReceiptHeaderTitle">Comprobante Oficial</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalReceiptSaas')">✕</button>
+        </div>
+        <div class="modal-body-saas" id="saasReceiptBody">
+            <!-- Inyectado dinámicamente -->
+        </div>
+        <div class="modal-footer-saas">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="closeSaasModal('modalReceiptSaas')">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Diagnóstico XAMPP y MySQL -->
+<div id="modalXamppDiagnostics" class="modal-backdrop">
+    <div class="modal-container">
+        <div class="modal-header-saas">
+            <h3 class="modal-title-saas"><span>🗄️</span> Telemetría de Servidor XAMPP & MySQL</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalXamppDiagnostics')">✕</button>
+        </div>
+        <div class="modal-body-saas">
+            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:0.75rem; margin-bottom:1.25rem;">
+                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.75rem;">
+                    <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Servidor Web</span>
+                    <div style="font-weight:700; color:var(--primary); font-size:0.9rem;">Apache / PHP 8.2</div>
+                </div>
+                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.75rem;">
+                    <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Motor Base Datos</span>
+                    <div style="font-weight:700; color:var(--emerald); font-size:0.9rem;">10.4.32-MariaDB / MySQL</div>
+                </div>
+                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.75rem;">
+                    <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Host & Puerto</span>
+                    <div style="font-weight:700; font-family:'JetBrains Mono'; font-size:0.9rem;">127.0.0.1:3306</div>
+                </div>
+                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.75rem;">
+                    <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Base de Datos</span>
+                    <div style="font-weight:700; color:var(--primary); font-size:0.9rem;">parkflow_db</div>
+                </div>
+            </div>
+
+            <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:var(--radius-md); padding:0.85rem; font-size:0.8rem; color:var(--emerald); margin-bottom:1rem;">
+                ✓ Servidor y base de datos relacional conectados y sincronizados en tiempo real mediante PDO.
+            </div>
+        </div>
+        <div class="modal-footer-saas" style="justify-content:space-between;">
+            <button type="button" class="btn btn-danger btn-sm" onclick="resetDatabaseFromSaas()">
+                Restablecer Base de Datos Demo
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalXamppDiagnostics')">
+                Entendido
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Crear Usuario -->
+<div id="modalNewUser" class="modal-backdrop">
+    <div class="modal-container">
+        <div class="modal-header-saas">
+            <h3 class="modal-title-saas"><span>👤</span> Crear Cuenta de Usuario</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalNewUser')">✕</button>
+        </div>
+        <form onsubmit="handleNewUserSubmit(event)">
+            <div class="modal-body-saas">
+                <div class="form-row">
+                    <label class="form-label-saas">Nombre Completo</label>
+                    <input type="text" id="nuName" class="form-control-saas" placeholder="Ej: Camilo Torres" required>
+                </div>
+                <div class="form-row">
+                    <label class="form-label-saas">Correo Electrónico</label>
+                    <input type="email" id="nuEmail" class="form-control-saas" placeholder="camilo@parkflow.co" required>
+                </div>
+                <div class="form-row">
+                    <label class="form-label-saas">Rol RBAC</label>
+                    <select id="nuRole" class="form-control-saas">
+                        <option value="Operador">Operador (Entradas, Cobros y Bahías)</option>
+                        <option value="Administrador">Administrador (Control Total & Finanzas)</option>
+                        <option value="Cliente">Cliente (Autoconsulta)</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label class="form-label-saas">Placa Asociada (Opcional)</label>
+                    <input type="text" id="nuPlate" class="form-control-saas" placeholder="Ej: KLM-456" style="text-transform:uppercase;">
+                </div>
+            </div>
+            <div class="modal-footer-saas">
+                <button type="button" class="btn btn-secondary" onclick="closeSaasModal('modalNewUser')">Cancelar</button>
+                <button type="submit" class="btn btn-primary">Guardar en MySQL</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ================================================================= -->
+<!-- LOGICA CLIENTE EN JAVASCRIPT CONEXIÓN A API PHP REST             -->
+<!-- ================================================================= -->
+    <script src="js/app.js"></script>
+</body>
+</html>

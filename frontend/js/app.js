@@ -1,0 +1,698 @@
+    const API_BASE = (window.location.protocol === 'file:')
+        ? 'http://localhost/parkflow/api'
+        : (window.location.pathname.includes('/parkflow/') ? '/parkflow/api' : 'api');
+    let saasState = {
+        spots: [],
+        tickets: [],
+        rates: [],
+        users: [],
+        audit: [],
+        currentRole: 'Administrador',
+        pendingCheckOutTicket: null
+    };
+
+    // Control de Vistas / Pestañas SaaS
+    function switchSaasView(viewId, btnElement) {
+        document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-item-btn').forEach(b => b.classList.remove('active'));
+
+        const target = document.getElementById(viewId);
+        if (target) target.classList.add('active');
+
+        if (btnElement) {
+            btnElement.classList.add('active');
+        } else {
+            // Find corresponding button
+            document.querySelectorAll('.nav-item-btn').forEach(b => {
+                if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(viewId)) {
+                    b.classList.add('active');
+                }
+            });
+        }
+
+        // Update breadcrumb
+        const breadcrumbNames = {
+            'view-overview': 'Dashboard General',
+            'view-operations': 'Flujo & Estancias',
+            'view-matrix': 'Telemetría de Bahías',
+            'view-rates': 'Matriz Tarifaria',
+            'view-users': 'Cuentas & RBAC',
+            'view-audit': 'Seguridad & Logs',
+            'view-client-portal': 'Portal Ciudadano'
+        };
+        document.getElementById('currentViewBreadcrumb').textContent = breadcrumbNames[viewId] || 'Dashboard';
+    }
+
+    function toggleMobileSidebar() {
+        document.getElementById('saasSidebar').classList.toggle('mobile-open');
+    }
+
+    // Modales
+    function openSaasModal(id) {
+        document.getElementById(id).classList.add('open');
+        if (id === 'modalCheckIn') filterAvailableBaysForCheckIn();
+    }
+    function closeSaasModal(id) {
+        document.getElementById(id).classList.remove('open');
+    }
+
+    // Cambio de Rol RBAC
+    function handleRoleChange(role) {
+        saasState.currentRole = role;
+        document.getElementById('sidebarAvatar').textContent = role.charAt(0);
+        if (role === 'Cliente') {
+            switchSaasView('view-client-portal');
+        } else if (role === 'Operador') {
+            switchSaasView('view-operations');
+        } else {
+            switchSaasView('view-overview');
+        }
+    }
+
+    // 1. Sincronización completa con MySQL vía API PHP
+    async function syncAllFromDatabase() {
+        try {
+            // Healthcheck
+            const statusRes = await fetch(`${API_BASE}/status.php`);
+            const statusJson = await statusRes.json();
+            const badge = document.getElementById('saasDbBadge');
+            const badgeText = document.getElementById('saasDbStatusText');
+
+            if (statusJson.success && statusJson.data.connected) {
+                badge.className = 'heartbeat-badge hb-connected';
+                badgeText.textContent = `XAMPP MySQL: ${statusJson.data.port || 3306}`;
+            } else {
+                badge.className = 'heartbeat-badge hb-disconnected';
+                badgeText.textContent = 'MySQL Desconectado';
+            }
+
+            // Datos de entidades en paralelo
+            const [spotsRes, ratesRes, ticketsRes, usersRes, auditRes] = await Promise.all([
+                fetch(`${API_BASE}/spots.php`).then(r => r.json()),
+                fetch(`${API_BASE}/rates.php`).then(r => r.json()),
+                fetch(`${API_BASE}/tickets.php`).then(r => r.json()),
+                fetch(`${API_BASE}/users.php`).then(r => r.json()),
+                fetch(`${API_BASE}/audit.php`).then(r => r.json())
+            ]);
+
+            if (spotsRes.success) saasState.spots = spotsRes.data;
+            if (ratesRes.success) saasState.rates = ratesRes.data;
+            if (ticketsRes.success) saasState.tickets = ticketsRes.data;
+            if (usersRes.success) saasState.users = usersRes.data;
+            if (auditRes.success) saasState.audit = auditRes.data;
+
+            renderSaasInterface();
+        } catch (err) {
+            console.error('Error sincronizando con API de PHP:', err);
+        }
+    }
+
+    function renderSaasInterface() {
+        renderKpis();
+        renderOverviewTable();
+        renderOperationsTable();
+        renderBayMatrix();
+        renderRatesTable();
+        renderUsersTable();
+        renderAuditTable();
+        renderCompletedTable();
+    }
+
+    // Renderizar KPIs
+    function renderKpis() {
+        const total = saasState.spots.length;
+        const occupied = saasState.spots.filter(s => s.estado === 'OCUPADO').length;
+        const free = total - occupied;
+        const pct = total > 0 ? Math.round((occupied / total) * 100) : 0;
+
+        // Total revenue
+        const completed = saasState.tickets.filter(t => t.estado === 'FINALIZADO');
+        const revenue = completed.reduce((sum, t) => sum + (parseFloat(t.valorPagado) || 0), 0);
+
+        // Nocturnos
+        const active = saasState.tickets.filter(t => t.estado === 'ACTIVO');
+        const midnightCount = active.filter(t => t.cruzoMedianoche).length;
+
+        document.getElementById('kpiTotalRevenue').textContent = `$${revenue.toLocaleString('es-CO')}`;
+        document.getElementById('kpiOccupancyPct').textContent = `${pct}%`;
+        document.getElementById('kpiOccupiedSpotsText').textContent = `${occupied} ocupados`;
+        document.getElementById('kpiFreeSpotsText').textContent = `${free} disponibles`;
+        document.getElementById('kpiOccupancyBar').style.width = `${pct}%`;
+        document.getElementById('kpiActiveVehicles').textContent = active.length;
+        document.getElementById('kpiMidnightCount').textContent = `${midnightCount} nocturnos`;
+        document.getElementById('sidebarActiveStaysBadge').textContent = active.length;
+    }
+
+    // Renderizar tabla en Overview
+    function renderOverviewTable() {
+        const active = saasState.tickets.filter(t => t.estado === 'ACTIVO').slice(0, 5);
+        const tbody = document.getElementById('overviewActiveTableBody');
+
+        if (active.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:1rem;">No hay estancias activas actualmente.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = active.map(t => `
+            <tr>
+                <td><span style="font-family:'JetBrains Mono'; font-weight:700; color:var(--primary);">${t.ticketCodigo}</span></td>
+                <td><span class="plate-pill">${t.placa}</span></td>
+                <td>${t.tipoVehiculo}</td>
+                <td><span style="font-weight:700; color:var(--emerald);">${t.spotCodigo}</span></td>
+                <td>${new Date(t.fechaIngreso).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'})}</td>
+                <td><span class="status-badge badge-active-live">Activo</span></td>
+                <td>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="openCheckOutModal('${t.id}')">Cobrar</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Renderizar tabla completa de Operaciones
+    function renderOperationsTable() {
+        filterOperationsTable(document.getElementById('operationsFilterInput')?.value || '');
+    }
+
+    function filterOperationsTable(query) {
+        const term = query.trim().toUpperCase();
+        const active = saasState.tickets.filter(t => t.estado === 'ACTIVO');
+        const filtered = term ? active.filter(t => t.placa.includes(term) || t.spotCodigo.includes(term) || t.ticketCodigo.includes(term)) : active;
+
+        const tbody = document.getElementById('operationsFullTableBody');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:1.5rem;">No se encontraron vehículos activos con ese criterio.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(t => `
+            <tr>
+                <td><strong style="color:var(--primary); font-family:'JetBrains Mono';">${t.ticketCodigo}</strong></td>
+                <td><span class="plate-pill">${t.placa}</span></td>
+                <td>${t.tipoVehiculo}</td>
+                <td><strong style="color:var(--emerald);">${t.spotCodigo}</strong></td>
+                <td>${new Date(t.fechaIngreso).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'})}</td>
+                <td>${t.cruzoMedianoche ? '<span style="color:var(--amber); font-weight:700;">🌙 Cruce Nocturno</span>' : '<span style="color:var(--text-muted);">Diurno</span>'}</td>
+                <td><span class="status-badge badge-active-live">Activo</span></td>
+                <td style="text-align:right;">
+                    <button type="button" class="btn btn-secondary btn-sm" title="Simular cruce de medianoche (-16h)" onclick="simulateMidnightCrossing('${t.id}')">🌙 -16h</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="openCheckOutModal('${t.id}')">Liquidación</button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Filtrar bahías en modal de CheckIn
+    function filterAvailableBaysForCheckIn() {
+        const type = document.getElementById('checkInType').value;
+        const select = document.getElementById('checkInBay');
+        select.innerHTML = '';
+
+        const freeBays = saasState.spots.filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === type);
+        if (freeBays.length === 0) {
+            select.innerHTML = `<option value="">No hay bahías disponibles para ${type}</option>`;
+            return;
+        }
+
+        freeBays.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.codigo;
+            opt.textContent = `${b.codigo} (${b.zona} · ${b.nivel})`;
+            select.appendChild(opt);
+        });
+    }
+
+    // Registrar Entrada (Check-In)
+    async function handleSaasEntrySubmit(e) {
+        e.preventDefault();
+        const plate = document.getElementById('checkInPlate').value.trim().toUpperCase();
+        const type = document.getElementById('checkInType').value;
+        const bay = document.getElementById('checkInBay').value;
+        const owner = document.getElementById('checkInOwner').value.trim() || 'Cliente Visitante';
+
+        if (!bay) {
+            alert('Seleccione una bahía disponible.');
+            return;
+        }
+
+        const btn = document.getElementById('btnSubmitCheckIn');
+        btn.disabled = true;
+        btn.textContent = 'Guardando en MySQL...';
+
+        try {
+            const res = await fetch(`${API_BASE}/tickets.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    placa: plate,
+                    tipoVehiculo: type,
+                    spotCodigo: bay,
+                    propietarioNombre: owner,
+                    operadorEntrada: saasState.currentRole
+                })
+            });
+
+            const data = await res.json();
+            if (!data.success) {
+                alert(data.message || 'Error registrando entrada.');
+                return;
+            }
+
+            closeSaasModal('modalCheckIn');
+            document.getElementById('checkInPlate').value = '';
+            document.getElementById('checkInOwner').value = '';
+
+            // Mostrar ticket generado
+            showCheckInReceipt(data.data);
+
+            await syncAllFromDatabase();
+        } catch (err) {
+            alert('Error de conexión: ' + err.message);
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Registrar en MySQL';
+        }
+    }
+
+    function showCheckInReceipt(ticket) {
+        document.getElementById('saasReceiptHeaderTitle').textContent = 'Ticket de Ingreso Oficial';
+        const html = `
+            <div class="saas-receipt">
+                <div class="receipt-brand">PARKFLOW CLOUD</div>
+                <div class="receipt-sub">TICKET DIGITAL · CONTROL DE ACCESO</div>
+                <div class="receipt-line"><span>TICKET N°:</span><strong>${ticket.ticketCodigo}</strong></div>
+                <div class="receipt-line"><span>PLACA:</span><strong style="color:#0284c7; font-size:1.1rem;">${ticket.placa}</strong></div>
+                <div class="receipt-line"><span>TIPO:</span><span>${ticket.tipoVehiculo}</span></div>
+                <div class="receipt-line"><span>BAHÍA:</span><strong style="color:#10b981;">${ticket.spotCodigo}</strong></div>
+                <div class="receipt-line"><span>FECHA ENTRADA:</span><span>${new Date(ticket.fechaIngreso).toLocaleString('es-CO')}</span></div>
+                <div class="receipt-line"><span>OPERADOR:</span><span>${ticket.operadorEntrada}</span></div>
+                <div style="text-align:center; margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
+                    <span style="font-size:0.68rem; color:#64748b;">Conserve este ticket para la salida y facturación.</span>
+                    <div style="font-family:'JetBrains Mono'; letter-spacing:0.3em; margin-top:0.35rem; font-size:0.85rem;">||| | |||| | ||||| |||| |</div>
+                </div>
+            </div>
+        `;
+        document.getElementById('saasReceiptBody').innerHTML = html;
+        openSaasModal('modalReceiptSaas');
+    }
+
+    // Modal de Cobro / Salida
+    function openCheckOutModal(ticketId) {
+        const ticket = saasState.tickets.find(t => t.id === ticketId);
+        if (!ticket) return;
+
+        saasState.pendingCheckOutTicket = ticket;
+
+        const rate = saasState.rates.find(r => r.tipoVehiculo === ticket.tipoVehiculo) || {
+            tarifaPorMinuto: 110,
+            tarifaPorHora: 5800,
+            tarifaPlenaDia: 42000,
+            fraccionGraciaMin: 5
+        };
+
+        const entryTime = new Date(ticket.fechaIngreso).getTime();
+        const mins = Math.max(1, Math.round((Date.now() - entryTime) / 60000));
+
+        let amount = 0;
+        if (ticket.cruzoMedianoche || mins >= 720) {
+            amount = rate.tarifaPlenaDia;
+        } else if (mins <= rate.fraccionGraciaMin) {
+            amount = 0;
+        } else {
+            const h = Math.floor(mins / 60);
+            const rem = mins % 60;
+            amount = (h * rate.tarifaPorHora) + (rem * rate.tarifaPorMinuto);
+            if (amount > rate.tarifaPlenaDia) amount = rate.tarifaPlenaDia;
+        }
+
+        saasState.pendingCheckOutTicket.calculatedMinutes = mins;
+        saasState.pendingCheckOutTicket.calculatedAmount = amount;
+
+        document.getElementById('coPlateDisplay').textContent = ticket.placa;
+        document.getElementById('coBayDisplay').textContent = ticket.spotCodigo;
+        document.getElementById('coDurationDisplay').textContent = `${mins} minutos (${(mins/60).toFixed(1)} hrs)`;
+        document.getElementById('coTotalAmountDisplay').textContent = `$${amount.toLocaleString('es-CO')} COP`;
+
+        openSaasModal('modalCheckOut');
+    }
+
+    async function confirmCheckOutPayment() {
+        const t = saasState.pendingCheckOutTicket;
+        if (!t) return;
+
+        const method = document.getElementById('coPaymentMethod').value;
+
+        try {
+            const res = await fetch(`${API_BASE}/tickets.php`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    logId: t.id,
+                    valorPagado: t.calculatedAmount,
+                    minutosTranscurridos: t.calculatedMinutes,
+                    metodoPago: method,
+                    operadorSalida: saasState.currentRole
+                })
+            });
+
+            const data = await res.json();
+            if (!data.success) {
+                alert(data.message || 'Error al liquidar salida.');
+                return;
+            }
+
+            closeSaasModal('modalCheckOut');
+            showCheckOutReceipt(data.data);
+            await syncAllFromDatabase();
+        } catch (e) {
+            alert('Error al liquidar cobro en MySQL: ' + e.message);
+        }
+    }
+
+    function showCheckOutReceipt(ticket) {
+        document.getElementById('saasReceiptHeaderTitle').textContent = 'Factura Electrónica Equivalente';
+        const html = `
+            <div class="saas-receipt">
+                <div class="receipt-brand">PARKFLOW CLOUD</div>
+                <div class="receipt-sub">FACTURA Y RECIBO DE PAGO · MYSQL AUDITED</div>
+                <div class="receipt-line"><span>TICKET N°:</span><strong>${ticket.ticketCodigo}</strong></div>
+                <div class="receipt-line"><span>PLACA:</span><strong style="color:#0284c7; font-size:1.15rem;">${ticket.placa}</strong></div>
+                <div class="receipt-line"><span>TIPO VEHÍCULO:</span><span>${ticket.tipoVehiculo}</span></div>
+                <div class="receipt-line"><span>BAHÍA LIBERADA:</span><strong>${ticket.spotCodigo}</strong></div>
+                <div class="receipt-line"><span>DURACIÓN TOTAL:</span><span>${ticket.minutosTranscurridos} minutos</span></div>
+                <div class="receipt-line"><span>MÉTODO PAGO:</span><span>${ticket.metodoPago}</span></div>
+                <div class="receipt-line"><span>FECHA SALIDA:</span><span>${new Date(ticket.fechaSalida).toLocaleString('es-CO')}</span></div>
+                <div class="receipt-total-bar">
+                    <span>TOTAL PAGADO:</span>
+                    <span style="color:#10b981;">$${(ticket.valorPagado || 0).toLocaleString('es-CO')} COP</span>
+                </div>
+                <div style="text-align:center; margin-top:1rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem; font-size:0.72rem; color:#64748b;">
+                    ¡Gracias por usar ParkFlow! Bahía liberada en MySQL.
+                </div>
+            </div>
+        `;
+        document.getElementById('saasReceiptBody').innerHTML = html;
+        openSaasModal('modalReceiptSaas');
+    }
+
+    // Simular cruce de medianoche
+    async function simulateMidnightCrossing(logId) {
+        try {
+            await fetch(`${API_BASE}/tickets.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'shift_midnight', logId, hoursBack: 16 })
+            });
+            await syncAllFromDatabase();
+        } catch (e) {
+            alert('Error al simular medianoche: ' + e.message);
+        }
+    }
+
+    // Renderizar Matriz 2D de Bahías
+    function renderBayMatrix() {
+        const zones = {
+            'Zona A · Estándar': [],
+            'Zona B · EV & VIP': [],
+            'Zona C · Motos': [],
+            'Zona D · Camionetas': []
+        };
+
+        saasState.spots.forEach(s => {
+            if (zones[s.zona]) zones[s.zona].push(s);
+        });
+
+        const container = document.getElementById('saasZonesContainer');
+        container.innerHTML = '';
+
+        for (const [zoneName, spots] of Object.entries(zones)) {
+            const zDiv = document.createElement('div');
+            zDiv.className = 'zone-box';
+
+            const freeCount = spots.filter(s => s.estado === 'DISPONIBLE').length;
+
+            const baysHtml = spots.map(s => {
+                const stateClass = s.estado === 'DISPONIBLE' ? 'bay-disponible' : s.estado === 'OCUPADO' ? 'bay-ocupado' : 'bay-bloqueado';
+                return `
+                    <div class="bay-cell ${stateClass}" onclick="handleBayClick('${s.id}', '${s.codigo}', '${s.estado}')">
+                        <div class="bay-code">${s.codigo}</div>
+                        <div class="bay-plate-text">${s.placaActual || '—'}</div>
+                        <span class="bay-state-tag">${s.estado}</span>
+                    </div>
+                `;
+            }).join('');
+
+            zDiv.innerHTML = `
+                <div class="zone-header-row">
+                    <span class="zone-title">${zoneName}</span>
+                    <span class="status-badge badge-active-live">${freeCount}/${spots.length} Libres</span>
+                </div>
+                <div class="bays-matrix">${baysHtml}</div>
+            `;
+            container.appendChild(zDiv);
+        }
+    }
+
+    async function handleBayClick(id, code, state) {
+        if (state === 'OCUPADO') {
+            const ticket = saasState.tickets.find(t => t.spotCodigo === code && t.estado === 'ACTIVO');
+            if (ticket) openCheckOutModal(ticket.id);
+            return;
+        }
+
+        if (!confirm(`¿Alternar estado de bahía ${code}? (Disponible <-> Mantenimiento/Bloqueado)`)) return;
+
+        try {
+            await fetch(`${API_BASE}/spots.php`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, toggleMantenimiento: true })
+            });
+            await syncAllFromDatabase();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+
+    // Renderizar Tarifas
+    function renderRatesTable() {
+        const tbody = document.getElementById('saasRatesTableBody');
+        tbody.innerHTML = saasState.rates.map(r => `
+            <tr>
+                <td><strong style="color:var(--text-heading);">${r.tipoVehiculo}</strong></td>
+                <td><span style="font-family:'JetBrains Mono';">$${r.tarifaPorMinuto}</span></td>
+                <td><span style="font-family:'JetBrains Mono'; font-weight:700; color:var(--primary);">$${r.tarifaPorHora.toLocaleString('es-CO')}</span></td>
+                <td><span style="font-family:'JetBrains Mono';">$${r.tarifaPlenaDia.toLocaleString('es-CO')}</span></td>
+                <td>${r.fraccionGraciaMin} min</td>
+                <td style="color:var(--text-muted); font-size:0.75rem;">${r.actualizadoEn}</td>
+                <td style="text-align:right;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="editRateModal('${r.id}', '${r.tipoVehiculo}', ${r.tarifaPorHora}, ${r.tarifaPorMinuto})">
+                        Editar
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function editRateModal(id, tipo, curH, curM) {
+        const newH = prompt(`Nueva tarifa por hora para ${tipo} (COP):`, curH);
+        if (!newH || isNaN(newH)) return;
+        const newM = prompt(`Nueva tarifa por minuto para ${tipo} (COP):`, curM);
+        if (!newM || isNaN(newM)) return;
+
+        try {
+            await fetch(`${API_BASE}/rates.php`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, tarifaPorHora: parseFloat(newH), tarifaPorMinuto: parseFloat(newM) })
+            });
+            await syncAllFromDatabase();
+        } catch (e) {
+            alert('Error actualizando tarifa: ' + e.message);
+        }
+    }
+
+    // Renderizar Usuarios
+    function renderUsersTable() {
+        const tbody = document.getElementById('saasUsersTableBody');
+        tbody.innerHTML = saasState.users.map(u => `
+            <tr>
+                <td><span style="font-family:'JetBrains Mono'; color:var(--text-muted);">${u.id}</span></td>
+                <td><strong style="color:var(--text-heading);">${u.nombre}</strong></td>
+                <td>${u.email}</td>
+                <td>
+                    <span class="status-badge ${u.rol==='Administrador'?'pill-emerald':u.rol==='Operador'?'pill-primary':'status-badge'}">
+                        ${u.rol}
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge ${u.activo ? 'badge-completed' : 'badge-blocked'}">
+                        ${u.activo ? 'Activo' : 'Inactivo'}
+                    </span>
+                </td>
+                <td style="color:var(--text-muted); font-size:0.75rem;">${u.ultimoAcceso}</td>
+                <td style="text-align:right;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="toggleUserStatus('${u.id}')">
+                        ${u.activo ? 'Desactivar' : 'Activar'}
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    async function toggleUserStatus(id) {
+        try {
+            await fetch(`${API_BASE}/users.php`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id, toggleActivo: true })
+            });
+            await syncAllFromDatabase();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+
+    async function handleNewUserSubmit(e) {
+        e.preventDefault();
+        const name = document.getElementById('nuName').value.trim();
+        const email = document.getElementById('nuEmail').value.trim();
+        const role = document.getElementById('nuRole').value;
+        const plate = document.getElementById('nuPlate').value.trim();
+
+        try {
+            const res = await fetch(`${API_BASE}/users.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nombre: name, email, rol: role, placaAsociada: plate })
+            });
+            const data = await res.json();
+            if (!data.success) {
+                alert(data.message || 'Error al crear usuario.');
+                return;
+            }
+            closeSaasModal('modalNewUser');
+            await syncAllFromDatabase();
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+
+    // Renderizar Auditoría
+    function renderAuditTable() {
+        const tbody = document.getElementById('saasAuditTableBody');
+        tbody.innerHTML = saasState.audit.slice(0, 30).map(a => `
+            <tr>
+                <td style="white-space:nowrap; font-family:'JetBrains Mono'; font-size:0.75rem; color:var(--text-muted);">${a.timestamp}</td>
+                <td><strong>${a.usuarioEmail}</strong></td>
+                <td>${a.rol}</td>
+                <td><span style="color:var(--primary); font-weight:700;">${a.modulo}</span></td>
+                <td>${a.accion}</td>
+                <td style="font-size:0.78rem;">${a.detalle}</td>
+                <td><span class="status-badge ${a.resultado==='OK'?'badge-completed':'badge-blocked'}">${a.resultado}</span></td>
+            </tr>
+        `).join('');
+    }
+
+    // Renderizar Historial de Estancias
+    function renderCompletedTable() {
+        const completed = saasState.tickets.filter(t => t.estado === 'FINALIZADO');
+        const tbody = document.getElementById('saasCompletedTableBody');
+
+        if (completed.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:1rem;">Sin estancias finalizadas registradas.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = completed.map(t => `
+            <tr>
+                <td><strong style="color:var(--primary); font-family:'JetBrains Mono';">${t.ticketCodigo}</strong></td>
+                <td><span class="plate-pill">${t.placa}</span></td>
+                <td>${t.spotCodigo}</td>
+                <td>${t.minutosTranscurridos || 0} min</td>
+                <td><strong style="color:var(--emerald);">$${(t.valorPagado || 0).toLocaleString('es-CO')}</strong></td>
+                <td>${t.metodoPago || '—'}</td>
+                <td style="color:var(--text-muted); font-size:0.75rem;">${new Date(t.fechaSalida || t.fechaIngreso).toLocaleString('es-CO')}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Portal del Cliente - Búsqueda
+    function handleSaasClientSearch() {
+        const plate = document.getElementById('saasClientPlateSearch').value.trim().toUpperCase();
+        const card = document.getElementById('saasClientResultCard');
+
+        if (!plate) {
+            alert('Ingresa una placa.');
+            return;
+        }
+
+        const active = saasState.tickets.find(t => t.estado === 'ACTIVO' && t.placa === plate);
+        if (!active) {
+            card.style.display = 'block';
+            card.innerHTML = `
+                <div style="color:var(--rose); font-weight:700; margin-bottom:0.25rem;">Vehículo no encontrado</div>
+                <p style="font-size:0.8rem; color:var(--text-muted);">La placa <strong>${plate}</strong> no tiene ingreso activo vigente.</p>
+            `;
+            return;
+        }
+
+        const mins = Math.max(1, Math.round((Date.now() - new Date(active.fechaIngreso).getTime()) / 60000));
+        card.style.display = 'block';
+        card.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                <div>
+                    <span class="plate-pill" style="font-size:1.25rem;">${active.placa}</span>
+                    <span style="margin-left:0.5rem; color:var(--primary); font-size:0.85rem;">${active.tipoVehiculo}</span>
+                </div>
+                <span class="status-badge badge-active-live">Estancia en Curso</span>
+            </div>
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem;">
+                <div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">Bahía Asignada</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:var(--emerald);">${active.spotCodigo}</div>
+                </div>
+                <div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">Hora Ingreso</div>
+                    <div style="font-size:1rem; font-weight:700; color:var(--text-heading);">${new Date(active.fechaIngreso).toLocaleTimeString('es-CO')}</div>
+                </div>
+                <div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">Tiempo Actual</div>
+                    <div style="font-size:1.2rem; font-weight:800; color:var(--primary);">${mins} mins</div>
+                </div>
+            </div>
+        `;
+    }
+
+    // Buscador Global en Topbar
+    function handleGlobalSearch(term) {
+        if (!term.trim()) return;
+        switchSaasView('view-operations');
+        const input = document.getElementById('operationsFilterInput');
+        if (input) {
+            input.value = term;
+            filterOperationsTable(term);
+        }
+    }
+
+    // Restablecer DB desde SaaS
+    async function resetDatabaseFromSaas() {
+        if (!confirm('¿Restablecer la base de datos `parkflow_db` en MySQL con los datos de fábrica?')) return;
+        try {
+            const res = await fetch(`${API_BASE}/setup.php`);
+            const data = await res.json();
+            if (data.success) {
+                alert('Base de datos restablecida con éxito en MySQL.');
+                closeSaasModal('modalXamppDiagnostics');
+                await syncAllFromDatabase();
+            }
+        } catch (e) {
+            alert('Error: ' + e.message);
+        }
+    }
+
+    // Inicializar al cargar el DOM
+    window.addEventListener('DOMContentLoaded', () => {
+        syncAllFromDatabase();
+        // Polling cada 12 segundos para actualizar métricas en vivo
+        setInterval(syncAllFromDatabase, 12000);
+    });
