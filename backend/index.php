@@ -1,49 +1,15 @@
-<?php
-/**
- * =============================================================================
- * ParkFlow Enterprise - SaaS Smart Parking Management Platform
- * Modern Dashboard / SaaS Architecture with PHP 8.2 + MySQL (XAMPP)
- * =============================================================================
- */
-
-require_once __DIR__ . '/config/database.php';
-
-$db = new Database();
-$pdo = $db->getConnection();
-$dbConnected = ($pdo !== null);
-$dbVersion = 'Desconocido';
-$tableCounts = [
-    'usuarios' => 0,
-    'espacios' => 0,
-    'tarifas'  => 0,
-    'tickets'  => 0,
-    'auditoria'=> 0
-];
-
-if ($dbConnected) {
-    try {
-        $stmt = $pdo->query("SELECT VERSION() as v");
-        $dbVersion = $stmt->fetch()['v'];
-        foreach (array_keys($tableCounts) as $tbl) {
-            $cStmt = $pdo->query("SELECT COUNT(*) as c FROM `{$tbl}`");
-            $tableCounts[$tbl] = (int)$cStmt->fetch()['c'];
-        }
-    } catch (Exception $e) {
-        $dbConnected = false;
-    }
-}
-?>
+﻿
 <!DOCTYPE html>
 <html lang="es" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ParkFlow SaaS — Enterprise Smart Parking Cloud</title>
+    <title>ParkFlow SaaS â€” Enterprise Smart Parking Cloud</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
+        <style>
+:root {
             --bg-base: #060911;
             --bg-surface: #0b1120;
             --bg-surface-elevated: #111a2e;
@@ -1014,7 +980,55 @@ if ($dbConnected) {
                 display: none;
             }
         }
-    </style>
+
+/* ========================================================================= */
+/* RBAC (Role-Based Access Control) Styles                                  */
+/* ========================================================================= */
+.nav-item-btn.restricted {
+    opacity: 0.5;
+    position: relative;
+    cursor: not-allowed !important;
+}
+.nav-item-btn.restricted:hover {
+    background: rgba(244, 63, 94, 0.08) !important;
+    border-color: rgba(244, 63, 94, 0.25) !important;
+    color: var(--rose) !important;
+}
+.pill-locked {
+    background: rgba(244, 63, 94, 0.15) !important;
+    color: var(--rose) !important;
+    font-size: 0.65rem !important;
+}
+.rbac-toast {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    background: #0f172a;
+    border: 1px solid rgba(244, 63, 94, 0.45);
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.7);
+    border-radius: var(--radius-md);
+    padding: 0.9rem 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+    z-index: 99999;
+    animation: rbacSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    max-width: 440px;
+}
+@keyframes rbacSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.role-badge-tag {
+    font-size: 0.68rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 9999px;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+</style>
 </head>
 <body>
 
@@ -1031,7 +1045,7 @@ if ($dbConnected) {
                     <span class="brand-plan">SaaS Enterprise</span>
                 </div>
             </a>
-            <button type="button" class="btn btn-secondary btn-sm mobile-toggle" onclick="toggleMobileSidebar()">✕</button>
+            <button type="button" class="btn btn-secondary btn-sm mobile-toggle" onclick="toggleMobileSidebar()">âœ•</button>
         </div>
 
         <!-- Navigation Menu -->
@@ -1040,7 +1054,7 @@ if ($dbConnected) {
 
             <button type="button" class="nav-item-btn active" onclick="switchSaasView('view-overview', this)">
                 <div class="nav-item-left">
-                    <span class="nav-item-icon">📊</span>
+                    <span class="nav-item-icon">ðŸ“Š</span>
                     <span>Dashboard General</span>
                 </div>
                 <span class="nav-pill-badge pill-emerald">En Vivo</span>
@@ -1048,7 +1062,7 @@ if ($dbConnected) {
 
             <button type="button" class="nav-item-btn" onclick="switchSaasView('view-operations', this)">
                 <div class="nav-item-left">
-                    <span class="nav-item-icon">🚗</span>
+                    <span class="nav-item-icon">ðŸš—</span>
                     <span>Flujo & Estancias</span>
                 </div>
                 <span class="nav-pill-badge pill-primary" id="sidebarActiveStaysBadge">0</span>
@@ -1056,30 +1070,30 @@ if ($dbConnected) {
 
             <button type="button" class="nav-item-btn" onclick="switchSaasView('view-matrix', this)">
                 <div class="nav-item-left">
-                    <span class="nav-item-icon">🗺️</span>
-                    <span>Telemetría de Bahías</span>
+                    <span class="nav-item-icon">ðŸ—ºï¸</span>
+                    <span>TelemetrÃ­a de BahÃ­as</span>
                 </div>
             </button>
 
-            <div class="nav-group-label">Administración</div>
+            <div class="nav-group-label">AdministraciÃ³n</div>
 
             <button type="button" class="nav-item-btn" onclick="switchSaasView('view-rates', this)">
                 <div class="nav-item-left">
-                    <span class="nav-item-icon">💰</span>
+                    <span class="nav-item-icon">ðŸ’°</span>
                     <span>Matriz Tarifaria</span>
                 </div>
             </button>
 
             <button type="button" class="nav-item-btn" onclick="switchSaasView('view-users', this)">
                 <div class="nav-item-left">
-                    <span class="nav-item-icon">👥</span>
+                    <span class="nav-item-icon">ðŸ‘¥</span>
                     <span>Cuentas & RBAC</span>
                 </div>
             </button>
 
             <button type="button" class="nav-item-btn" onclick="switchSaasView('view-audit', this)">
                 <div class="nav-item-left">
-                    <span class="nav-item-icon">🛡️</span>
+                    <span class="nav-item-icon">ðŸ›¡ï¸</span>
                     <span>Seguridad & Logs</span>
                 </div>
             </button>
@@ -1088,7 +1102,7 @@ if ($dbConnected) {
 
             <button type="button" class="nav-item-btn" onclick="switchSaasView('view-client-portal', this)">
                 <div class="nav-item-left">
-                    <span class="nav-item-icon">📱</span>
+                    <span class="nav-item-icon">ðŸ“±</span>
                     <span>Portal Ciudadano</span>
                 </div>
             </button>
@@ -1116,7 +1130,7 @@ if ($dbConnected) {
         <!-- SaaS Topbar -->
         <header class="saas-topbar">
             <div class="topbar-left">
-                <button type="button" class="mobile-toggle" onclick="toggleMobileSidebar()">☰</button>
+                <button type="button" class="mobile-toggle" onclick="toggleMobileSidebar()">â˜°</button>
                 <div class="breadcrumb">
                     <span class="breadcrumb-item">ParkFlow</span>
                     <span class="breadcrumb-sep">/</span>
@@ -1126,15 +1140,15 @@ if ($dbConnected) {
 
             <!-- Global Live Filter Search -->
             <div class="topbar-search">
-                <span class="search-icon-abs">🔍</span>
-                <input type="text" id="globalSearchInput" placeholder="Buscar placa, ticket o bahía..." oninput="handleGlobalSearch(this.value)">
+                <span class="search-icon-abs">ðŸ”</span>
+                <input type="text" id="globalSearchInput" placeholder="Buscar placa, ticket o bahÃ­a..." oninput="handleGlobalSearch(this.value)">
             </div>
 
             <div class="topbar-right">
                 <!-- Server Status Chip -->
-                <div id="saasDbBadge" class="heartbeat-badge <?= $dbConnected ? 'hb-connected' : 'hb-disconnected' ?>" onclick="openSaasModal('modalXamppDiagnostics')">
+                <div id="saasDbBadge" class="heartbeat-badge hb-connected" onclick="openSaasModal('modalXamppDiagnostics')">
                     <span class="status-dot"></span>
-                    <span id="saasDbStatusText"><?= $dbConnected ? 'XAMPP MySQL: 3306' : 'MySQL Desconectado' ?></span>
+                    <span id="saasDbStatusText">XAMPP MySQL: 3306</span>
                 </div>
 
                 <!-- Primary Action -->
@@ -1148,6 +1162,33 @@ if ($dbConnected) {
         <main class="saas-content">
 
             <!-- ======================================================== -->
+            <!-- 0. VIEW: FORBIDDEN / ACCESO DENEGADO (RBAC)              -->
+            <!-- ======================================================== -->
+            <div id="view-forbidden" class="view-panel" style="text-align:center; padding:3rem 1.5rem;">
+                <div style="max-width:560px; margin:0 auto; background:var(--bg-surface); border:1px solid rgba(244,63,94,0.3); border-radius:var(--radius-xl); padding:2.5rem 2rem; box-shadow:0 12px 35px rgba(0,0,0,0.5);">
+                    <div style="width:72px; height:72px; border-radius:50%; background:rgba(244,63,94,0.15); color:var(--rose); display:flex; align-items:center; justify-content:center; font-size:2.2rem; margin:0 auto 1.25rem; border:1px solid rgba(244,63,94,0.35);">
+                        ðŸ”’
+                    </div>
+                    <div class="role-badge-tag" style="background:rgba(244,63,94,0.15); color:var(--rose); margin-bottom:0.75rem;">
+                        CONTROL DE ACCESO RBAC
+                    </div>
+                    <h2 style="color:var(--text-heading); font-size:1.4rem; font-weight:800; margin-bottom:0.75rem;">MÃ³dulo Restringido</h2>
+                    <p id="forbiddenReasonText" style="color:var(--text-body); font-size:0.88rem; line-height:1.6; margin-bottom:1.75rem;">
+                        Tu rol actual no dispone de los privilegios necesarios para indagar o realizar acciones en este mÃ³dulo administrativo.
+                    </p>
+                    <div style="display:flex; flex-direction:column; gap:0.75rem; align-items:center;">
+                        <button type="button" class="btn btn-primary" onclick="returnToAuthorizedView()">
+                            Volver a mi MÃ³dulo Autorizado
+                        </button>
+                        <span style="font-size:0.75rem; color:var(--text-muted);">
+                            ðŸ’¡ Puedes cambiar entre los roles de Administrador, Operador y Cliente en la esquina inferior izquierda.
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- ======================================================== -->
             <!-- 1. VIEW: DASHBOARD GENERAL (SaaS Overview & Analytics)   -->
             <!-- ======================================================== -->
             <div id="view-overview" class="view-panel active">
@@ -1158,20 +1199,20 @@ if ($dbConnected) {
                     <div class="kpi-card">
                         <div class="kpi-top">
                             <span class="kpi-label">Recaudo Acumulado</span>
-                            <div class="kpi-icon-badge" style="background:var(--emerald-subtle); color:var(--emerald);">💵</div>
+                            <div class="kpi-icon-badge" style="background:var(--emerald-subtle); color:var(--emerald);">ðŸ’µ</div>
                         </div>
                         <div class="kpi-value" id="kpiTotalRevenue">$0</div>
                         <div class="kpi-bottom">
-                            <span class="trend-chip trend-up">↑ +14.8%</span>
+                            <span class="trend-chip trend-up">â†‘ +14.8%</span>
                             <span style="color:var(--text-muted);">vs periodo anterior</span>
                         </div>
                     </div>
 
-                    <!-- KPI 2: Ocupación en Tiempo Real -->
+                    <!-- KPI 2: OcupaciÃ³n en Tiempo Real -->
                     <div class="kpi-card">
                         <div class="kpi-top">
-                            <span class="kpi-label">Ocupación Actual</span>
-                            <div class="kpi-icon-badge" style="background:rgba(0,245,255,0.15); color:var(--primary);">🅿️</div>
+                            <span class="kpi-label">OcupaciÃ³n Actual</span>
+                            <div class="kpi-icon-badge" style="background:rgba(0,245,255,0.15); color:var(--primary);">ðŸ…¿ï¸</div>
                         </div>
                         <div class="kpi-value" id="kpiOccupancyPct">0%</div>
                         <div class="kpi-bottom" style="flex-direction:column; align-items:flex-start; width:100%;">
@@ -1185,11 +1226,11 @@ if ($dbConnected) {
                         </div>
                     </div>
 
-                    <!-- KPI 3: Vehículos Activos -->
+                    <!-- KPI 3: VehÃ­culos Activos -->
                     <div class="kpi-card">
                         <div class="kpi-top">
                             <span class="kpi-label">Estancias Activas</span>
-                            <div class="kpi-icon-badge" style="background:var(--indigo-subtle); color:var(--indigo);">🚘</div>
+                            <div class="kpi-icon-badge" style="background:var(--indigo-subtle); color:var(--indigo);">ðŸš˜</div>
                         </div>
                         <div class="kpi-value" id="kpiActiveVehicles">0</div>
                         <div class="kpi-bottom">
@@ -1198,15 +1239,15 @@ if ($dbConnected) {
                         </div>
                     </div>
 
-                    <!-- KPI 4: Telemetría Sensores IoT -->
+                    <!-- KPI 4: TelemetrÃ­a Sensores IoT -->
                     <div class="kpi-card">
                         <div class="kpi-top">
                             <span class="kpi-label">Salud de Red IoT</span>
-                            <div class="kpi-icon-badge" style="background:rgba(245,158,11,0.15); color:var(--amber);">📡</div>
+                            <div class="kpi-icon-badge" style="background:rgba(245,158,11,0.15); color:var(--amber);">ðŸ“¡</div>
                         </div>
                         <div class="kpi-value" id="kpiSensorHealth">99.8%</div>
                         <div class="kpi-bottom">
-                            <span class="trend-chip trend-up">✓ Nominal</span>
+                            <span class="trend-chip trend-up">âœ“ Nominal</span>
                             <span style="color:var(--text-muted);">24 nodos activos</span>
                         </div>
                     </div>
@@ -1214,12 +1255,12 @@ if ($dbConnected) {
 
                 <!-- SaaS Interactive Charts Row -->
                 <div class="analytics-grid">
-                    <!-- Curva de Tráfico y Flujo (SVG Bezier Graph) -->
+                    <!-- Curva de TrÃ¡fico y Flujo (SVG Bezier Graph) -->
                     <div class="saas-card">
                         <div class="card-header-flex">
                             <div>
-                                <h3 class="card-heading-title">📈 Flujo Vehicular & Ingresos por Franja Horaria</h3>
-                                <p class="card-heading-sub">Monitoreo de afluencia de vehículos en las últimas 24 horas</p>
+                                <h3 class="card-heading-title">ðŸ“ˆ Flujo Vehicular & Ingresos por Franja Horaria</h3>
+                                <p class="card-heading-sub">Monitoreo de afluencia de vehÃ­culos en las Ãºltimas 24 horas</p>
                             </div>
                             <div style="display:flex; gap:0.5rem;">
                                 <span class="nav-pill-badge pill-primary">Tiempo Real</span>
@@ -1254,8 +1295,8 @@ if ($dbConnected) {
                     <div class="saas-card">
                         <div class="card-header-flex">
                             <div>
-                                <h3 class="card-heading-title">🚗 Distribución por Flota</h3>
-                                <p class="card-heading-sub">Proporción por tipo de vehículo</p>
+                                <h3 class="card-heading-title">ðŸš— DistribuciÃ³n por Flota</h3>
+                                <p class="card-heading-sub">ProporciÃ³n por tipo de vehÃ­culo</p>
                             </div>
                         </div>
                         <div style="display:flex; align-items:center; justify-content:center; height:120px;">
@@ -1273,7 +1314,7 @@ if ($dbConnected) {
                         </div>
                         <div class="donut-legend">
                             <div class="legend-row">
-                                <div class="legend-left"><div class="legend-color-dot" style="background:#00f5ff;"></div><span>Automóviles</span></div>
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#00f5ff;"></div><span>AutomÃ³viles</span></div>
                                 <span style="font-weight:700; color:var(--text-heading);" id="distAutoCount">45%</span>
                             </div>
                             <div class="legend-row">
@@ -1281,7 +1322,7 @@ if ($dbConnected) {
                                 <span style="font-weight:700; color:var(--text-heading);" id="distMotoCount">25%</span>
                             </div>
                             <div class="legend-row">
-                                <div class="legend-left"><div class="legend-color-dot" style="background:#10b981;"></div><span>Eléctricos EV</span></div>
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#10b981;"></div><span>ElÃ©ctricos EV</span></div>
                                 <span style="font-weight:700; color:var(--text-heading);" id="distEvCount">15%</span>
                             </div>
                             <div class="legend-row">
@@ -1296,11 +1337,11 @@ if ($dbConnected) {
                 <div class="table-card">
                     <div class="table-toolbar">
                         <div>
-                            <h3 style="font-size:0.95rem; font-weight:700; color:var(--text-heading);">Vehículos en Estancia Activa</h3>
+                            <h3 style="font-size:0.95rem; font-weight:700; color:var(--text-heading);">VehÃ­culos en Estancia Activa</h3>
                             <p style="font-size:0.75rem; color:var(--text-muted);">Sincronizado en tiempo real con MySQL</p>
                         </div>
                         <button type="button" class="btn btn-secondary btn-sm" onclick="switchSaasView('view-operations')">
-                            Ver Todas las Operaciones →
+                            Ver Todas las Operaciones â†’
                         </button>
                     </div>
                     <div class="table-responsive">
@@ -1309,11 +1350,11 @@ if ($dbConnected) {
                                 <tr>
                                     <th>Ticket</th>
                                     <th>Placa</th>
-                                    <th>Tipo Vehículo</th>
-                                    <th>Bahía</th>
+                                    <th>Tipo VehÃ­culo</th>
+                                    <th>BahÃ­a</th>
                                     <th>Hora Entrada</th>
                                     <th>Estado</th>
-                                    <th>Acción</th>
+                                    <th>AcciÃ³n</th>
                                 </tr>
                             </thead>
                             <tbody id="overviewActiveTableBody">
@@ -1334,13 +1375,13 @@ if ($dbConnected) {
                         <div style="display:flex; align-items:center; gap:1rem;">
                             <h3 style="font-size:1rem; font-weight:700; color:var(--text-heading);">Control de Flujo Vehicular</h3>
                             <div class="table-search-box">
-                                <span class="search-icon-abs">🔍</span>
-                                <input type="text" id="operationsFilterInput" placeholder="Filtrar por placa o bahía..." oninput="filterOperationsTable(this.value)">
+                                <span class="search-icon-abs">ðŸ”</span>
+                                <input type="text" id="operationsFilterInput" placeholder="Filtrar por placa o bahÃ­a..." oninput="filterOperationsTable(this.value)">
                             </div>
                         </div>
                         <div style="display:flex; gap:0.5rem;">
                             <button type="button" class="btn btn-secondary btn-sm" onclick="syncAllFromDatabase()">
-                                <span>🔄</span> Actualizar
+                                <span>ðŸ”„</span> Actualizar
                             </button>
                             <button type="button" class="btn btn-primary btn-sm" onclick="openSaasModal('modalCheckIn')">
                                 <span>+</span> Registrar Entrada
@@ -1354,7 +1395,7 @@ if ($dbConnected) {
                                     <th>Ticket ID</th>
                                     <th>Placa</th>
                                     <th>Tipo</th>
-                                    <th>Bahía Asignada</th>
+                                    <th>BahÃ­a Asignada</th>
                                     <th>Hora Ingreso</th>
                                     <th>Cruce Medianoche</th>
                                     <th>Estado</th>
@@ -1362,7 +1403,7 @@ if ($dbConnected) {
                                 </tr>
                             </thead>
                             <tbody id="operationsFullTableBody">
-                                <!-- Inyectado dinámicamente -->
+                                <!-- Inyectado dinÃ¡micamente -->
                             </tbody>
                         </table>
                     </div>
@@ -1370,23 +1411,23 @@ if ($dbConnected) {
             </div>
 
             <!-- ======================================================== -->
-            <!-- 3. VIEW: TELEMETRÍA DE BAHÍAS (MAPA 2D INTERACTIVO)     -->
+            <!-- 3. VIEW: TELEMETRÃA DE BAHÃAS (MAPA 2D INTERACTIVO)     -->
             <!-- ======================================================== -->
             <div id="view-matrix" class="view-panel">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
                     <div>
-                        <h2 style="font-size:1.15rem; font-weight:800; color:var(--text-heading);">Matriz de Ocupación por Zonas</h2>
-                        <p style="font-size:0.75rem; color:var(--text-muted);">Haz clic en cualquier bahía para cambiar su disponibilidad o inspeccionar el vehículo</p>
+                        <h2 style="font-size:1.15rem; font-weight:800; color:var(--text-heading);">Matriz de OcupaciÃ³n por Zonas</h2>
+                        <p style="font-size:0.75rem; color:var(--text-muted);">Haz clic en cualquier bahÃ­a para cambiar su disponibilidad o inspeccionar el vehÃ­culo</p>
                     </div>
                     <div style="display:flex; gap:0.75rem; font-size:0.75rem;">
-                        <span style="color:var(--emerald);">● Disponible</span>
-                        <span style="color:var(--rose);">● Ocupado</span>
-                        <span style="color:#94a3b8;">● Bloqueado</span>
+                        <span style="color:var(--emerald);">â— Disponible</span>
+                        <span style="color:var(--rose);">â— Ocupado</span>
+                        <span style="color:#94a3b8;">â— Bloqueado</span>
                     </div>
                 </div>
 
                 <div class="bay-grid-container" id="saasZonesContainer">
-                    <!-- Inyectado dinámicamente -->
+                    <!-- Inyectado dinÃ¡micamente -->
                 </div>
             </div>
 
@@ -1397,7 +1438,7 @@ if ($dbConnected) {
                 <div class="table-card" style="max-width:960px; margin:0 auto;">
                     <div class="table-toolbar">
                         <div>
-                            <h3 style="font-size:1rem; font-weight:700; color:var(--text-heading);">Configuración de Tarifas y Cobro</h3>
+                            <h3 style="font-size:1rem; font-weight:700; color:var(--text-heading);">ConfiguraciÃ³n de Tarifas y Cobro</h3>
                             <p style="font-size:0.75rem; color:var(--text-muted);">Valores en Pesos Colombianos (COP) sincronizados con tabla `tarifas` en MySQL</p>
                         </div>
                     </div>
@@ -1405,17 +1446,17 @@ if ($dbConnected) {
                         <table class="saas-table">
                             <thead>
                                 <tr>
-                                    <th>Tipo de Vehículo</th>
+                                    <th>Tipo de VehÃ­culo</th>
                                     <th>Por Minuto</th>
                                     <th>Por Hora</th>
-                                    <th>Día Pleno</th>
-                                    <th>Fracción Gracia</th>
-                                    <th>Último Cambio</th>
-                                    <th style="text-align:right;">Acción</th>
+                                    <th>DÃ­a Pleno</th>
+                                    <th>FracciÃ³n Gracia</th>
+                                    <th>Ãšltimo Cambio</th>
+                                    <th style="text-align:right;">AcciÃ³n</th>
                                 </tr>
                             </thead>
                             <tbody id="saasRatesTableBody">
-                                <!-- Inyectado dinámicamente -->
+                                <!-- Inyectado dinÃ¡micamente -->
                             </tbody>
                         </table>
                     </div>
@@ -1423,7 +1464,7 @@ if ($dbConnected) {
             </div>
 
             <!-- ======================================================== -->
-            <!-- 5. VIEW: GESTIÓN DE USUARIOS Y RBAC                      -->
+            <!-- 5. VIEW: GESTIÃ“N DE USUARIOS Y RBAC                      -->
             <!-- ======================================================== -->
             <div id="view-users" class="view-panel">
                 <div class="table-card">
@@ -1442,15 +1483,15 @@ if ($dbConnected) {
                                 <tr>
                                     <th>ID</th>
                                     <th>Nombre Completo</th>
-                                    <th>Correo Electrónico</th>
+                                    <th>Correo ElectrÃ³nico</th>
                                     <th>Rol Asignado</th>
                                     <th>Estado</th>
-                                    <th>Último Acceso</th>
-                                    <th style="text-align:right;">Acción</th>
+                                    <th>Ãšltimo Acceso</th>
+                                    <th style="text-align:right;">AcciÃ³n</th>
                                 </tr>
                             </thead>
                             <tbody id="saasUsersTableBody">
-                                <!-- Inyectado dinámicamente -->
+                                <!-- Inyectado dinÃ¡micamente -->
                             </tbody>
                         </table>
                     </div>
@@ -1458,14 +1499,14 @@ if ($dbConnected) {
             </div>
 
             <!-- ======================================================== -->
-            <!-- 6. VIEW: BITÁCORA DE AUDITORÍA Y SEGURIDAD              -->
+            <!-- 6. VIEW: BITÃCORA DE AUDITORÃA Y SEGURIDAD              -->
             <!-- ======================================================== -->
             <div id="view-audit" class="view-panel">
                 <div class="table-card">
                     <div class="table-toolbar">
                         <div>
-                            <h3 style="font-size:1rem; font-weight:700; color:var(--text-heading);">Bitácora Inmutable de Auditoría</h3>
-                            <p style="font-size:0.75rem; color:var(--text-muted);">Registro cronológico de eventos en tabla `auditoria` de MySQL</p>
+                            <h3 style="font-size:1rem; font-weight:700; color:var(--text-heading);">BitÃ¡cora Inmutable de AuditorÃ­a</h3>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">Registro cronolÃ³gico de eventos en tabla `auditoria` de MySQL</p>
                         </div>
                         <span class="nav-pill-badge pill-emerald">Integridad Verificada</span>
                     </div>
@@ -1476,14 +1517,14 @@ if ($dbConnected) {
                                     <th>Fecha / Hora</th>
                                     <th>Usuario</th>
                                     <th>Rol</th>
-                                    <th>Módulo</th>
-                                    <th>Acción</th>
+                                    <th>MÃ³dulo</th>
+                                    <th>AcciÃ³n</th>
                                     <th>Detalle</th>
                                     <th>Resultado</th>
                                 </tr>
                             </thead>
                             <tbody id="saasAuditTableBody">
-                                <!-- Inyectado dinámicamente -->
+                                <!-- Inyectado dinÃ¡micamente -->
                             </tbody>
                         </table>
                     </div>
@@ -1498,8 +1539,8 @@ if ($dbConnected) {
                     <div class="saas-card">
                         <div class="card-header-flex">
                             <div>
-                                <h3 class="card-heading-title">📱 Portal de Consulta Ciudadana</h3>
-                                <p class="card-heading-sub">Consulta el estado, tiempo transcurrido y tarifa de tu vehículo en tiempo real</p>
+                                <h3 class="card-heading-title">ðŸ“± Portal de Consulta Ciudadana</h3>
+                                <p class="card-heading-sub">Consulta el estado, tiempo transcurrido y tarifa de tu vehÃ­culo en tiempo real</p>
                             </div>
                         </div>
                         <div style="display:flex; gap:0.75rem; margin-bottom:1rem;">
@@ -1510,7 +1551,7 @@ if ($dbConnected) {
                         </div>
 
                         <div id="saasClientResultCard" style="display:none; background:var(--bg-surface-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:1.25rem;">
-                            <!-- Inyectado dinámicamente -->
+                            <!-- Inyectado dinÃ¡micamente -->
                         </div>
                     </div>
 
@@ -1525,15 +1566,15 @@ if ($dbConnected) {
                                     <tr>
                                         <th>Ticket</th>
                                         <th>Placa</th>
-                                        <th>Bahía</th>
+                                        <th>BahÃ­a</th>
                                         <th>Minutos</th>
                                         <th>Valor Pagado</th>
-                                        <th>Método</th>
+                                        <th>MÃ©todo</th>
                                         <th>Fecha Salida</th>
                                     </tr>
                                 </thead>
                                 <tbody id="saasCompletedTableBody">
-                                    <!-- Inyectado dinámicamente -->
+                                    <!-- Inyectado dinÃ¡micamente -->
                                 </tbody>
                             </table>
                         </div>
@@ -1553,28 +1594,28 @@ if ($dbConnected) {
 <div id="modalCheckIn" class="modal-backdrop">
     <div class="modal-container">
         <div class="modal-header-saas">
-            <h3 class="modal-title-saas"><span>🎟️</span> Registrar Entrada de Vehículo</h3>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalCheckIn')">✕</button>
+            <h3 class="modal-title-saas"><span>ðŸŽŸï¸</span> Registrar Entrada de VehÃ­culo</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalCheckIn')">âœ•</button>
         </div>
         <form onsubmit="handleSaasEntrySubmit(event)">
             <div class="modal-body-saas">
                 <div class="form-row">
-                    <label class="form-label-saas">Placa del Vehículo</label>
+                    <label class="form-label-saas">Placa del VehÃ­culo</label>
                     <input type="text" id="checkInPlate" class="form-control-saas" placeholder="ABC-123 o XRT-82A" required style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700;">
                 </div>
                 <div class="form-row">
-                    <label class="form-label-saas">Tipo de Vehículo</label>
+                    <label class="form-label-saas">Tipo de VehÃ­culo</label>
                     <select id="checkInType" class="form-control-saas" onchange="filterAvailableBaysForCheckIn()">
-                        <option value="Automóvil">Automóvil (Zona A)</option>
-                        <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
+                        <option value="AutomÃ³vil">AutomÃ³vil (Zona A)</option>
+                        <option value="ElÃ©ctrico EV">ElÃ©ctrico EV (Zona B)</option>
                         <option value="Motocicleta">Motocicleta (Zona C)</option>
                         <option value="Camioneta">Camioneta / SUV (Zona D)</option>
                     </select>
                 </div>
                 <div class="form-row">
-                    <label class="form-label-saas">Bahía de Parqueo Asignada</label>
+                    <label class="form-label-saas">BahÃ­a de Parqueo Asignada</label>
                     <select id="checkInBay" class="form-control-saas" required>
-                        <option value="">Cargando bahías disponibles...</option>
+                        <option value="">Cargando bahÃ­as disponibles...</option>
                     </select>
                 </div>
                 <div class="form-row">
@@ -1590,21 +1631,21 @@ if ($dbConnected) {
     </div>
 </div>
 
-<!-- Modal: Cobro y Liquidación de Salida -->
+<!-- Modal: Cobro y LiquidaciÃ³n de Salida -->
 <div id="modalCheckOut" class="modal-backdrop">
     <div class="modal-container">
         <div class="modal-header-saas">
-            <h3 class="modal-title-saas"><span>💳</span> Liquidación de Estancia & Cobro</h3>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalCheckOut')">✕</button>
+            <h3 class="modal-title-saas"><span>ðŸ’³</span> LiquidaciÃ³n de Estancia & Cobro</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalCheckOut')">âœ•</button>
         </div>
         <div class="modal-body-saas">
             <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1.25rem;">
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
-                    <span style="color:var(--text-muted); font-size:0.8rem;">Vehículo & Placa:</span>
+                    <span style="color:var(--text-muted); font-size:0.8rem;">VehÃ­culo & Placa:</span>
                     <span class="plate-pill" id="coPlateDisplay">---</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
-                    <span style="color:var(--text-muted);">Bahía Asignada:</span>
+                    <span style="color:var(--text-muted);">BahÃ­a Asignada:</span>
                     <span style="color:var(--primary); font-weight:700;" id="coBayDisplay">---</span>
                 </div>
                 <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
@@ -1618,10 +1659,10 @@ if ($dbConnected) {
             </div>
 
             <div class="form-row">
-                <label class="form-label-saas">Método de Pago</label>
+                <label class="form-label-saas">MÃ©todo de Pago</label>
                 <select id="coPaymentMethod" class="form-control-saas">
                     <option value="Efectivo">Efectivo</option>
-                    <option value="Tarjeta">Tarjeta Débito / Crédito</option>
+                    <option value="Tarjeta">Tarjeta DÃ©bito / CrÃ©dito</option>
                     <option value="QR Digital">QR Digital (Bancolombia / Nequi)</option>
                 </select>
             </div>
@@ -1629,7 +1670,7 @@ if ($dbConnected) {
         <div class="modal-footer-saas">
             <button type="button" class="btn btn-secondary" onclick="closeSaasModal('modalCheckOut')">Cancelar</button>
             <button type="button" class="btn btn-primary" onclick="confirmCheckOutPayment()">
-                Confirmar Cobro y Liberar Bahía
+                Confirmar Cobro y Liberar BahÃ­a
             </button>
         </div>
     </div>
@@ -1640,34 +1681,34 @@ if ($dbConnected) {
     <div class="modal-container" style="max-width:440px;">
         <div class="modal-header-saas">
             <h3 class="modal-title-saas" id="saasReceiptHeaderTitle">Comprobante Oficial</h3>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalReceiptSaas')">✕</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalReceiptSaas')">âœ•</button>
         </div>
         <div class="modal-body-saas" id="saasReceiptBody">
-            <!-- Inyectado dinámicamente -->
+            <!-- Inyectado dinÃ¡micamente -->
         </div>
         <div class="modal-footer-saas">
-            <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir</button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">ðŸ–¨ï¸ Imprimir</button>
             <button type="button" class="btn btn-primary btn-sm" onclick="closeSaasModal('modalReceiptSaas')">Cerrar</button>
         </div>
     </div>
 </div>
 
-<!-- Modal: Diagnóstico XAMPP y MySQL -->
+<!-- Modal: DiagnÃ³stico XAMPP y MySQL -->
 <div id="modalXamppDiagnostics" class="modal-backdrop">
     <div class="modal-container">
         <div class="modal-header-saas">
-            <h3 class="modal-title-saas"><span>🗄️</span> Telemetría de Servidor XAMPP & MySQL</h3>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalXamppDiagnostics')">✕</button>
+            <h3 class="modal-title-saas"><span>ðŸ—„ï¸</span> TelemetrÃ­a de Servidor XAMPP & MySQL</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalXamppDiagnostics')">âœ•</button>
         </div>
         <div class="modal-body-saas">
             <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:0.75rem; margin-bottom:1.25rem;">
                 <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.75rem;">
                     <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Servidor Web</span>
-                    <div style="font-weight:700; color:var(--primary); font-size:0.9rem;">Apache / PHP <?= phpversion() ?></div>
+                    <div style="font-weight:700; color:var(--primary); font-size:0.9rem;">Apache / PHP 8.2</div>
                 </div>
                 <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.75rem;">
                     <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Motor Base Datos</span>
-                    <div style="font-weight:700; color:var(--emerald); font-size:0.9rem;"><?= htmlspecialchars($dbVersion) ?></div>
+                    <div style="font-weight:700; color:var(--emerald); font-size:0.9rem;">10.4.32-MariaDB / MySQL</div>
                 </div>
                 <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.75rem;">
                     <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Host & Puerto</span>
@@ -1675,12 +1716,12 @@ if ($dbConnected) {
                 </div>
                 <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:0.75rem;">
                     <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Base de Datos</span>
-                    <div style="font-weight:700; color:var(--primary); font-size:0.9rem;"><?= htmlspecialchars($db->getDbName()) ?></div>
+                    <div style="font-weight:700; color:var(--primary); font-size:0.9rem;">parkflow_db</div>
                 </div>
             </div>
 
             <div style="background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.3); border-radius:var(--radius-md); padding:0.85rem; font-size:0.8rem; color:var(--emerald); margin-bottom:1rem;">
-                ✓ Servidor y base de datos relacional conectados y sincronizados en tiempo real mediante PDO.
+                âœ“ Servidor y base de datos relacional conectados y sincronizados en tiempo real mediante PDO.
             </div>
         </div>
         <div class="modal-footer-saas" style="justify-content:space-between;">
@@ -1698,8 +1739,8 @@ if ($dbConnected) {
 <div id="modalNewUser" class="modal-backdrop">
     <div class="modal-container">
         <div class="modal-header-saas">
-            <h3 class="modal-title-saas"><span>👤</span> Crear Cuenta de Usuario</h3>
-            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalNewUser')">✕</button>
+            <h3 class="modal-title-saas"><span>ðŸ‘¤</span> Crear Cuenta de Usuario</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalNewUser')">âœ•</button>
         </div>
         <form onsubmit="handleNewUserSubmit(event)">
             <div class="modal-body-saas">
@@ -1708,13 +1749,13 @@ if ($dbConnected) {
                     <input type="text" id="nuName" class="form-control-saas" placeholder="Ej: Camilo Torres" required>
                 </div>
                 <div class="form-row">
-                    <label class="form-label-saas">Correo Electrónico</label>
+                    <label class="form-label-saas">Correo ElectrÃ³nico</label>
                     <input type="email" id="nuEmail" class="form-control-saas" placeholder="camilo@parkflow.co" required>
                 </div>
                 <div class="form-row">
                     <label class="form-label-saas">Rol RBAC</label>
                     <select id="nuRole" class="form-control-saas">
-                        <option value="Operador">Operador (Entradas, Cobros y Bahías)</option>
+                        <option value="Operador">Operador (Entradas, Cobros y BahÃ­as)</option>
                         <option value="Administrador">Administrador (Control Total & Finanzas)</option>
                         <option value="Cliente">Cliente (Autoconsulta)</option>
                     </select>
@@ -1733,10 +1774,12 @@ if ($dbConnected) {
 </div>
 
 <!-- ================================================================= -->
-<!-- LOGICA CLIENTE EN JAVASCRIPT CONEXIÓN A API PHP REST             -->
+<!-- LOGICA CLIENTE EN JAVASCRIPT CONEXIÃ“N A API PHP REST             -->
 <!-- ================================================================= -->
-<script>
-    const API_BASE = 'api';
+    <script>
+    const API_BASE = (window.location.protocol === 'file:')
+        ? 'http://localhost/parkflow/api'
+        : (window.location.pathname.includes('/parkflow/') ? '/parkflow/api' : 'api');
     let saasState = {
         spots: [],
         tickets: [],
@@ -1747,8 +1790,198 @@ if ($dbConnected) {
         pendingCheckOutTicket: null
     };
 
-    // Control de Vistas / Pestañas SaaS
+        // Matriz de Permisos RBAC (Role-Based Access Control)
+    const RBAC_RULES = {
+        'Administrador': {
+            name: 'Diana Katerine (Admin)',
+            avatar: 'A',
+            badge: 'Super Administrador',
+            badgeClass: 'pill-emerald',
+            defaultView: 'view-overview',
+            allowedViews: [
+                'view-overview',
+                'view-operations',
+                'view-matrix',
+                'view-rates',
+                'view-users',
+                'view-audit',
+                'view-client-portal'
+            ],
+            canCheckIn: true,
+            canCheckOut: true,
+            canEditRates: true,
+            canManageUsers: true,
+            canViewAudit: true,
+            canResetDb: true
+        },
+        'Operador': {
+            name: 'Carlos Mendoza (Operador)',
+            avatar: 'O',
+            badge: 'Operador de Patio',
+            badgeClass: 'pill-primary',
+            defaultView: 'view-operations',
+            allowedViews: [
+                'view-overview',
+                'view-operations',
+                'view-matrix',
+                'view-client-portal'
+            ],
+            canCheckIn: true,
+            canCheckOut: true,
+            canEditRates: false,
+            canManageUsers: false,
+            canViewAudit: false,
+            canResetDb: false
+        },
+        'Cliente': {
+            name: 'Conductor Ciudadano',
+            avatar: 'C',
+            badge: 'Cliente / Autoservicio',
+            badgeClass: 'pill-primary',
+            defaultView: 'view-client-portal',
+            allowedViews: [
+                'view-client-portal'
+            ],
+            canCheckIn: false,
+            canCheckOut: false,
+            canEditRates: false,
+            canManageUsers: false,
+            canViewAudit: false,
+            canResetDb: false
+        }
+    };
+
+    const MODULE_NAMES = {
+        'view-overview': { name: 'Dashboard General', minRole: 'Operador' },
+        'view-operations': { name: 'Flujo & Estancias', minRole: 'Operador' },
+        'view-matrix': { name: 'TelemetrÃ­a de BahÃ­as', minRole: 'Operador' },
+        'view-rates': { name: 'Matriz Tarifaria', minRole: 'Administrador' },
+        'view-users': { name: 'Cuentas & RBAC', minRole: 'Administrador' },
+        'view-audit': { name: 'Seguridad & Logs', minRole: 'Administrador' },
+        'view-client-portal': { name: 'Portal Ciudadano', minRole: 'Cliente' }
+    };
+
+    function showRbacToast(msg, isBlocked = true) {
+        const existing = document.getElementById('activeRbacToast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.id = 'activeRbacToast';
+        toast.className = 'rbac-toast';
+        toast.innerHTML = `
+            <span style="font-size:1.4rem;">${isBlocked ? 'â›”' : 'ðŸ›¡ï¸'}</span>
+            <div style="flex:1;">
+                <div style="font-weight:700; color:${isBlocked ? 'var(--rose)' : 'var(--emerald)'}; font-size:0.85rem;">
+                    ${isBlocked ? 'Acceso Restringido por Permiso RBAC' : 'Privilegios Actualizados'}
+                </div>
+                <div style="font-size:0.78rem; color:var(--text-body); margin-top:2px;">
+                    ${msg}
+                </div>
+            </div>
+            <button onclick="this.parentElement.remove()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1rem;">âœ•</button>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => { if (toast.parentElement) toast.remove(); }, 5000);
+    }
+
+    function returnToAuthorizedView() {
+        const roleConfig = RBAC_RULES[saasState.currentRole] || RBAC_RULES['Administrador'];
+        switchSaasView(roleConfig.defaultView);
+    }
+
+    function applyRbacToUI() {
+        const role = saasState.currentRole || 'Administrador';
+        const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
+
+        // 1. Sidebar profile
+        const avatar = document.getElementById('sidebarAvatar');
+        const userName = document.getElementById('sidebarUserName');
+        if (avatar) avatar.textContent = config.avatar;
+        if (userName) userName.textContent = config.name;
+
+        // 2. Navigation items
+        document.querySelectorAll('.nav-item-btn').forEach(btn => {
+            const onclickAttr = btn.getAttribute('onclick') || '';
+            let targetView = null;
+            for (const viewId of Object.keys(MODULE_NAMES)) {
+                if (onclickAttr.includes(viewId)) {
+                    targetView = viewId;
+                    break;
+                }
+            }
+
+            if (!targetView) return;
+
+            const isAllowed = config.allowedViews.includes(targetView);
+            const lockBadge = btn.querySelector('.pill-locked');
+            const normalBadge = btn.querySelector('.nav-pill-badge:not(.pill-locked)');
+
+            if (isAllowed) {
+                btn.classList.remove('restricted');
+                btn.removeAttribute('title');
+                if (lockBadge) lockBadge.remove();
+                if (normalBadge) normalBadge.style.display = 'inline-block';
+            } else {
+                btn.classList.add('restricted');
+                btn.setAttribute('title', `Acceso restringido para rol ${role}. Requiere: ${MODULE_NAMES[targetView].minRole}`);
+                if (normalBadge) normalBadge.style.display = 'none';
+                if (!lockBadge) {
+                    const badge = document.createElement('span');
+                    badge.className = 'nav-pill-badge pill-locked';
+                    badge.textContent = 'ðŸ”’ Bloqueado';
+                    btn.appendChild(badge);
+                }
+            }
+        });
+
+        // 3. Topbar "Registrar Entrada" button
+        const topbarCheckInBtn = document.querySelector('.saas-topbar .btn-primary');
+        if (topbarCheckInBtn) {
+            topbarCheckInBtn.style.display = config.canCheckIn ? 'inline-flex' : 'none';
+        }
+
+        // 4. Rate creation button
+        const addRateBtn = document.querySelector('#view-rates .btn-primary');
+        if (addRateBtn) {
+            addRateBtn.style.display = config.canEditRates ? 'inline-flex' : 'none';
+        }
+
+        // 5. Global Search in Topbar
+        const globalSearch = document.getElementById('globalSearchInput');
+        if (globalSearch) {
+            globalSearch.disabled = (role === 'Cliente');
+            globalSearch.placeholder = (role === 'Cliente') 
+                ? 'BÃºsqueda disponible en Portal Cliente...' 
+                : 'Buscar placa, ticket o bahÃ­a...';
+        }
+    }
+
+    // Control de Vistas / PestaÃ±as SaaS
     function switchSaasView(viewId, btnElement) {
+        const role = saasState.currentRole || 'Administrador';
+        const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
+
+        // Enforce RBAC
+        if (!config.allowedViews.includes(viewId)) {
+            const modInfo = MODULE_NAMES[viewId] || { name: 'MÃ³dulo Administrativo', minRole: 'Administrador' };
+            showRbacToast(`El rol <strong>${role}</strong> no tiene autorizaciÃ³n para acceder a <strong>${modInfo.name}</strong>. Se requiere rol <strong>${modInfo.minRole}</strong>.`);
+            
+            // Show Forbidden Panel
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item-btn').forEach(b => b.classList.remove('active'));
+
+            const forbidden = document.getElementById('view-forbidden');
+            if (forbidden) {
+                forbidden.classList.add('active');
+                const reason = document.getElementById('forbiddenReasonText');
+                if (reason) {
+                    reason.innerHTML = `Tu perfil actual estÃ¡ configurado como <strong>${role}</strong>. El mÃ³dulo <strong>${modInfo.name}</strong> contiene funciones y datos protegidos restringidos exclusivamente para <strong>${modInfo.minRole}</strong>.`;
+                }
+            }
+            document.getElementById('currentViewBreadcrumb').textContent = 'Acceso Denegado â›”';
+            return;
+        }
+
         document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item-btn').forEach(b => b.classList.remove('active'));
 
@@ -1758,7 +1991,6 @@ if ($dbConnected) {
         if (btnElement) {
             btnElement.classList.add('active');
         } else {
-            // Find corresponding button
             document.querySelectorAll('.nav-item-btn').forEach(b => {
                 if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(viewId)) {
                     b.classList.add('active');
@@ -1770,7 +2002,7 @@ if ($dbConnected) {
         const breadcrumbNames = {
             'view-overview': 'Dashboard General',
             'view-operations': 'Flujo & Estancias',
-            'view-matrix': 'Telemetría de Bahías',
+            'view-matrix': 'TelemetrÃ­a de BahÃ­as',
             'view-rates': 'Matriz Tarifaria',
             'view-users': 'Cuentas & RBAC',
             'view-audit': 'Seguridad & Logs',
@@ -1795,17 +2027,19 @@ if ($dbConnected) {
     // Cambio de Rol RBAC
     function handleRoleChange(role) {
         saasState.currentRole = role;
-        document.getElementById('sidebarAvatar').textContent = role.charAt(0);
-        if (role === 'Cliente') {
-            switchSaasView('view-client-portal');
-        } else if (role === 'Operador') {
+        applyRbacToUI();
+
+        const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
+        switchSaasView(config.defaultView);
+        showRbacToast(`SesiÃ³n cambiada a: <strong>${role}</strong> (${config.badge}). Permisos ajustados.`, false);
+    } else if (role === 'Operador') {
             switchSaasView('view-operations');
         } else {
             switchSaasView('view-overview');
         }
     }
 
-    // 1. Sincronización completa con MySQL vía API PHP
+    // 1. SincronizaciÃ³n completa con MySQL vÃ­a API PHP
     async function syncAllFromDatabase() {
         try {
             // Healthcheck
@@ -1916,7 +2150,7 @@ if ($dbConnected) {
 
         const tbody = document.getElementById('operationsFullTableBody');
         if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:1.5rem;">No se encontraron vehículos activos con ese criterio.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; color:var(--text-muted); padding:1.5rem;">No se encontraron vehÃ­culos activos con ese criterio.</td></tr>';
             return;
         }
 
@@ -1927,17 +2161,17 @@ if ($dbConnected) {
                 <td>${t.tipoVehiculo}</td>
                 <td><strong style="color:var(--emerald);">${t.spotCodigo}</strong></td>
                 <td>${new Date(t.fechaIngreso).toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit'})}</td>
-                <td>${t.cruzoMedianoche ? '<span style="color:var(--amber); font-weight:700;">🌙 Cruce Nocturno</span>' : '<span style="color:var(--text-muted);">Diurno</span>'}</td>
+                <td>${t.cruzoMedianoche ? '<span style="color:var(--amber); font-weight:700;">ðŸŒ™ Cruce Nocturno</span>' : '<span style="color:var(--text-muted);">Diurno</span>'}</td>
                 <td><span class="status-badge badge-active-live">Activo</span></td>
                 <td style="text-align:right;">
-                    <button type="button" class="btn btn-secondary btn-sm" title="Simular cruce de medianoche (-16h)" onclick="simulateMidnightCrossing('${t.id}')">🌙 -16h</button>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="openCheckOutModal('${t.id}')">Liquidación</button>
+                    <button type="button" class="btn btn-secondary btn-sm" title="Simular cruce de medianoche (-16h)" onclick="simulateMidnightCrossing('${t.id}')">ðŸŒ™ -16h</button>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="openCheckOutModal('${t.id}')">LiquidaciÃ³n</button>
                 </td>
             </tr>
         `).join('');
     }
 
-    // Filtrar bahías en modal de CheckIn
+    // Filtrar bahÃ­as en modal de CheckIn
     function filterAvailableBaysForCheckIn() {
         const type = document.getElementById('checkInType').value;
         const select = document.getElementById('checkInBay');
@@ -1945,14 +2179,14 @@ if ($dbConnected) {
 
         const freeBays = saasState.spots.filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === type);
         if (freeBays.length === 0) {
-            select.innerHTML = `<option value="">No hay bahías disponibles para ${type}</option>`;
+            select.innerHTML = `<option value="">No hay bahÃ­as disponibles para ${type}</option>`;
             return;
         }
 
         freeBays.forEach(b => {
             const opt = document.createElement('option');
             opt.value = b.codigo;
-            opt.textContent = `${b.codigo} (${b.zona} · ${b.nivel})`;
+            opt.textContent = `${b.codigo} (${b.zona} Â· ${b.nivel})`;
             select.appendChild(opt);
         });
     }
@@ -1966,7 +2200,7 @@ if ($dbConnected) {
         const owner = document.getElementById('checkInOwner').value.trim() || 'Cliente Visitante';
 
         if (!bay) {
-            alert('Seleccione una bahía disponible.');
+            alert('Seleccione una bahÃ­a disponible.');
             return;
         }
 
@@ -2002,7 +2236,7 @@ if ($dbConnected) {
 
             await syncAllFromDatabase();
         } catch (err) {
-            alert('Error de conexión: ' + err.message);
+            alert('Error de conexiÃ³n: ' + err.message);
         } finally {
             btn.disabled = false;
             btn.textContent = 'Registrar en MySQL';
@@ -2014,15 +2248,15 @@ if ($dbConnected) {
         const html = `
             <div class="saas-receipt">
                 <div class="receipt-brand">PARKFLOW CLOUD</div>
-                <div class="receipt-sub">TICKET DIGITAL · CONTROL DE ACCESO</div>
-                <div class="receipt-line"><span>TICKET N°:</span><strong>${ticket.ticketCodigo}</strong></div>
+                <div class="receipt-sub">TICKET DIGITAL Â· CONTROL DE ACCESO</div>
+                <div class="receipt-line"><span>TICKET NÂ°:</span><strong>${ticket.ticketCodigo}</strong></div>
                 <div class="receipt-line"><span>PLACA:</span><strong style="color:#0284c7; font-size:1.1rem;">${ticket.placa}</strong></div>
                 <div class="receipt-line"><span>TIPO:</span><span>${ticket.tipoVehiculo}</span></div>
-                <div class="receipt-line"><span>BAHÍA:</span><strong style="color:#10b981;">${ticket.spotCodigo}</strong></div>
+                <div class="receipt-line"><span>BAHÃA:</span><strong style="color:#10b981;">${ticket.spotCodigo}</strong></div>
                 <div class="receipt-line"><span>FECHA ENTRADA:</span><span>${new Date(ticket.fechaIngreso).toLocaleString('es-CO')}</span></div>
                 <div class="receipt-line"><span>OPERADOR:</span><span>${ticket.operadorEntrada}</span></div>
                 <div style="text-align:center; margin-top:1.25rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem;">
-                    <span style="font-size:0.68rem; color:#64748b;">Conserve este ticket para la salida y facturación.</span>
+                    <span style="font-size:0.68rem; color:#64748b;">Conserve este ticket para la salida y facturaciÃ³n.</span>
                     <div style="font-family:'JetBrains Mono'; letter-spacing:0.3em; margin-top:0.35rem; font-size:0.85rem;">||| | |||| | ||||| |||| |</div>
                 </div>
             </div>
@@ -2105,24 +2339,24 @@ if ($dbConnected) {
     }
 
     function showCheckOutReceipt(ticket) {
-        document.getElementById('saasReceiptHeaderTitle').textContent = 'Factura Electrónica Equivalente';
+        document.getElementById('saasReceiptHeaderTitle').textContent = 'Factura ElectrÃ³nica Equivalente';
         const html = `
             <div class="saas-receipt">
                 <div class="receipt-brand">PARKFLOW CLOUD</div>
-                <div class="receipt-sub">FACTURA Y RECIBO DE PAGO · MYSQL AUDITED</div>
-                <div class="receipt-line"><span>TICKET N°:</span><strong>${ticket.ticketCodigo}</strong></div>
+                <div class="receipt-sub">FACTURA Y RECIBO DE PAGO Â· MYSQL AUDITED</div>
+                <div class="receipt-line"><span>TICKET NÂ°:</span><strong>${ticket.ticketCodigo}</strong></div>
                 <div class="receipt-line"><span>PLACA:</span><strong style="color:#0284c7; font-size:1.15rem;">${ticket.placa}</strong></div>
-                <div class="receipt-line"><span>TIPO VEHÍCULO:</span><span>${ticket.tipoVehiculo}</span></div>
-                <div class="receipt-line"><span>BAHÍA LIBERADA:</span><strong>${ticket.spotCodigo}</strong></div>
-                <div class="receipt-line"><span>DURACIÓN TOTAL:</span><span>${ticket.minutosTranscurridos} minutos</span></div>
-                <div class="receipt-line"><span>MÉTODO PAGO:</span><span>${ticket.metodoPago}</span></div>
+                <div class="receipt-line"><span>TIPO VEHÃCULO:</span><span>${ticket.tipoVehiculo}</span></div>
+                <div class="receipt-line"><span>BAHÃA LIBERADA:</span><strong>${ticket.spotCodigo}</strong></div>
+                <div class="receipt-line"><span>DURACIÃ“N TOTAL:</span><span>${ticket.minutosTranscurridos} minutos</span></div>
+                <div class="receipt-line"><span>MÃ‰TODO PAGO:</span><span>${ticket.metodoPago}</span></div>
                 <div class="receipt-line"><span>FECHA SALIDA:</span><span>${new Date(ticket.fechaSalida).toLocaleString('es-CO')}</span></div>
                 <div class="receipt-total-bar">
                     <span>TOTAL PAGADO:</span>
                     <span style="color:#10b981;">$${(ticket.valorPagado || 0).toLocaleString('es-CO')} COP</span>
                 </div>
                 <div style="text-align:center; margin-top:1rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem; font-size:0.72rem; color:#64748b;">
-                    ¡Gracias por usar ParkFlow! Bahía liberada en MySQL.
+                    Â¡Gracias por usar ParkFlow! BahÃ­a liberada en MySQL.
                 </div>
             </div>
         `;
@@ -2144,13 +2378,13 @@ if ($dbConnected) {
         }
     }
 
-    // Renderizar Matriz 2D de Bahías
+    // Renderizar Matriz 2D de BahÃ­as
     function renderBayMatrix() {
         const zones = {
-            'Zona A · Estándar': [],
-            'Zona B · EV & VIP': [],
-            'Zona C · Motos': [],
-            'Zona D · Camionetas': []
+            'Zona A Â· EstÃ¡ndar': [],
+            'Zona B Â· EV & VIP': [],
+            'Zona C Â· Motos': [],
+            'Zona D Â· Camionetas': []
         };
 
         saasState.spots.forEach(s => {
@@ -2171,7 +2405,7 @@ if ($dbConnected) {
                 return `
                     <div class="bay-cell ${stateClass}" onclick="handleBayClick('${s.id}', '${s.codigo}', '${s.estado}')">
                         <div class="bay-code">${s.codigo}</div>
-                        <div class="bay-plate-text">${s.placaActual || '—'}</div>
+                        <div class="bay-plate-text">${s.placaActual || 'â€”'}</div>
                         <span class="bay-state-tag">${s.estado}</span>
                     </div>
                 `;
@@ -2195,7 +2429,7 @@ if ($dbConnected) {
             return;
         }
 
-        if (!confirm(`¿Alternar estado de bahía ${code}? (Disponible <-> Mantenimiento/Bloqueado)`)) return;
+        if (!confirm(`Â¿Alternar estado de bahÃ­a ${code}? (Disponible <-> Mantenimiento/Bloqueado)`)) return;
 
         try {
             await fetch(`${API_BASE}/spots.php`, {
@@ -2313,7 +2547,7 @@ if ($dbConnected) {
         }
     }
 
-    // Renderizar Auditoría
+    // Renderizar AuditorÃ­a
     function renderAuditTable() {
         const tbody = document.getElementById('saasAuditTableBody');
         tbody.innerHTML = saasState.audit.slice(0, 30).map(a => `
@@ -2346,13 +2580,13 @@ if ($dbConnected) {
                 <td>${t.spotCodigo}</td>
                 <td>${t.minutosTranscurridos || 0} min</td>
                 <td><strong style="color:var(--emerald);">$${(t.valorPagado || 0).toLocaleString('es-CO')}</strong></td>
-                <td>${t.metodoPago || '—'}</td>
+                <td>${t.metodoPago || 'â€”'}</td>
                 <td style="color:var(--text-muted); font-size:0.75rem;">${new Date(t.fechaSalida || t.fechaIngreso).toLocaleString('es-CO')}</td>
             </tr>
         `).join('');
     }
 
-    // Portal del Cliente - Búsqueda
+    // Portal del Cliente - BÃºsqueda
     function handleSaasClientSearch() {
         const plate = document.getElementById('saasClientPlateSearch').value.trim().toUpperCase();
         const card = document.getElementById('saasClientResultCard');
@@ -2366,7 +2600,7 @@ if ($dbConnected) {
         if (!active) {
             card.style.display = 'block';
             card.innerHTML = `
-                <div style="color:var(--rose); font-weight:700; margin-bottom:0.25rem;">Vehículo no encontrado</div>
+                <div style="color:var(--rose); font-weight:700; margin-bottom:0.25rem;">VehÃ­culo no encontrado</div>
                 <p style="font-size:0.8rem; color:var(--text-muted);">La placa <strong>${plate}</strong> no tiene ingreso activo vigente.</p>
             `;
             return;
@@ -2384,7 +2618,7 @@ if ($dbConnected) {
             </div>
             <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem;">
                 <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted);">Bahía Asignada</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted);">BahÃ­a Asignada</div>
                     <div style="font-size:1.2rem; font-weight:800; color:var(--emerald);">${active.spotCodigo}</div>
                 </div>
                 <div>
@@ -2412,12 +2646,12 @@ if ($dbConnected) {
 
     // Restablecer DB desde SaaS
     async function resetDatabaseFromSaas() {
-        if (!confirm('¿Restablecer la base de datos `parkflow_db` en MySQL con los datos de fábrica?')) return;
+        if (!confirm('Â¿Restablecer la base de datos `parkflow_db` en MySQL con los datos de fÃ¡brica?')) return;
         try {
             const res = await fetch(`${API_BASE}/setup.php`);
             const data = await res.json();
             if (data.success) {
-                alert('Base de datos restablecida con éxito en MySQL.');
+                alert('Base de datos restablecida con Ã©xito en MySQL.');
                 closeSaasModal('modalXamppDiagnostics');
                 await syncAllFromDatabase();
             }
@@ -2429,7 +2663,7 @@ if ($dbConnected) {
     // Inicializar al cargar el DOM
     window.addEventListener('DOMContentLoaded', () => {
         syncAllFromDatabase();
-        // Polling cada 12 segundos para actualizar métricas en vivo
+        // Polling cada 12 segundos para actualizar mÃ©tricas en vivo
         setInterval(syncAllFromDatabase, 12000);
     });
 </script>

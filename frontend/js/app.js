@@ -11,8 +11,198 @@
         pendingCheckOutTicket: null
     };
 
+        // Matriz de Permisos RBAC (Role-Based Access Control)
+    const RBAC_RULES = {
+        'Administrador': {
+            name: 'Diana Katerine (Admin)',
+            avatar: 'A',
+            badge: 'Super Administrador',
+            badgeClass: 'pill-emerald',
+            defaultView: 'view-overview',
+            allowedViews: [
+                'view-overview',
+                'view-operations',
+                'view-matrix',
+                'view-rates',
+                'view-users',
+                'view-audit',
+                'view-client-portal'
+            ],
+            canCheckIn: true,
+            canCheckOut: true,
+            canEditRates: true,
+            canManageUsers: true,
+            canViewAudit: true,
+            canResetDb: true
+        },
+        'Operador': {
+            name: 'Carlos Mendoza (Operador)',
+            avatar: 'O',
+            badge: 'Operador de Patio',
+            badgeClass: 'pill-primary',
+            defaultView: 'view-operations',
+            allowedViews: [
+                'view-overview',
+                'view-operations',
+                'view-matrix',
+                'view-client-portal'
+            ],
+            canCheckIn: true,
+            canCheckOut: true,
+            canEditRates: false,
+            canManageUsers: false,
+            canViewAudit: false,
+            canResetDb: false
+        },
+        'Cliente': {
+            name: 'Conductor Ciudadano',
+            avatar: 'C',
+            badge: 'Cliente / Autoservicio',
+            badgeClass: 'pill-primary',
+            defaultView: 'view-client-portal',
+            allowedViews: [
+                'view-client-portal'
+            ],
+            canCheckIn: false,
+            canCheckOut: false,
+            canEditRates: false,
+            canManageUsers: false,
+            canViewAudit: false,
+            canResetDb: false
+        }
+    };
+
+    const MODULE_NAMES = {
+        'view-overview': { name: 'Dashboard General', minRole: 'Operador' },
+        'view-operations': { name: 'Flujo & Estancias', minRole: 'Operador' },
+        'view-matrix': { name: 'Telemetría de Bahías', minRole: 'Operador' },
+        'view-rates': { name: 'Matriz Tarifaria', minRole: 'Administrador' },
+        'view-users': { name: 'Cuentas & RBAC', minRole: 'Administrador' },
+        'view-audit': { name: 'Seguridad & Logs', minRole: 'Administrador' },
+        'view-client-portal': { name: 'Portal Ciudadano', minRole: 'Cliente' }
+    };
+
+    function showRbacToast(msg, isBlocked = true) {
+        const existing = document.getElementById('activeRbacToast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.id = 'activeRbacToast';
+        toast.className = 'rbac-toast';
+        toast.innerHTML = `
+            <span style="font-size:1.4rem;">${isBlocked ? '⛔' : '🛡️'}</span>
+            <div style="flex:1;">
+                <div style="font-weight:700; color:${isBlocked ? 'var(--rose)' : 'var(--emerald)'}; font-size:0.85rem;">
+                    ${isBlocked ? 'Acceso Restringido por Permiso RBAC' : 'Privilegios Actualizados'}
+                </div>
+                <div style="font-size:0.78rem; color:var(--text-body); margin-top:2px;">
+                    ${msg}
+                </div>
+            </div>
+            <button onclick="this.parentElement.remove()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1rem;">✕</button>
+        `;
+        document.body.appendChild(toast);
+        setTimeout(() => { if (toast.parentElement) toast.remove(); }, 5000);
+    }
+
+    function returnToAuthorizedView() {
+        const roleConfig = RBAC_RULES[saasState.currentRole] || RBAC_RULES['Administrador'];
+        switchSaasView(roleConfig.defaultView);
+    }
+
+    function applyRbacToUI() {
+        const role = saasState.currentRole || 'Administrador';
+        const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
+
+        // 1. Sidebar profile
+        const avatar = document.getElementById('sidebarAvatar');
+        const userName = document.getElementById('sidebarUserName');
+        if (avatar) avatar.textContent = config.avatar;
+        if (userName) userName.textContent = config.name;
+
+        // 2. Navigation items
+        document.querySelectorAll('.nav-item-btn').forEach(btn => {
+            const onclickAttr = btn.getAttribute('onclick') || '';
+            let targetView = null;
+            for (const viewId of Object.keys(MODULE_NAMES)) {
+                if (onclickAttr.includes(viewId)) {
+                    targetView = viewId;
+                    break;
+                }
+            }
+
+            if (!targetView) return;
+
+            const isAllowed = config.allowedViews.includes(targetView);
+            const lockBadge = btn.querySelector('.pill-locked');
+            const normalBadge = btn.querySelector('.nav-pill-badge:not(.pill-locked)');
+
+            if (isAllowed) {
+                btn.classList.remove('restricted');
+                btn.removeAttribute('title');
+                if (lockBadge) lockBadge.remove();
+                if (normalBadge) normalBadge.style.display = 'inline-block';
+            } else {
+                btn.classList.add('restricted');
+                btn.setAttribute('title', `Acceso restringido para rol ${role}. Requiere: ${MODULE_NAMES[targetView].minRole}`);
+                if (normalBadge) normalBadge.style.display = 'none';
+                if (!lockBadge) {
+                    const badge = document.createElement('span');
+                    badge.className = 'nav-pill-badge pill-locked';
+                    badge.textContent = '🔒 Bloqueado';
+                    btn.appendChild(badge);
+                }
+            }
+        });
+
+        // 3. Topbar "Registrar Entrada" button
+        const topbarCheckInBtn = document.querySelector('.saas-topbar .btn-primary');
+        if (topbarCheckInBtn) {
+            topbarCheckInBtn.style.display = config.canCheckIn ? 'inline-flex' : 'none';
+        }
+
+        // 4. Rate creation button
+        const addRateBtn = document.querySelector('#view-rates .btn-primary');
+        if (addRateBtn) {
+            addRateBtn.style.display = config.canEditRates ? 'inline-flex' : 'none';
+        }
+
+        // 5. Global Search in Topbar
+        const globalSearch = document.getElementById('globalSearchInput');
+        if (globalSearch) {
+            globalSearch.disabled = (role === 'Cliente');
+            globalSearch.placeholder = (role === 'Cliente') 
+                ? 'Búsqueda disponible en Portal Cliente...' 
+                : 'Buscar placa, ticket o bahía...';
+        }
+    }
+
     // Control de Vistas / Pestañas SaaS
     function switchSaasView(viewId, btnElement) {
+        const role = saasState.currentRole || 'Administrador';
+        const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
+
+        // Enforce RBAC
+        if (!config.allowedViews.includes(viewId)) {
+            const modInfo = MODULE_NAMES[viewId] || { name: 'Módulo Administrativo', minRole: 'Administrador' };
+            showRbacToast(`El rol <strong>${role}</strong> no tiene autorización para acceder a <strong>${modInfo.name}</strong>. Se requiere rol <strong>${modInfo.minRole}</strong>.`);
+            
+            // Show Forbidden Panel
+            document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item-btn').forEach(b => b.classList.remove('active'));
+
+            const forbidden = document.getElementById('view-forbidden');
+            if (forbidden) {
+                forbidden.classList.add('active');
+                const reason = document.getElementById('forbiddenReasonText');
+                if (reason) {
+                    reason.innerHTML = `Tu perfil actual está configurado como <strong>${role}</strong>. El módulo <strong>${modInfo.name}</strong> contiene funciones y datos protegidos restringidos exclusivamente para <strong>${modInfo.minRole}</strong>.`;
+                }
+            }
+            document.getElementById('currentViewBreadcrumb').textContent = 'Acceso Denegado ⛔';
+            return;
+        }
+
         document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-item-btn').forEach(b => b.classList.remove('active'));
 
@@ -22,7 +212,6 @@
         if (btnElement) {
             btnElement.classList.add('active');
         } else {
-            // Find corresponding button
             document.querySelectorAll('.nav-item-btn').forEach(b => {
                 if (b.getAttribute('onclick') && b.getAttribute('onclick').includes(viewId)) {
                     b.classList.add('active');
@@ -59,10 +248,12 @@
     // Cambio de Rol RBAC
     function handleRoleChange(role) {
         saasState.currentRole = role;
-        document.getElementById('sidebarAvatar').textContent = role.charAt(0);
-        if (role === 'Cliente') {
-            switchSaasView('view-client-portal');
-        } else if (role === 'Operador') {
+        applyRbacToUI();
+
+        const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
+        switchSaasView(config.defaultView);
+        showRbacToast(`Sesión cambiada a: <strong>${role}</strong> (${config.badge}). Permisos ajustados.`, false);
+    } else if (role === 'Operador') {
             switchSaasView('view-operations');
         } else {
             switchSaasView('view-overview');
