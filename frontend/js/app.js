@@ -249,7 +249,7 @@
             allowedViews: [
                 'view-client-portal'
             ],
-            canCheckIn: false,
+            canCheckIn: true,
             canCheckOut: false,
             canEditRates: false,
             canManageUsers: false,
@@ -345,6 +345,14 @@
         const topbarCheckInBtn = document.querySelector('.saas-topbar .btn-primary');
         if (topbarCheckInBtn) {
             topbarCheckInBtn.style.display = config.canCheckIn ? 'inline-flex' : 'none';
+            topbarCheckInBtn.innerHTML = (role === 'Cliente') 
+                ? '<span>🚗</span> Registrar mi Vehículo' 
+                : '<span>+</span> Registrar Entrada';
+        }
+
+        // Si es cliente, filtrar bahías para su formulario de registro
+        if (role === 'Cliente') {
+            filterAvailableBaysForClientSelf();
         }
 
         // 4. Rate creation button
@@ -592,6 +600,111 @@
             select.appendChild(opt);
         });
     }
+
+        // =========================================================================
+    // Registro de Vehículos por el Cliente (Autoservicio)
+    // =========================================================================
+    function filterAvailableBaysForClientSelf() {
+        const typeSelect = document.getElementById('clientSelfType');
+        const baySelect = document.getElementById('clientSelfBay');
+        if (!typeSelect || !baySelect) return;
+
+        const selectedType = typeSelect.value;
+        const available = saasState.spots.filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === selectedType);
+
+        baySelect.innerHTML = '';
+        if (available.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = `No hay bahías libres para ${selectedType}`;
+            baySelect.appendChild(opt);
+            return;
+        }
+
+        available.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.codigo;
+            opt.textContent = `${b.codigo} (${b.zona} · ${b.nivel})`;
+            baySelect.appendChild(opt);
+        });
+    }
+
+    async function handleClientSelfEntrySubmit(e) {
+        if (e) e.preventDefault();
+        const plateInput = document.getElementById('clientSelfPlate');
+        const typeSelect = document.getElementById('clientSelfType');
+        const baySelect = document.getElementById('clientSelfBay');
+        const btn = document.getElementById('btnSubmitClientSelf');
+
+        const plate = plateInput ? plateInput.value.trim().toUpperCase() : '';
+        const type = typeSelect ? typeSelect.value : 'Automóvil';
+        const bay = baySelect ? baySelect.value : '';
+        const owner = currentAuthSession?.nombre || 'Cliente Autoservicio';
+
+        if (!plate) {
+            alert('Por favor ingresa la placa de tu vehículo.');
+            return;
+        }
+
+        if (!bay) {
+            alert('Por favor selecciona una bahía de parqueo disponible.');
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Registrando...';
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/tickets.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    placa: plate,
+                    tipoVehiculo: type,
+                    spotCodigo: bay,
+                    propietarioNombre: owner,
+                    operadorEntrada: 'Autoservicio Cliente (' + owner + ')'
+                })
+            });
+
+            const data = await res.json();
+            if (!data.success) {
+                alert(data.message || 'No fue posible registrar el vehículo.');
+                return;
+            }
+
+            // Limpiar campo de placa
+            if (plateInput) plateInput.value = '';
+
+            // Mostrar ticket generado
+            showCheckInReceipt(data.data);
+
+            // Sincronizar datos
+            await syncAllFromDatabase();
+
+            // Consultar inmediatamente para mostrar la estancia en curso en el portal
+            const clientSearchInput = document.getElementById('saasClientPlateSearch');
+            if (clientSearchInput) {
+                clientSearchInput.value = plate;
+                handleSaasClientSearch();
+            }
+
+            showRbacToast(`✅ ¡Tu vehículo <strong>${plate}</strong> fue registrado con éxito en la bahía <strong>${bay}</strong>!`, false);
+
+        } catch (err) {
+            alert('Error al registrar vehículo: ' + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>🚀</span> Registrar Entrada';
+            }
+        }
+    }
+
+    window.filterAvailableBaysForClientSelf = filterAvailableBaysForClientSelf;
+    window.handleClientSelfEntrySubmit = handleClientSelfEntrySubmit;
 
     // Registrar Entrada (Check-In)
     async function handleSaasEntrySubmit(e) {

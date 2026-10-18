@@ -1759,6 +1759,50 @@
             <!-- ======================================================== -->
             <div id="view-client-portal" class="view-panel">
                 <div style="max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:1.5rem;">
+                    <!-- Tarjeta de Registro de Vehículo para el Cliente -->
+                    <div class="saas-card" style="border:1px solid rgba(0, 245, 255, 0.3); background:linear-gradient(180deg, rgba(11, 17, 32, 0.95), rgba(17, 26, 46, 0.9)); box-shadow:0 8px 30px rgba(0,245,255,0.08);">
+                        <div class="card-header-flex" style="margin-bottom:1.25rem;">
+                            <div style="display:flex; align-items:center; gap:0.75rem;">
+                                <div style="width:42px; height:42px; border-radius:var(--radius-md); background:linear-gradient(135deg, var(--primary), var(--indigo)); color:#060911; display:flex; align-items:center; justify-content:center; font-size:1.35rem; font-weight:800; box-shadow:0 0 15px var(--primary-glow);">
+                                    🚗
+                                </div>
+                                <div>
+                                    <h3 class="card-heading-title" style="color:var(--text-heading); font-size:1.15rem; font-weight:800;">Registrar Ingreso de mi Vehículo</h3>
+                                    <p class="card-heading-sub">Registra la llegada de tu vehículo, selecciona o recibe una bahía y obtén tu ticket digital al instante</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="openSaasModal('modalCheckIn')">
+                                <span>📋</span> Formulario Completo
+                            </button>
+                        </div>
+
+                        <!-- Formulario de Registro Rápido de Cliente -->
+                        <form onsubmit="handleClientSelfEntrySubmit(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) 170px; gap:1rem; align-items:flex-end;">
+                            <div class="form-row" style="margin-bottom:0;">
+                                <label class="form-label-saas" style="font-weight:700; color:var(--text-heading);">Placa de tu Vehículo</label>
+                                <input type="text" id="clientSelfPlate" class="form-control-saas" placeholder="Ej: KLM-456 o ABC-123" required style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700; font-size:1.05rem; letter-spacing:0.05em;">
+                            </div>
+                            <div class="form-row" style="margin-bottom:0;">
+                                <label class="form-label-saas" style="font-weight:700; color:var(--text-heading);">Tipo de Vehículo</label>
+                                <select id="clientSelfType" class="form-control-saas" onchange="filterAvailableBaysForClientSelf()" style="font-weight:600;">
+                                    <option value="Automóvil">Automóvil (Zona A)</option>
+                                    <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
+                                    <option value="Motocicleta">Motocicleta (Zona C)</option>
+                                    <option value="Camioneta">Camioneta / SUV (Zona D)</option>
+                                </select>
+                            </div>
+                            <div class="form-row" style="margin-bottom:0;">
+                                <label class="form-label-saas" style="font-weight:700; color:var(--text-heading);">Bahía de Parqueo</label>
+                                <select id="clientSelfBay" class="form-control-saas" required style="font-weight:600;">
+                                    <option value="">Cargando bahías disponibles...</option>
+                                </select>
+                            </div>
+                            <button type="submit" id="btnSubmitClientSelf" class="btn btn-primary" style="height:44px; font-weight:800; font-size:0.9rem; width:100%; box-shadow:0 4px 15px rgba(0,245,255,0.25);">
+                                <span>🚀</span> Registrar Entrada
+                            </button>
+                        </form>
+                    </div>
+
                     <div class="saas-card">
                         <div class="card-header-flex">
                             <div>
@@ -2251,7 +2295,7 @@
             allowedViews: [
                 'view-client-portal'
             ],
-            canCheckIn: false,
+            canCheckIn: true,
             canCheckOut: false,
             canEditRates: false,
             canManageUsers: false,
@@ -2347,6 +2391,14 @@
         const topbarCheckInBtn = document.querySelector('.saas-topbar .btn-primary');
         if (topbarCheckInBtn) {
             topbarCheckInBtn.style.display = config.canCheckIn ? 'inline-flex' : 'none';
+            topbarCheckInBtn.innerHTML = (role === 'Cliente') 
+                ? '<span>🚗</span> Registrar mi Vehículo' 
+                : '<span>+</span> Registrar Entrada';
+        }
+
+        // Si es cliente, filtrar bahías para su formulario de registro
+        if (role === 'Cliente') {
+            filterAvailableBaysForClientSelf();
         }
 
         // 4. Rate creation button
@@ -2594,6 +2646,111 @@
             select.appendChild(opt);
         });
     }
+
+        // =========================================================================
+    // Registro de Vehículos por el Cliente (Autoservicio)
+    // =========================================================================
+    function filterAvailableBaysForClientSelf() {
+        const typeSelect = document.getElementById('clientSelfType');
+        const baySelect = document.getElementById('clientSelfBay');
+        if (!typeSelect || !baySelect) return;
+
+        const selectedType = typeSelect.value;
+        const available = saasState.spots.filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === selectedType);
+
+        baySelect.innerHTML = '';
+        if (available.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = `No hay bahías libres para ${selectedType}`;
+            baySelect.appendChild(opt);
+            return;
+        }
+
+        available.forEach(b => {
+            const opt = document.createElement('option');
+            opt.value = b.codigo;
+            opt.textContent = `${b.codigo} (${b.zona} · ${b.nivel})`;
+            baySelect.appendChild(opt);
+        });
+    }
+
+    async function handleClientSelfEntrySubmit(e) {
+        if (e) e.preventDefault();
+        const plateInput = document.getElementById('clientSelfPlate');
+        const typeSelect = document.getElementById('clientSelfType');
+        const baySelect = document.getElementById('clientSelfBay');
+        const btn = document.getElementById('btnSubmitClientSelf');
+
+        const plate = plateInput ? plateInput.value.trim().toUpperCase() : '';
+        const type = typeSelect ? typeSelect.value : 'Automóvil';
+        const bay = baySelect ? baySelect.value : '';
+        const owner = currentAuthSession?.nombre || 'Cliente Autoservicio';
+
+        if (!plate) {
+            alert('Por favor ingresa la placa de tu vehículo.');
+            return;
+        }
+
+        if (!bay) {
+            alert('Por favor selecciona una bahía de parqueo disponible.');
+            return;
+        }
+
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Registrando...';
+        }
+
+        try {
+            const res = await fetch(`${API_BASE}/tickets.php`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    placa: plate,
+                    tipoVehiculo: type,
+                    spotCodigo: bay,
+                    propietarioNombre: owner,
+                    operadorEntrada: 'Autoservicio Cliente (' + owner + ')'
+                })
+            });
+
+            const data = await res.json();
+            if (!data.success) {
+                alert(data.message || 'No fue posible registrar el vehículo.');
+                return;
+            }
+
+            // Limpiar campo de placa
+            if (plateInput) plateInput.value = '';
+
+            // Mostrar ticket generado
+            showCheckInReceipt(data.data);
+
+            // Sincronizar datos
+            await syncAllFromDatabase();
+
+            // Consultar inmediatamente para mostrar la estancia en curso en el portal
+            const clientSearchInput = document.getElementById('saasClientPlateSearch');
+            if (clientSearchInput) {
+                clientSearchInput.value = plate;
+                handleSaasClientSearch();
+            }
+
+            showRbacToast(`✅ ¡Tu vehículo <strong>${plate}</strong> fue registrado con éxito en la bahía <strong>${bay}</strong>!`, false);
+
+        } catch (err) {
+            alert('Error al registrar vehículo: ' + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>🚀</span> Registrar Entrada';
+            }
+        }
+    }
+
+    window.filterAvailableBaysForClientSelf = filterAvailableBaysForClientSelf;
+    window.handleClientSelfEntrySubmit = handleClientSelfEntrySubmit;
 
     // Registrar Entrada (Check-In)
     async function handleSaasEntrySubmit(e) {
