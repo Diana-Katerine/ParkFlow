@@ -1027,9 +1027,219 @@
     align-items: center;
     gap: 0.3rem;
 }
+
+/* ========================================================================= */
+/* SaaS Login & Authentication Screen Styles                                */
+/* ========================================================================= */
+.saas-auth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: radial-gradient(circle at 50% 15%, rgba(0, 245, 255, 0.1), transparent 60%), #060911;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    overflow-y: auto;
+    backdrop-filter: blur(20px);
+}
+.saas-auth-card {
+    width: 100%;
+    max-width: 460px;
+    background: #0b1120;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 2.25rem 2rem;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 245, 255, 0.12);
+    position: relative;
+    animation: authFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes authFadeIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.auth-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 1.75rem;
+}
+.auth-icon-wrap {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--primary), var(--indigo));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #060911;
+    box-shadow: 0 0 20px var(--primary-glow);
+    margin-bottom: 0.85rem;
+}
+.auth-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-heading);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.35rem;
+}
+.auth-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+.auth-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+.auth-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-body);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.auth-input {
+    width: 100%;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-heading);
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.auth-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.15);
+}
+.auth-quick-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.25rem;
+}
+.quick-role-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 0.85rem;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-heading);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    text-align: left;
+    font-family: inherit;
+}
+.quick-role-btn:hover {
+    border-color: var(--primary);
+    background: rgba(0, 245, 255, 0.06);
+    transform: translateX(2px);
+}
+.btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    background: rgba(244, 63, 94, 0.12);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    color: var(--rose);
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+.btn-logout:hover {
+    background: rgba(244, 63, 94, 0.25);
+    border-color: var(--rose);
+}
 </style>
 </head>
 <body>
+    <!-- ======================================================== -->
+    <!-- AUTHENTICATION GATEWAY / LOGIN OBLIGATORIO               -->
+    <!-- ======================================================== -->
+    <div id="saasAuthScreen" class="saas-auth-overlay">
+        <div class="saas-auth-card">
+            <div class="auth-brand">
+                <div class="auth-icon-wrap">🅿️</div>
+                <h1 class="auth-title">ParkFlow Enterprise</h1>
+                <p class="auth-subtitle">Sistema Inteligente de Gestión de Parqueaderos</p>
+                <div style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.4rem; padding:0.2rem 0.6rem; border-radius:9999px; background:rgba(0,245,255,0.1); border:1px solid rgba(0,245,255,0.25); color:var(--primary); font-size:0.7rem; font-weight:700;">
+                    🔒 Acceso Restringido · Autenticación Obligatoria
+                </div>
+            </div>
+
+            <!-- Error message container -->
+            <div id="authErrorMsg" style="display:none; margin-bottom:1rem; padding:0.65rem 0.85rem; border-radius:var(--radius-md); background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.3); color:var(--rose); font-size:0.8rem; font-weight:600;">
+            </div>
+
+            <!-- Login Form -->
+            <form id="authLoginForm" onsubmit="handleAuthSubmit(event)">
+                <div class="auth-form-group">
+                    <label class="auth-label">Correo Electrónico</label>
+                    <input type="email" id="authInputEmail" class="auth-input" placeholder="ejemplo@parkpulse.co" required autocomplete="email">
+                </div>
+                <div class="auth-form-group">
+                    <label class="auth-label">Contraseña</label>
+                    <input type="password" id="authInputPassword" class="auth-input" placeholder="••••••••••••" required autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%; margin-top:0.5rem; padding:0.75rem;">
+                    Iniciar Sesión en ParkFlow →
+                </button>
+            </form>
+
+            <!-- Quick Demo Login Selection by Role -->
+            <div class="auth-quick-cards">
+                <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:0.05em; margin-bottom:0.25rem;">
+                    ⚡ Acceso Rápido por Perfil (Demo RBAC):
+                </div>
+
+                <button type="button" class="quick-role-btn" onclick="quickLogin('admin@parkpulse.co')">
+                    <div>
+                        <div style="font-weight:700; color:var(--primary);">👑 Administrador</div>
+                        <div style="font-size:0.7rem; color:var(--text-muted);">admin@parkpulse.co · Acceso Total</div>
+                    </div>
+                    <span class="role-badge-tag pill-emerald" style="font-size:0.65rem;">Total</span>
+                </button>
+
+                <button type="button" class="quick-role-btn" onclick="quickLogin('operador@parkpulse.co')">
+                    <div>
+                        <div style="font-weight:700; color:var(--emerald);">👷 Operador</div>
+                        <div style="font-size:0.7rem; color:var(--text-muted);">operador@parkpulse.co · Entradas, Salidas y Bahías</div>
+                    </div>
+                    <span class="role-badge-tag pill-primary" style="font-size:0.65rem;">Operativo</span>
+                </button>
+
+                <button type="button" class="quick-role-btn" onclick="quickLogin('cliente@parkpulse.co')">
+                    <div>
+                        <div style="font-weight:700; color:#38bdf8;">👤 Cliente / Conductor</div>
+                        <div style="font-size:0.7rem; color:var(--text-muted);">cliente@parkpulse.co · Portal Ciudadano (Placa: KLM-456)</div>
+                    </div>
+                    <span class="role-badge-tag" style="background:rgba(56,189,248,0.15); color:#38bdf8; font-size:0.65rem;">Cliente</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
 
 <div class="saas-layout">
 
@@ -1119,6 +1329,9 @@
                         <option value="Cliente">Rol: Cliente</option>
                     </select>
                 </div>
+                        <button type="button" class="btn-logout" onclick="handleLogout()">
+                <span>🚪</span> Cerrar Sesión
+            </button>
             </div>
         </div>
     </aside>
@@ -1150,6 +1363,9 @@
                     <span id="saasDbStatusText">XAMPP MySQL: 3306</span>
                 </div>
 
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="handleLogout()" title="Cerrar sesión segura">
+                    <span>🚪</span> Salir
+                </button>
                 <!-- Primary Action -->
                 <button type="button" class="btn btn-primary btn-sm" onclick="openSaasModal('modalCheckIn')">
                     <span>+</span> Registrar Entrada
@@ -1776,6 +1992,147 @@
 <!-- LOGICA CLIENTE EN JAVASCRIPT CONEXIÓN A API PHP REST             -->
 <!-- ================================================================= -->
     <script>
+    // =========================================================================
+    // Sistema de Autenticación y Control de Sesión
+    // =========================================================================
+    const REGISTERED_ACCOUNTS = [
+        {
+            email: 'admin@parkpulse.co',
+            password: 'admin',
+            nombre: 'Alejandro Vargas',
+            rol: 'Administrador',
+            placa: null
+        },
+        {
+            email: 'operador@parkpulse.co',
+            password: 'oper',
+            nombre: 'Camila Mendoza',
+            rol: 'Operador',
+            placa: null
+        },
+        {
+            email: 'cliente@parkpulse.co',
+            password: 'cliente',
+            nombre: 'Diana K. Pérez',
+            rol: 'Cliente',
+            placa: 'KLM-456'
+        }
+    ];
+
+    let currentAuthSession = null;
+
+    function checkAuthSession() {
+        try {
+            const saved = localStorage.getItem('parkflow_auth_session');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && parsed.email && parsed.rol) {
+                    currentAuthSession = parsed;
+                    saasState.currentRole = parsed.rol;
+                    hideAuthScreen();
+                    checkAuthSession();
+        applyRbacToUI();
+                    const config = RBAC_RULES[parsed.rol] || RBAC_RULES['Administrador'];
+                    switchSaasView(config.defaultView);
+                    return true;
+                }
+            }
+        } catch (e) {
+            console.error('Error reading auth session:', e);
+        }
+
+        // Si no hay sesión válida: BLOQUEAR ACCESO Y MOSTRAR LOGIN
+        showAuthScreen();
+        return false;
+    }
+
+    function showAuthScreen() {
+        const overlay = document.getElementById('saasAuthScreen');
+        if (overlay) overlay.style.display = 'flex';
+        const err = document.getElementById('authErrorMsg');
+        if (err) err.style.display = 'none';
+    }
+
+    function hideAuthScreen() {
+        const overlay = document.getElementById('saasAuthScreen');
+        if (overlay) overlay.style.display = 'none';
+    }
+
+    function handleAuthSubmit(event) {
+        event.preventDefault();
+        const email = document.getElementById('authInputEmail').value.trim().toLowerCase();
+        const pass = document.getElementById('authInputPassword').value.trim();
+        const err = document.getElementById('authErrorMsg');
+
+        // Buscar cuenta
+        const match = REGISTERED_ACCOUNTS.find(a => a.email.toLowerCase() === email);
+        if (!match) {
+            err.style.display = 'block';
+            err.textContent = '❌ Correo no registrado. Usa admin@parkpulse.co, operador@parkpulse.co o cliente@parkpulse.co';
+            return;
+        }
+
+        // Simulación o verificación de clave (permite clave correcta o demo)
+        if (pass.length < 3) {
+            err.style.display = 'block';
+            err.textContent = '❌ La contraseña debe tener al menos 3 caracteres.';
+            return;
+        }
+
+        loginUserSuccess(match);
+    }
+
+    function quickLogin(email) {
+        const match = REGISTERED_ACCOUNTS.find(a => a.email.toLowerCase() === email.toLowerCase());
+        if (match) {
+            loginUserSuccess(match);
+        }
+    }
+
+    function loginUserSuccess(account) {
+        currentAuthSession = account;
+        saasState.currentRole = account.rol;
+        try {
+            localStorage.setItem('parkflow_auth_session', JSON.stringify(account));
+        } catch (e) {}
+
+        hideAuthScreen();
+        checkAuthSession();
+        applyRbacToUI();
+
+        // Si es cliente y tiene placa, pre-cargar en el buscador del portal
+        if (account.rol === 'Cliente' && account.placa) {
+            const plateInput = document.getElementById('saasClientPlateSearch');
+            if (plateInput) plateInput.value = account.placa;
+        }
+
+        const config = RBAC_RULES[account.rol] || RBAC_RULES['Administrador'];
+        switchSaasView(config.defaultView);
+
+        // Actualizar selector de rol del sidebar para reflejar el usuario logeado
+        const selector = document.getElementById('saasRoleSelector');
+        if (selector) selector.value = account.rol;
+
+        showRbacToast(`Bienvenido/a <strong>${account.nombre}</strong>. Has ingresado como <strong>${account.rol}</strong>.`, false);
+    }
+
+    function handleLogout() {
+        if (!confirm('¿Estás seguro/a de que deseas cerrar sesión?')) return;
+        currentAuthSession = null;
+        try {
+            localStorage.removeItem('parkflow_auth_session');
+        } catch (e) {}
+
+        // Limpiar inputs
+        const emailInput = document.getElementById('authInputEmail');
+        const passInput = document.getElementById('authInputPassword');
+        if (emailInput) emailInput.value = '';
+        if (passInput) passInput.value = '';
+
+        showAuthScreen();
+        showRbacToast('Sesión cerrada. Acceso al sistema bloqueado.', true);
+    }
+
     const API_BASE = (window.location.protocol === 'file:')
         ? 'http://localhost/parkflow/api'
         : (window.location.pathname.includes('/parkflow/') ? '/parkflow/api' : 'api');
@@ -2026,6 +2383,7 @@
     // Cambio de Rol RBAC
     function handleRoleChange(role) {
         saasState.currentRole = role;
+        checkAuthSession();
         applyRbacToUI();
 
         const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];

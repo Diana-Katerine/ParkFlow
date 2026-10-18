@@ -1,3 +1,144 @@
+    // =========================================================================
+    // Sistema de Autenticación y Control de Sesión
+    // =========================================================================
+    const REGISTERED_ACCOUNTS = [
+        {
+            email: 'admin@parkpulse.co',
+            password: 'admin',
+            nombre: 'Alejandro Vargas',
+            rol: 'Administrador',
+            placa: null
+        },
+        {
+            email: 'operador@parkpulse.co',
+            password: 'oper',
+            nombre: 'Camila Mendoza',
+            rol: 'Operador',
+            placa: null
+        },
+        {
+            email: 'cliente@parkpulse.co',
+            password: 'cliente',
+            nombre: 'Diana K. Pérez',
+            rol: 'Cliente',
+            placa: 'KLM-456'
+        }
+    ];
+
+    let currentAuthSession = null;
+
+    function checkAuthSession() {
+        try {
+            const saved = localStorage.getItem('parkflow_auth_session');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed && parsed.email && parsed.rol) {
+                    currentAuthSession = parsed;
+                    saasState.currentRole = parsed.rol;
+                    hideAuthScreen();
+                    checkAuthSession();
+        applyRbacToUI();
+                    const config = RBAC_RULES[parsed.rol] || RBAC_RULES['Administrador'];
+                    switchSaasView(config.defaultView);
+                    return true;
+                }
+            }
+        } catch (e) {
+            console.error('Error reading auth session:', e);
+        }
+
+        // Si no hay sesión válida: BLOQUEAR ACCESO Y MOSTRAR LOGIN
+        showAuthScreen();
+        return false;
+    }
+
+    function showAuthScreen() {
+        const overlay = document.getElementById('saasAuthScreen');
+        if (overlay) overlay.style.display = 'flex';
+        const err = document.getElementById('authErrorMsg');
+        if (err) err.style.display = 'none';
+    }
+
+    function hideAuthScreen() {
+        const overlay = document.getElementById('saasAuthScreen');
+        if (overlay) overlay.style.display = 'none';
+    }
+
+    function handleAuthSubmit(event) {
+        event.preventDefault();
+        const email = document.getElementById('authInputEmail').value.trim().toLowerCase();
+        const pass = document.getElementById('authInputPassword').value.trim();
+        const err = document.getElementById('authErrorMsg');
+
+        // Buscar cuenta
+        const match = REGISTERED_ACCOUNTS.find(a => a.email.toLowerCase() === email);
+        if (!match) {
+            err.style.display = 'block';
+            err.textContent = '❌ Correo no registrado. Usa admin@parkpulse.co, operador@parkpulse.co o cliente@parkpulse.co';
+            return;
+        }
+
+        // Simulación o verificación de clave (permite clave correcta o demo)
+        if (pass.length < 3) {
+            err.style.display = 'block';
+            err.textContent = '❌ La contraseña debe tener al menos 3 caracteres.';
+            return;
+        }
+
+        loginUserSuccess(match);
+    }
+
+    function quickLogin(email) {
+        const match = REGISTERED_ACCOUNTS.find(a => a.email.toLowerCase() === email.toLowerCase());
+        if (match) {
+            loginUserSuccess(match);
+        }
+    }
+
+    function loginUserSuccess(account) {
+        currentAuthSession = account;
+        saasState.currentRole = account.rol;
+        try {
+            localStorage.setItem('parkflow_auth_session', JSON.stringify(account));
+        } catch (e) {}
+
+        hideAuthScreen();
+        checkAuthSession();
+        applyRbacToUI();
+
+        // Si es cliente y tiene placa, pre-cargar en el buscador del portal
+        if (account.rol === 'Cliente' && account.placa) {
+            const plateInput = document.getElementById('saasClientPlateSearch');
+            if (plateInput) plateInput.value = account.placa;
+        }
+
+        const config = RBAC_RULES[account.rol] || RBAC_RULES['Administrador'];
+        switchSaasView(config.defaultView);
+
+        // Actualizar selector de rol del sidebar para reflejar el usuario logeado
+        const selector = document.getElementById('saasRoleSelector');
+        if (selector) selector.value = account.rol;
+
+        showRbacToast(`Bienvenido/a <strong>${account.nombre}</strong>. Has ingresado como <strong>${account.rol}</strong>.`, false);
+    }
+
+    function handleLogout() {
+        if (!confirm('¿Estás seguro/a de que deseas cerrar sesión?')) return;
+        currentAuthSession = null;
+        try {
+            localStorage.removeItem('parkflow_auth_session');
+        } catch (e) {}
+
+        // Limpiar inputs
+        const emailInput = document.getElementById('authInputEmail');
+        const passInput = document.getElementById('authInputPassword');
+        if (emailInput) emailInput.value = '';
+        if (passInput) passInput.value = '';
+
+        showAuthScreen();
+        showRbacToast('Sesión cerrada. Acceso al sistema bloqueado.', true);
+    }
+
     const API_BASE = (window.location.protocol === 'file:')
         ? 'http://localhost/parkflow/api'
         : (window.location.pathname.includes('/parkflow/') ? '/parkflow/api' : 'api');
@@ -248,6 +389,7 @@
     // Cambio de Rol RBAC
     function handleRoleChange(role) {
         saasState.currentRole = role;
+        checkAuthSession();
         applyRbacToUI();
 
         const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];

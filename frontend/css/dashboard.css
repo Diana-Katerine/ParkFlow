@@ -1017,3 +1017,147 @@
     align-items: center;
     gap: 0.3rem;
 }
+
+/* ========================================================================= */
+/* SaaS Login & Authentication Screen Styles                                */
+/* ========================================================================= */
+.saas-auth-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999999;
+    background: radial-gradient(circle at 50% 15%, rgba(0, 245, 255, 0.1), transparent 60%), #060911;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    overflow-y: auto;
+    backdrop-filter: blur(20px);
+}
+.saas-auth-card {
+    width: 100%;
+    max-width: 460px;
+    background: #0b1120;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    padding: 2.25rem 2rem;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 245, 255, 0.12);
+    position: relative;
+    animation: authFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes authFadeIn {
+    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.auth-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 1.75rem;
+}
+.auth-icon-wrap {
+    width: 52px;
+    height: 52px;
+    background: linear-gradient(135deg, var(--primary), var(--indigo));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #060911;
+    box-shadow: 0 0 20px var(--primary-glow);
+    margin-bottom: 0.85rem;
+}
+.auth-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: var(--text-heading);
+    letter-spacing: -0.02em;
+    margin-bottom: 0.35rem;
+}
+.auth-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+.auth-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+    text-align: left;
+}
+.auth-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-body);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.auth-input {
+    width: 100%;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-heading);
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-md);
+    font-size: 0.85rem;
+    outline: none;
+    transition: all 0.2s;
+    font-family: inherit;
+}
+.auth-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.15);
+}
+.auth-quick-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1.5rem;
+    border-top: 1px solid var(--border);
+    padding-top: 1.25rem;
+}
+.quick-role-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 0.85rem;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    color: var(--text-heading);
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all 0.15s;
+    text-align: left;
+    font-family: inherit;
+}
+.quick-role-btn:hover {
+    border-color: var(--primary);
+    background: rgba(0, 245, 255, 0.06);
+    transform: translateX(2px);
+}
+.btn-logout {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    background: rgba(244, 63, 94, 0.12);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    color: var(--rose);
+    border-radius: var(--radius-md);
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+}
+.btn-logout:hover {
+    background: rgba(244, 63, 94, 0.25);
+    border-color: var(--rose);
+}
