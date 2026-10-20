@@ -784,44 +784,201 @@
         openSaasModal('modalReceiptSaas');
     }
 
-    // Modal de Cobro / Salida
-    function openCheckOutModal(ticketId) {
-        const ticket = saasState.tickets.find(t => t.id === ticketId);
-        if (!ticket) return;
+    // =========================================================================
+    // CÁLCULO DE COBRO POR MINUTOS DE ESTADÍA & LIQUIDACIÓN
+    // =========================================================================
+    let checkOutCalculationMode = 'MINUTE'; // 'MINUTE' o 'MIXED'
+    let checkOutBaseMinutes = 1;
 
-        saasState.pendingCheckOutTicket = ticket;
-
-        const rate = saasState.rates.find(r => r.tipoVehiculo === ticket.tipoVehiculo) || {
+    function calculateStayFee(tipoVehiculo, minutes, mode = 'MINUTE') {
+        const rate = (saasState.rates && saasState.rates.find(r => r.tipoVehiculo === tipoVehiculo)) || {
             tarifaPorMinuto: 110,
             tarifaPorHora: 5800,
             tarifaPlenaDia: 42000,
             fraccionGraciaMin: 5
         };
 
-        const entryTime = new Date(ticket.fechaIngreso).getTime();
-        const mins = Math.max(1, Math.round((Date.now() - entryTime) / 60000));
+        const mins = Math.max(1, parseInt(minutes) || 1);
+        const grace = rate.fraccionGraciaMin !== undefined ? rate.fraccionGraciaMin : 5;
 
-        let amount = 0;
-        if (ticket.cruzoMedianoche || mins >= 720) {
-            amount = rate.tarifaPlenaDia;
-        } else if (mins <= rate.fraccionGraciaMin) {
-            amount = 0;
-        } else {
-            const h = Math.floor(mins / 60);
-            const rem = mins % 60;
-            amount = (h * rate.tarifaPorHora) + (rem * rate.tarifaPorMinuto);
-            if (amount > rate.tarifaPlenaDia) amount = rate.tarifaPlenaDia;
+        // Regla 1: Dentro del período de gracia (cortesía gratuita)
+        if (mins <= grace) {
+            return {
+                minutes: mins,
+                graceMin: grace,
+                billableMinutes: 0,
+                ratePerMinute: rate.tarifaPorMinuto,
+                ratePerHour: rate.tarifaPorHora,
+                ratePerDay: rate.tarifaPlenaDia,
+                mode: mode,
+                subtotal: 0,
+                total: 0,
+                formula: `Estadía (${mins}m) ≤ Gracia (${grace}m) → Cortesía gratuita ($0 COP)`,
+                isGrace: true,
+                isMaxDay: false
+            };
         }
 
-        saasState.pendingCheckOutTicket.calculatedMinutes = mins;
-        saasState.pendingCheckOutTicket.calculatedAmount = amount;
+        // Regla 2: Estadía de 12 horas o más (720 min) -> Aplica tarifa plena de día
+        if (mins >= 720) {
+            return {
+                minutes: mins,
+                graceMin: grace,
+                billableMinutes: mins,
+                ratePerMinute: rate.tarifaPorMinuto,
+                ratePerHour: rate.tarifaPorHora,
+                ratePerDay: rate.tarifaPlenaDia,
+                mode: mode,
+                subtotal: rate.tarifaPlenaDia,
+                total: Math.round(rate.tarifaPlenaDia),
+                formula: `Estadía prolongada (${mins}m ≥ 12h) → Tarifa Plena Día`,
+                isGrace: false,
+                isMaxDay: true
+            };
+        }
+
+        let total = 0;
+        let formula = '';
+
+        if (mode === 'MINUTE') {
+            // Cobro exacto por minuto
+            total = mins * rate.tarifaPorMinuto;
+            if (total > rate.tarifaPlenaDia) {
+                total = rate.tarifaPlenaDia;
+                formula = `${mins}m × $${rate.tarifaPorMinuto.toLocaleString('es-CO')}/min (Tope Día Pleno)`;
+            } else {
+                formula = `${mins} min × $${rate.tarifaPorMinuto.toLocaleString('es-CO')}/min = $${Math.round(total).toLocaleString('es-CO')} COP`;
+            }
+        } else {
+            // Cobro Mixto (horas completas + minutos restantes)
+            const h = Math.floor(mins / 60);
+            const rem = mins % 60;
+            total = (h * rate.tarifaPorHora) + (rem * rate.tarifaPorMinuto);
+            if (total > rate.tarifaPlenaDia) {
+                total = rate.tarifaPlenaDia;
+                formula = `${h}h + ${rem}m (Tope Día Pleno)`;
+            } else {
+                formula = `${h}h ($${rate.tarifaPorHora.toLocaleString('es-CO')}) + ${rem}m ($${(rem * rate.tarifaPorMinuto).toLocaleString('es-CO')})`;
+            }
+        }
+
+        return {
+            minutes: mins,
+            graceMin: grace,
+            billableMinutes: mins,
+            ratePerMinute: rate.tarifaPorMinuto,
+            ratePerHour: rate.tarifaPorHora,
+            ratePerDay: rate.tarifaPlenaDia,
+            mode: mode,
+            subtotal: total,
+            total: Math.round(total),
+            formula: formula,
+            isGrace: false,
+            isMaxDay: total >= rate.tarifaPlenaDia
+        };
+    }
+
+    // Modal de Cobro / Salida
+    function openCheckOutModal(ticketId) {
+        const ticket = saasState.tickets.find(t => t.id === ticketId);
+        if (!ticket) return;
+
+        saasState.pendingCheckOutTicket = ticket;
+        checkOutCalculationMode = 'MINUTE';
+
+        const entryTime = new Date(ticket.fechaIngreso).getTime();
+        const mins = Math.max(1, Math.round((Date.now() - entryTime) / 60000));
+        checkOutBaseMinutes = mins;
 
         document.getElementById('coPlateDisplay').textContent = ticket.placa;
         document.getElementById('coBayDisplay').textContent = ticket.spotCodigo;
-        document.getElementById('coDurationDisplay').textContent = `${mins} minutos (${(mins/60).toFixed(1)} hrs)`;
-        document.getElementById('coTotalAmountDisplay').textContent = `$${amount.toLocaleString('es-CO')} COP`;
+        
+        const typeDisplay = document.getElementById('coVehicleTypeDisplay');
+        if (typeDisplay) typeDisplay.textContent = ticket.tipoVehiculo;
 
+        const realDisplay = document.getElementById('coRealDurationDisplay');
+        if (realDisplay) realDisplay.textContent = `${mins}m`;
+
+        const minsInput = document.getElementById('coMinutesInput');
+        if (minsInput) minsInput.value = mins;
+
+        const btnMin = document.getElementById('btnRateModeMinute');
+        const btnMix = document.getElementById('btnRateModeMixed');
+        if (btnMin && btnMix) {
+            btnMin.className = 'btn btn-primary btn-sm';
+            btnMix.className = 'btn btn-secondary btn-sm';
+        }
+
+        recalculateCheckOutAmount(mins);
         openSaasModal('modalCheckOut');
+    }
+
+    function setCheckOutCalculationMode(mode) {
+        checkOutCalculationMode = mode;
+        const btnMin = document.getElementById('btnRateModeMinute');
+        const btnMix = document.getElementById('btnRateModeMixed');
+        if (btnMin && btnMix) {
+            if (mode === 'MINUTE') {
+                btnMin.className = 'btn btn-primary btn-sm';
+                btnMix.className = 'btn btn-secondary btn-sm';
+            } else {
+                btnMin.className = 'btn btn-secondary btn-sm';
+                btnMix.className = 'btn btn-primary btn-sm';
+            }
+        }
+        recalculateCheckOutAmount();
+    }
+
+    function onCheckOutMinutesInputChange(val) {
+        const m = Math.max(1, parseInt(val) || 1);
+        recalculateCheckOutAmount(m);
+    }
+
+    function adjustCheckOutMinutes(delta) {
+        const minsInput = document.getElementById('coMinutesInput');
+        if (!minsInput) return;
+        const current = parseInt(minsInput.value) || checkOutBaseMinutes;
+        const next = Math.max(1, current + delta);
+        minsInput.value = next;
+        recalculateCheckOutAmount(next);
+    }
+
+    function resetCheckOutToRealTime() {
+        const minsInput = document.getElementById('coMinutesInput');
+        if (minsInput) minsInput.value = checkOutBaseMinutes;
+        recalculateCheckOutAmount(checkOutBaseMinutes);
+    }
+
+    function recalculateCheckOutAmount(customMins) {
+        const t = saasState.pendingCheckOutTicket;
+        if (!t) return;
+
+        const minsInput = document.getElementById('coMinutesInput');
+        const mins = customMins !== undefined ? customMins : (minsInput ? (parseInt(minsInput.value) || checkOutBaseMinutes) : checkOutBaseMinutes);
+
+        const calc = calculateStayFee(t.tipoVehiculo, mins, checkOutCalculationMode);
+
+        t.calculatedMinutes = calc.minutes;
+        t.calculatedAmount = calc.total;
+        t.calculationMode = checkOutCalculationMode;
+
+        const rateMinEl = document.getElementById('coRatePerMinuteDisplay');
+        if (rateMinEl) rateMinEl.textContent = `$${calc.ratePerMinute.toLocaleString('es-CO')} / min`;
+
+        const graceEl = document.getElementById('coGraceDisplay');
+        if (graceEl) graceEl.textContent = `${calc.graceMin} min de cortesía`;
+
+        const billableEl = document.getElementById('coBillableMinsDisplay');
+        if (billableEl) billableEl.textContent = `${calc.billableMinutes} min`;
+
+        const formulaEl = document.getElementById('coFormulaDisplay');
+        if (formulaEl) formulaEl.textContent = calc.formula;
+
+        const totalEl = document.getElementById('coTotalAmountDisplay');
+        if (totalEl) totalEl.textContent = `$${calc.total.toLocaleString('es-CO')} COP`;
+
+        const durationDisplay = document.getElementById('coDurationDisplay');
+        if (durationDisplay) durationDisplay.textContent = `${calc.minutes} minutos (${(calc.minutes/60).toFixed(1)} hrs)`;
     }
 
     async function confirmCheckOutPayment() {
@@ -850,15 +1007,16 @@
             }
 
             closeSaasModal('modalCheckOut');
-            showCheckOutReceipt(data.data);
+            showCheckOutReceipt(data.data, t);
             await syncAllFromDatabase();
         } catch (e) {
             alert('Error al liquidar cobro en MySQL: ' + e.message);
         }
     }
 
-    function showCheckOutReceipt(ticket) {
+    function showCheckOutReceipt(ticket, pendingInfo) {
         document.getElementById('saasReceiptHeaderTitle').textContent = 'Factura Electrónica Equivalente';
+        const rate = (saasState.rates && saasState.rates.find(r => r.tipoVehiculo === ticket.tipoVehiculo)) || { tarifaPorMinuto: 110 };
         const html = `
             <div class="saas-receipt">
                 <div class="receipt-brand">PARKFLOW CLOUD</div>
@@ -867,20 +1025,135 @@
                 <div class="receipt-line"><span>PLACA:</span><strong style="color:#0284c7; font-size:1.15rem;">${ticket.placa}</strong></div>
                 <div class="receipt-line"><span>TIPO VEHÍCULO:</span><span>${ticket.tipoVehiculo}</span></div>
                 <div class="receipt-line"><span>BAHÍA LIBERADA:</span><strong>${ticket.spotCodigo}</strong></div>
-                <div class="receipt-line"><span>DURACIÓN TOTAL:</span><span>${ticket.minutosTranscurridos} minutos</span></div>
+                <div class="receipt-line"><span>DURACIÓN ESTADÍA:</span><strong>${ticket.minutosTranscurridos} minutos</strong></div>
+                <div class="receipt-line"><span>TARIFA / MINUTO:</span><span>$${rate.tarifaPorMinuto.toLocaleString('es-CO')}/min</span></div>
                 <div class="receipt-line"><span>MÉTODO PAGO:</span><span>${ticket.metodoPago}</span></div>
                 <div class="receipt-line"><span>FECHA SALIDA:</span><span>${new Date(ticket.fechaSalida).toLocaleString('es-CO')}</span></div>
                 <div class="receipt-total-bar">
-                    <span>TOTAL PAGADO:</span>
+                    <span>TOTAL LIQUIDADO:</span>
                     <span style="color:#10b981;">$${(ticket.valorPagado || 0).toLocaleString('es-CO')} COP</span>
                 </div>
                 <div style="text-align:center; margin-top:1rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem; font-size:0.72rem; color:#64748b;">
-                    ¡Gracias por usar ParkFlow! Bahía liberada en MySQL.
+                    Cobro liquidado por minutos de estadía en ParkFlow. Bahía liberada en MySQL.
                 </div>
             </div>
         `;
         document.getElementById('saasReceiptBody').innerHTML = html;
         openSaasModal('modalReceiptSaas');
+    }
+
+    // =========================================================================
+    // CALCULADORA GENERAL & PORTAL DE ESTADÍA POR MINUTOS
+    // =========================================================================
+    function openMinuteCalculatorModal(tipoVehiculo, mins) {
+        if (tipoVehiculo) {
+            const vSelect = document.getElementById('modalCalcVehicleType');
+            if (vSelect) vSelect.value = tipoVehiculo;
+        }
+        if (mins) {
+            setModalCalcMinutes(mins);
+        } else {
+            updateModalMinuteCalculation();
+        }
+        openSaasModal('modalMinuteCalculator');
+    }
+
+    function updateModalMinuteCalculation() {
+        const vType = document.getElementById('modalCalcVehicleType')?.value || 'Automóvil';
+        const mode = document.getElementById('modalCalcMode')?.value || 'MINUTE';
+        const mins = parseInt(document.getElementById('modalCalcMinutesInput')?.value) || 45;
+
+        const calc = calculateStayFee(vType, mins, mode);
+
+        const hoursEl = document.getElementById('modalCalcHoursEquiv');
+        if (hoursEl) hoursEl.textContent = `≈ ${(mins/60).toFixed(1)}h`;
+
+        const rateMinEl = document.getElementById('modalCalcRateMinDisplay');
+        if (rateMinEl) rateMinEl.textContent = `$${calc.ratePerMinute.toLocaleString('es-CO')} / min`;
+
+        const graceEl = document.getElementById('modalCalcGraceDisplay');
+        if (graceEl) graceEl.textContent = `${calc.graceMin} min gratis`;
+
+        const billableEl = document.getElementById('modalCalcBillableDisplay');
+        if (billableEl) billableEl.textContent = `${calc.billableMinutes} mins`;
+
+        const formulaEl = document.getElementById('modalCalcFormulaDisplay');
+        if (formulaEl) formulaEl.textContent = calc.formula;
+
+        const totalEl = document.getElementById('modalCalcTotalDisplay');
+        if (totalEl) totalEl.textContent = `$${calc.total.toLocaleString('es-CO')} COP`;
+    }
+
+    function onModalCalcMinutesInputChange(val) {
+        const m = Math.max(1, parseInt(val) || 1);
+        const range = document.getElementById('modalCalcMinutesRange');
+        if (range && m <= 480) range.value = m;
+        updateModalMinuteCalculation();
+    }
+
+    function onModalCalcMinutesRangeChange(val) {
+        const input = document.getElementById('modalCalcMinutesInput');
+        if (input) input.value = val;
+        updateModalMinuteCalculation();
+    }
+
+    function setModalCalcMinutes(mins) {
+        const input = document.getElementById('modalCalcMinutesInput');
+        const range = document.getElementById('modalCalcMinutesRange');
+        if (input) input.value = mins;
+        if (range && mins <= 480) range.value = mins;
+        updateModalMinuteCalculation();
+    }
+
+    // Portal del Cliente - Calculadora de Minutos
+    function updatePortalMinuteCalculation() {
+        const vType = document.getElementById('calcPortalVehicleType')?.value || 'Automóvil';
+        const mode = document.getElementById('calcPortalMode')?.value || 'MINUTE';
+        const mins = parseInt(document.getElementById('calcPortalMinutesInput')?.value) || 45;
+
+        const calc = calculateStayFee(vType, mins, mode);
+
+        const hoursEl = document.getElementById('calcPortalHoursEquiv');
+        if (hoursEl) hoursEl.textContent = `≈ ${(mins/60).toFixed(1)} hrs`;
+
+        const minsDisplay = document.getElementById('calcPortalMinutesDisplay');
+        if (minsDisplay) minsDisplay.textContent = `${mins} minutos`;
+
+        const rateMinEl = document.getElementById('calcPortalRateMinDisplay');
+        if (rateMinEl) rateMinEl.textContent = `$${calc.ratePerMinute.toLocaleString('es-CO')} / min`;
+
+        const graceEl = document.getElementById('calcPortalGraceDisplay');
+        if (graceEl) graceEl.textContent = `${calc.graceMin} min gratis`;
+
+        const billableEl = document.getElementById('calcPortalBillableDisplay');
+        if (billableEl) billableEl.textContent = `${calc.billableMinutes} min`;
+
+        const formulaEl = document.getElementById('calcPortalFormulaDisplay');
+        if (formulaEl) formulaEl.textContent = calc.formula;
+
+        const totalEl = document.getElementById('calcPortalTotalDisplay');
+        if (totalEl) totalEl.textContent = `$${calc.total.toLocaleString('es-CO')} COP`;
+    }
+
+    function onPortalMinutesInputChange(val) {
+        const m = Math.max(1, parseInt(val) || 1);
+        const range = document.getElementById('calcPortalMinutesRange');
+        if (range && m <= 480) range.value = m;
+        updatePortalMinuteCalculation();
+    }
+
+    function onPortalMinutesRangeChange(val) {
+        const input = document.getElementById('calcPortalMinutesInput');
+        if (input) input.value = val;
+        updatePortalMinuteCalculation();
+    }
+
+    function setPortalMinutes(mins) {
+        const input = document.getElementById('calcPortalMinutesInput');
+        const range = document.getElementById('calcPortalMinutesRange');
+        if (input) input.value = mins;
+        if (range && mins <= 480) range.value = mins;
+        updatePortalMinuteCalculation();
     }
 
     // Simular cruce de medianoche
@@ -1576,34 +1849,54 @@
             card.style.display = 'block';
             card.innerHTML = `
                 <div style="color:var(--rose); font-weight:700; margin-bottom:0.25rem;">Vehículo no encontrado</div>
-                <p style="font-size:0.8rem; color:var(--text-muted);">La placa <strong>${plate}</strong> no tiene ingreso activo vigente.</p>
+                <p style="font-size:0.8rem; color:var(--text-muted);">La placa <strong>${plate}</strong> no tiene ingreso activo vigente en el parqueadero.</p>
             `;
             return;
         }
 
         const mins = Math.max(1, Math.round((Date.now() - new Date(active.fechaIngreso).getTime()) / 60000));
+        const calc = calculateStayFee(active.tipoVehiculo, mins, 'MINUTE');
+
         card.style.display = 'block';
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
                 <div>
                     <span class="plate-pill" style="font-size:1.25rem;">${active.placa}</span>
-                    <span style="margin-left:0.5rem; color:var(--primary); font-size:0.85rem;">${active.tipoVehiculo}</span>
+                    <span style="margin-left:0.5rem; color:var(--primary); font-size:0.85rem; font-weight:700;">${active.tipoVehiculo}</span>
                 </div>
                 <span class="status-badge badge-active-live">Estancia en Curso</span>
             </div>
-            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:0.75rem; margin-bottom:1rem;">
                 <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted);">Bahía Asignada</div>
-                    <div style="font-size:1.2rem; font-weight:800; color:var(--emerald);">${active.spotCodigo}</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Bahía Asignada</div>
+                    <div style="font-size:1.25rem; font-weight:800; color:var(--emerald);">${active.spotCodigo}</div>
                 </div>
                 <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted);">Hora Ingreso</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Hora Ingreso</div>
                     <div style="font-size:1rem; font-weight:700; color:var(--text-heading);">${new Date(active.fechaIngreso).toLocaleTimeString('es-CO')}</div>
                 </div>
                 <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted);">Tiempo Actual</div>
-                    <div style="font-size:1.2rem; font-weight:800; color:var(--primary);">${mins} mins</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Tiempo Transcurrido</div>
+                    <div style="font-size:1.25rem; font-weight:800; color:var(--primary);">${mins} mins</div>
                 </div>
+                <div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Tarifa por Minuto</div>
+                    <div style="font-size:1.1rem; font-weight:800; color:var(--text-heading);">$${calc.ratePerMinute.toLocaleString('es-CO')}/min</div>
+                </div>
+            </div>
+            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                <div>
+                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">Total Acumulado a Cobrar por Minutos:</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono';">${calc.formula}</div>
+                </div>
+                <div style="font-size:1.5rem; font-weight:900; color:var(--emerald); font-family:'JetBrains Mono';">
+                    $${calc.total.toLocaleString('es-CO')} COP
+                </div>
+            </div>
+            <div style="margin-top:0.75rem; text-align:right;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="handleSaasClientSearch()" style="font-size:0.75rem;">
+                    🔄 Recalcular Minutos en Vivo
+                </button>
             </div>
         `;
     }
@@ -1635,10 +1928,34 @@
         }
     }
 
+    // Exportar funciones a window para soporte completo de eventos inline HTML
+    window.calculateStayFee = calculateStayFee;
+    window.openCheckOutModal = openCheckOutModal;
+    window.setCheckOutCalculationMode = setCheckOutCalculationMode;
+    window.onCheckOutMinutesInputChange = onCheckOutMinutesInputChange;
+    window.adjustCheckOutMinutes = adjustCheckOutMinutes;
+    window.resetCheckOutToRealTime = resetCheckOutToRealTime;
+    window.recalculateCheckOutAmount = recalculateCheckOutAmount;
+    window.confirmCheckOutPayment = confirmCheckOutPayment;
+    window.showCheckOutReceipt = showCheckOutReceipt;
+    window.openMinuteCalculatorModal = openMinuteCalculatorModal;
+    window.updateModalMinuteCalculation = updateModalMinuteCalculation;
+    window.onModalCalcMinutesInputChange = onModalCalcMinutesInputChange;
+    window.onModalCalcMinutesRangeChange = onModalCalcMinutesRangeChange;
+    window.setModalCalcMinutes = setModalCalcMinutes;
+    window.updatePortalMinuteCalculation = updatePortalMinuteCalculation;
+    window.onPortalMinutesInputChange = onPortalMinutesInputChange;
+    window.onPortalMinutesRangeChange = onPortalMinutesRangeChange;
+    window.setPortalMinutes = setPortalMinutes;
+    window.handleSaasClientSearch = handleSaasClientSearch;
+    window.handleGlobalSearch = handleGlobalSearch;
+    window.resetDatabaseFromSaas = resetDatabaseFromSaas;
+
     // Inicializar al cargar el DOM
     window.addEventListener('DOMContentLoaded', () => {
         checkAuthSession();
         syncAllFromDatabase();
+        updatePortalMinuteCalculation();
         // Polling cada 12 segundos para actualizar métricas en vivo
         setInterval(syncAllFromDatabase, 12000);
     });

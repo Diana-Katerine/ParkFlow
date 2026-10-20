@@ -1450,7 +1450,10 @@
                     <span id="saasDbStatusText">XAMPP MySQL: 3306</span>
                 </div>
 
-                                <button type="button" class="btn btn-secondary btn-sm" onclick="handleLogout()" title="Cerrar sesión segura">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="openMinuteCalculatorModal()" title="Calcular total por minutos de estadía">
+                    <span>⏱️</span> Calc. Minutos
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="handleLogout()" title="Cerrar sesión segura">
                     <span>🚪</span> Salir
                 </button>
                 <!-- Primary Action -->
@@ -1682,6 +1685,9 @@
                             </div>
                         </div>
                         <div style="display:flex; gap:0.5rem;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="openMinuteCalculatorModal()">
+                                <span>⏱️</span> Calc. Minutos
+                            </button>
                             <button type="button" class="btn btn-secondary btn-sm" onclick="syncAllFromDatabase()">
                                 <span>🔄</span> Actualizar
                             </button>
@@ -1743,6 +1749,9 @@
                             <h3 style="font-size:1rem; font-weight:700; color:var(--text-heading);">Configuración de Tarifas y Cobro</h3>
                             <p style="font-size:0.75rem; color:var(--text-muted);">Valores en Pesos Colombianos (COP) sincronizados con tabla `tarifas` en MySQL</p>
                         </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="openMinuteCalculatorModal()">
+                            <span>⏱️</span> Probar Calculadora
+                        </button>
                     </div>
                     <div class="table-responsive">
                         <table class="saas-table">
@@ -2050,6 +2059,106 @@
                         </div>
                     </div>
 
+                    <!-- Calculadora Interactiva de Tarifa por Minutos de Estadía -->
+                    <div class="saas-card" style="border: 1px solid rgba(0, 245, 255, 0.25);">
+                        <div class="card-header-flex">
+                            <div>
+                                <h3 class="card-heading-title"><span>⏱️</span> Calculadora de Tarifa por Minutos de Estadía</h3>
+                                <p class="card-heading-sub">Calcula el total a cobrar de forma transparente según el tiempo exacto de permanencia en minutos</p>
+                            </div>
+                            <span class="role-badge-tag pill-primary">Cálculo en Tiempo Real</span>
+                        </div>
+
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1rem; margin-bottom:1.25rem;">
+                            <div>
+                                <label class="form-label-saas">Tipo de Vehículo</label>
+                                <select id="calcPortalVehicleType" class="form-control-saas" onchange="updatePortalMinuteCalculation()">
+                                    <option value="Automóvil">🚗 Automóvil ($110 / min)</option>
+                                    <option value="Motocicleta">🏍️ Motocicleta ($65 / min)</option>
+                                    <option value="Camioneta">🚙 Camioneta / SUV ($135 / min)</option>
+                                    <option value="Eléctrico EV">⚡ Eléctrico EV ($95 / min)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label-saas">Modalidad de Cobro</label>
+                                <select id="calcPortalMode" class="form-control-saas" onchange="updatePortalMinuteCalculation()">
+                                    <option value="MINUTE">⏱️ Cobro por Minutos Exactos (Minutos × Tarifa/min)</option>
+                                    <option value="MIXED">⏳ Cobro Mixto (Horas Completas + Fracción Minutos)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Slider y Selector de Minutos -->
+                        <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1.25rem; margin-bottom:1.25rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                <label style="font-size:0.85rem; font-weight:700; color:var(--text-heading);">
+                                    Minutos de Permanencia en Parqueadero:
+                                </label>
+                                <div style="display:flex; align-items:center; gap:0.5rem;">
+                                    <input type="number" id="calcPortalMinutesInput" min="1" max="1440" value="45" class="form-control-saas" style="width:100px; text-align:center; font-family:'JetBrains Mono'; font-weight:800; font-size:1.1rem; padding:0.35rem 0.5rem;" oninput="onPortalMinutesInputChange(this.value)">
+                                    <span style="font-size:0.85rem; font-weight:700; color:var(--primary);" id="calcPortalHoursEquiv">≈ 0.8 hrs</span>
+                                </div>
+                            </div>
+
+                            <input type="range" id="calcPortalMinutesRange" min="1" max="480" value="45" step="1" style="width:100%; accent-color:var(--primary); cursor:pointer; margin-bottom:0.4rem;" oninput="onPortalMinutesRangeChange(this.value)">
+
+                            <div style="display:flex; justify-content:space-between; font-size:0.72rem; color:var(--text-muted); margin-bottom:1rem;">
+                                <span>1m</span>
+                                <span>15m</span>
+                                <span>30m</span>
+                                <span>1h (60m)</span>
+                                <span>2h (120m)</span>
+                                <span>4h (240m)</span>
+                                <span>8h (480m)</span>
+                            </div>
+
+                            <!-- Botones Rápidos de Minutos -->
+                            <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                <span style="font-size:0.75rem; color:var(--text-muted); align-self:center; margin-right:0.25rem;">Atajos:</span>
+                                <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="setPortalMinutes(15)">15 min</button>
+                                <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="setPortalMinutes(30)">30 min</button>
+                                <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="setPortalMinutes(45)">45 min</button>
+                                <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="setPortalMinutes(60)">1 Hora</button>
+                                <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="setPortalMinutes(90)">1.5 Horas</button>
+                                <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="setPortalMinutes(120)">2 Horas</button>
+                                <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="setPortalMinutes(180)">3 Horas</button>
+                                <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="setPortalMinutes(240)">4 Horas</button>
+                                <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.75rem; padding:0.25rem 0.6rem;" onclick="setPortalMinutes(360)">6 Horas</button>
+                            </div>
+                        </div>
+
+                        <!-- Desglose de Cálculo y Resultado -->
+                        <div style="background:var(--bg-surface-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:1.25rem;">
+                            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(140px, 1fr)); gap:1rem; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:1rem;">
+                                <div>
+                                    <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase;">Tarifa por Minuto</div>
+                                    <div style="font-size:1.15rem; font-weight:800; color:var(--text-heading);" id="calcPortalRateMinDisplay">$110 / min</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase;">Período Gracia</div>
+                                    <div style="font-size:1.15rem; font-weight:700; color:var(--amber);" id="calcPortalGraceDisplay">5 min gratis</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase;">Minutos a Liquidar</div>
+                                    <div style="font-size:1.15rem; font-weight:800; color:var(--primary);" id="calcPortalBillableDisplay">45 min</div>
+                                </div>
+                                <div>
+                                    <div style="font-size:0.72rem; color:var(--text-muted); text-transform:uppercase;">Fórmula Liquidación</div>
+                                    <div style="font-size:0.85rem; font-family:'JetBrains Mono'; font-weight:700; color:var(--text-heading);" id="calcPortalFormulaDisplay">45 × $110</div>
+                                </div>
+                            </div>
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                                <div>
+                                    <div style="font-size:0.8rem; font-weight:700; color:var(--text-heading);">Total a Cobrar por Estadía:</div>
+                                    <div style="font-size:0.72rem; color:var(--text-muted);">Pesos Colombianos (COP) · IVA incluido</div>
+                                </div>
+                                <div style="font-size:1.75rem; font-weight:900; color:var(--emerald); font-family:'JetBrains Mono';" id="calcPortalTotalDisplay">
+                                    $4.950 COP
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Completed Stays History -->
                     <div class="table-card">
                         <div class="table-toolbar">
@@ -2129,32 +2238,92 @@
 
 <!-- Modal: Cobro y Liquidación de Salida -->
 <div id="modalCheckOut" class="modal-backdrop">
-    <div class="modal-container">
+    <div class="modal-container" style="max-width:540px;">
         <div class="modal-header-saas">
-            <h3 class="modal-title-saas"><span>💳</span> Liquidación de Estancia & Cobro</h3>
+            <h3 class="modal-title-saas"><span>💳</span> Liquidación de Estancia & Cobro por Minutos</h3>
             <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalCheckOut')">✕</button>
         </div>
         <div class="modal-body-saas">
-            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1.25rem;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
-                    <span style="color:var(--text-muted); font-size:0.8rem;">Vehículo & Placa:</span>
-                    <span class="plate-pill" id="coPlateDisplay">---</span>
+            <!-- Resumen Vehicular -->
+            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <div>
+                        <span style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase; letter-spacing:0.05em;">Vehículo:</span>
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.2rem;">
+                            <span class="plate-pill" id="coPlateDisplay">---</span>
+                            <span style="color:var(--primary); font-size:0.8rem; font-weight:700;" id="coVehicleTypeDisplay">---</span>
+                        </div>
+                    </div>
+                    <div style="text-align:right;">
+                        <span style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">Bahía:</span>
+                        <div style="color:var(--emerald); font-weight:800; font-size:1.1rem;" id="coBayDisplay">---</div>
+                    </div>
                 </div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
-                    <span style="color:var(--text-muted);">Bahía Asignada:</span>
-                    <span style="color:var(--primary); font-weight:700;" id="coBayDisplay">---</span>
+
+                <!-- Selector de Modalidad de Cobro -->
+                <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid var(--border);">
+                    <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:0.4rem; font-weight:600;">Modalidad de Cobro:</div>
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+                        <button type="button" id="btnRateModeMinute" class="btn btn-primary btn-sm" onclick="setCheckOutCalculationMode('MINUTE')" style="font-size:0.75rem; padding:0.4rem 0.5rem; justify-content:center;">
+                            ⏱️ Minutos Exactos
+                        </button>
+                        <button type="button" id="btnRateModeMixed" class="btn btn-secondary btn-sm" onclick="setCheckOutCalculationMode('MIXED')" style="font-size:0.75rem; padding:0.4rem 0.5rem; justify-content:center;">
+                            ⏳ Horas + Fracción
+                        </button>
+                    </div>
                 </div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
-                    <span style="color:var(--text-muted);">Tiempo Transcurrido:</span>
-                    <span style="font-weight:700; color:var(--text-heading);" id="coDurationDisplay">0 mins</span>
+
+                <!-- Simulador / Ajuste Dinámico de Minutos -->
+                <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px dashed var(--border);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                        <label for="coMinutesInput" style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">
+                            Minutos de Estadía a Cobrar:
+                        </label>
+                        <span style="font-size:0.72rem; color:var(--primary); cursor:pointer; text-decoration:underline;" onclick="resetCheckOutToRealTime()">
+                            ↺ Tiempo Real (<span id="coRealDurationDisplay">0m</span>)
+                        </span>
+                    </div>
+                    <div style="display:flex; gap:0.5rem; align-items:center;">
+                        <input type="number" id="coMinutesInput" min="1" max="2880" class="form-control-saas" style="font-family:'JetBrains Mono'; font-weight:800; font-size:1.1rem; text-align:center; max-width:130px;" oninput="onCheckOutMinutesInputChange(this.value)">
+                        <div style="display:flex; gap:0.25rem; flex-wrap:wrap;">
+                            <button type="button" class="btn btn-secondary btn-sm" style="padding:0.25rem 0.45rem; font-size:0.72rem;" onclick="adjustCheckOutMinutes(-15)">-15m</button>
+                            <button type="button" class="btn btn-secondary btn-sm" style="padding:0.25rem 0.45rem; font-size:0.72rem;" onclick="adjustCheckOutMinutes(-5)">-5m</button>
+                            <button type="button" class="btn btn-secondary btn-sm" style="padding:0.25rem 0.45rem; font-size:0.72rem;" onclick="adjustCheckOutMinutes(5)">+5m</button>
+                            <button type="button" class="btn btn-secondary btn-sm" style="padding:0.25rem 0.45rem; font-size:0.72rem;" onclick="adjustCheckOutMinutes(15)">+15m</button>
+                            <button type="button" class="btn btn-secondary btn-sm" style="padding:0.25rem 0.45rem; font-size:0.72rem;" onclick="adjustCheckOutMinutes(30)">+30m</button>
+                        </div>
+                    </div>
                 </div>
-                <div style="display:flex; justify-content:space-between; font-size:1.25rem; font-weight:800; border-top:1px dashed var(--border); padding-top:0.75rem; margin-top:0.75rem;">
-                    <span>Total a Pagar:</span>
-                    <span style="color:var(--emerald);" id="coTotalAmountDisplay">$0</span>
+
+                <!-- Desglose Matemático del Cálculo por Minuto -->
+                <div style="margin-top:0.75rem; background:var(--bg-surface-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.6rem 0.75rem; font-size:0.78rem;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                        <span style="color:var(--text-muted);">Tarifa base por minuto:</span>
+                        <span style="font-weight:700; color:var(--text-heading);" id="coRatePerMinuteDisplay">$0 / min</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                        <span style="color:var(--text-muted);">Período de gracia:</span>
+                        <span style="color:var(--amber);" id="coGraceDisplay">5 min cortesía</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem;">
+                        <span style="color:var(--text-muted);">Minutos a liquidar:</span>
+                        <span style="font-weight:700; color:var(--primary);" id="coBillableMinsDisplay">0 min</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.25rem; font-size:0.75rem; border-top:1px dashed var(--border); padding-top:0.35rem; color:var(--text-muted);">
+                        <span>Fórmula aplicada:</span>
+                        <span id="coFormulaDisplay" style="font-family:'JetBrains Mono'; color:var(--text-heading); font-size:0.75rem;">0 × $0</span>
+                    </div>
+                </div>
+
+                <!-- Total a Pagar -->
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size:1.35rem; font-weight:800; border-top:2px solid var(--border); padding-top:0.75rem; margin-top:0.75rem;">
+                    <span>Total a Liquidar:</span>
+                    <span style="color:var(--emerald);" id="coTotalAmountDisplay">$0 COP</span>
                 </div>
             </div>
 
-            <div class="form-row">
+            <!-- Método de Pago -->
+            <div class="form-row" style="margin-bottom:0;">
                 <label class="form-label-saas">Método de Pago</label>
                 <select id="coPaymentMethod" class="form-control-saas">
                     <option value="Efectivo">Efectivo</option>
@@ -2166,8 +2335,106 @@
         <div class="modal-footer-saas">
             <button type="button" class="btn btn-secondary" onclick="closeSaasModal('modalCheckOut')">Cancelar</button>
             <button type="button" class="btn btn-primary" onclick="confirmCheckOutPayment()">
-                Confirmar Cobro y Liberar Bahía
+                <span>✅</span> Confirmar Cobro y Liberar Bahía
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Calculadora General de Estadía por Minutos -->
+<div id="modalMinuteCalculator" class="modal-backdrop">
+    <div class="modal-container" style="max-width:540px;">
+        <div class="modal-header-saas">
+            <h3 class="modal-title-saas"><span>⏱️</span> Calculadora de Estadía por Minutos</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalMinuteCalculator')">✕</button>
+        </div>
+        <div class="modal-body-saas">
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:1rem;">
+                Calcula instantáneamente el valor total a cobrar según los minutos exactos de permanencia y el tipo de vehículo.
+            </p>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:1rem;">
+                <div>
+                    <label class="form-label-saas">Tipo de Vehículo</label>
+                    <select id="modalCalcVehicleType" class="form-control-saas" onchange="updateModalMinuteCalculation()">
+                        <option value="Automóvil">🚗 Automóvil ($110/min)</option>
+                        <option value="Motocicleta">🏍️ Motocicleta ($65/min)</option>
+                        <option value="Camioneta">🚙 Camioneta ($135/min)</option>
+                        <option value="Eléctrico EV">⚡ Eléctrico EV ($95/min)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="form-label-saas">Modalidad de Cobro</label>
+                    <select id="modalCalcMode" class="form-control-saas" onchange="updateModalMinuteCalculation()">
+                        <option value="MINUTE">⏱️ Minutos Exactos</option>
+                        <option value="MIXED">⏳ Mixto (Horas + Minutos)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <label style="font-size:0.8rem; font-weight:700; color:var(--text-heading);">
+                        Minutos de Permanencia:
+                    </label>
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <input type="number" id="modalCalcMinutesInput" min="1" max="1440" value="45" class="form-control-saas" style="width:90px; text-align:center; font-family:'JetBrains Mono'; font-weight:800; font-size:1.1rem; padding:0.25rem 0.5rem;" oninput="onModalCalcMinutesInputChange(this.value)">
+                        <span style="font-size:0.8rem; font-weight:700; color:var(--primary);" id="modalCalcHoursEquiv">≈ 0.8h</span>
+                    </div>
+                </div>
+                <input type="range" id="modalCalcMinutesRange" min="1" max="480" value="45" step="1" style="width:100%; accent-color:var(--primary); cursor:pointer;" oninput="onModalCalcMinutesRangeChange(this.value)">
+                <div style="display:flex; justify-content:space-between; font-size:0.7rem; color:var(--text-muted); margin-top:0.25rem; margin-bottom:0.75rem;">
+                    <span>1m</span>
+                    <span>15m</span>
+                    <span>30m</span>
+                    <span>1h (60m)</span>
+                    <span>2h (120m)</span>
+                    <span>4h (240m)</span>
+                    <span>8h (480m)</span>
+                </div>
+
+                <!-- Botones de minutos rápidos -->
+                <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.25rem 0.5rem;" onclick="setModalCalcMinutes(15)">15m</button>
+                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.25rem 0.5rem;" onclick="setModalCalcMinutes(30)">30m</button>
+                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.25rem 0.5rem;" onclick="setModalCalcMinutes(45)">45m</button>
+                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.25rem 0.5rem;" onclick="setModalCalcMinutes(60)">1h</button>
+                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.25rem 0.5rem;" onclick="setModalCalcMinutes(90)">1.5h</button>
+                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.25rem 0.5rem;" onclick="setModalCalcMinutes(120)">2h</button>
+                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.25rem 0.5rem;" onclick="setModalCalcMinutes(180)">3h</button>
+                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.25rem 0.5rem;" onclick="setModalCalcMinutes(240)">4h</button>
+                </div>
+            </div>
+
+            <!-- Desglose de Cálculo -->
+            <div style="background:var(--bg-surface-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem;">
+                <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:0.5rem; margin-bottom:0.75rem; font-size:0.8rem;">
+                    <div>
+                        <span style="color:var(--text-muted);">Tarifa por minuto:</span>
+                        <div style="font-weight:700; color:var(--text-heading);" id="modalCalcRateMinDisplay">$110 / min</div>
+                    </div>
+                    <div>
+                        <span style="color:var(--text-muted);">Período de gracia:</span>
+                        <div style="font-weight:700; color:var(--amber);" id="modalCalcGraceDisplay">5 min gratis</div>
+                    </div>
+                    <div>
+                        <span style="color:var(--text-muted);">Minutos a liquidar:</span>
+                        <div style="font-weight:700; color:var(--primary);" id="modalCalcBillableDisplay">45 mins</div>
+                    </div>
+                    <div>
+                        <span style="color:var(--text-muted);">Operación:</span>
+                        <div style="font-weight:700; font-family:'JetBrains Mono'; color:var(--text-heading);" id="modalCalcFormulaDisplay">45 × $110</div>
+                    </div>
+                </div>
+
+                <div style="border-top:1px dashed var(--border); padding-top:0.75rem; display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-size:0.9rem; font-weight:700;">Total a Cobrar:</span>
+                    <span style="font-size:1.5rem; font-weight:900; color:var(--emerald); font-family:'JetBrains Mono';" id="modalCalcTotalDisplay">$4.950 COP</span>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer-saas">
+            <button type="button" class="btn btn-secondary" onclick="closeSaasModal('modalMinuteCalculator')">Cerrar</button>
         </div>
     </div>
 </div>
@@ -3059,44 +3326,201 @@
         openSaasModal('modalReceiptSaas');
     }
 
-    // Modal de Cobro / Salida
-    function openCheckOutModal(ticketId) {
-        const ticket = saasState.tickets.find(t => t.id === ticketId);
-        if (!ticket) return;
+    // =========================================================================
+    // CÁLCULO DE COBRO POR MINUTOS DE ESTADÍA & LIQUIDACIÓN
+    // =========================================================================
+    let checkOutCalculationMode = 'MINUTE'; // 'MINUTE' o 'MIXED'
+    let checkOutBaseMinutes = 1;
 
-        saasState.pendingCheckOutTicket = ticket;
-
-        const rate = saasState.rates.find(r => r.tipoVehiculo === ticket.tipoVehiculo) || {
+    function calculateStayFee(tipoVehiculo, minutes, mode = 'MINUTE') {
+        const rate = (saasState.rates && saasState.rates.find(r => r.tipoVehiculo === tipoVehiculo)) || {
             tarifaPorMinuto: 110,
             tarifaPorHora: 5800,
             tarifaPlenaDia: 42000,
             fraccionGraciaMin: 5
         };
 
-        const entryTime = new Date(ticket.fechaIngreso).getTime();
-        const mins = Math.max(1, Math.round((Date.now() - entryTime) / 60000));
+        const mins = Math.max(1, parseInt(minutes) || 1);
+        const grace = rate.fraccionGraciaMin !== undefined ? rate.fraccionGraciaMin : 5;
 
-        let amount = 0;
-        if (ticket.cruzoMedianoche || mins >= 720) {
-            amount = rate.tarifaPlenaDia;
-        } else if (mins <= rate.fraccionGraciaMin) {
-            amount = 0;
-        } else {
-            const h = Math.floor(mins / 60);
-            const rem = mins % 60;
-            amount = (h * rate.tarifaPorHora) + (rem * rate.tarifaPorMinuto);
-            if (amount > rate.tarifaPlenaDia) amount = rate.tarifaPlenaDia;
+        // Regla 1: Dentro del período de gracia (cortesía gratuita)
+        if (mins <= grace) {
+            return {
+                minutes: mins,
+                graceMin: grace,
+                billableMinutes: 0,
+                ratePerMinute: rate.tarifaPorMinuto,
+                ratePerHour: rate.tarifaPorHora,
+                ratePerDay: rate.tarifaPlenaDia,
+                mode: mode,
+                subtotal: 0,
+                total: 0,
+                formula: `Estadía (${mins}m) ≤ Gracia (${grace}m) → Cortesía gratuita ($0 COP)`,
+                isGrace: true,
+                isMaxDay: false
+            };
         }
 
-        saasState.pendingCheckOutTicket.calculatedMinutes = mins;
-        saasState.pendingCheckOutTicket.calculatedAmount = amount;
+        // Regla 2: Estadía de 12 horas o más (720 min) -> Aplica tarifa plena de día
+        if (mins >= 720) {
+            return {
+                minutes: mins,
+                graceMin: grace,
+                billableMinutes: mins,
+                ratePerMinute: rate.tarifaPorMinuto,
+                ratePerHour: rate.tarifaPorHora,
+                ratePerDay: rate.tarifaPlenaDia,
+                mode: mode,
+                subtotal: rate.tarifaPlenaDia,
+                total: Math.round(rate.tarifaPlenaDia),
+                formula: `Estadía prolongada (${mins}m ≥ 12h) → Tarifa Plena Día`,
+                isGrace: false,
+                isMaxDay: true
+            };
+        }
+
+        let total = 0;
+        let formula = '';
+
+        if (mode === 'MINUTE') {
+            // Cobro exacto por minuto
+            total = mins * rate.tarifaPorMinuto;
+            if (total > rate.tarifaPlenaDia) {
+                total = rate.tarifaPlenaDia;
+                formula = `${mins}m × $${rate.tarifaPorMinuto.toLocaleString('es-CO')}/min (Tope Día Pleno)`;
+            } else {
+                formula = `${mins} min × $${rate.tarifaPorMinuto.toLocaleString('es-CO')}/min = $${Math.round(total).toLocaleString('es-CO')} COP`;
+            }
+        } else {
+            // Cobro Mixto (horas completas + minutos restantes)
+            const h = Math.floor(mins / 60);
+            const rem = mins % 60;
+            total = (h * rate.tarifaPorHora) + (rem * rate.tarifaPorMinuto);
+            if (total > rate.tarifaPlenaDia) {
+                total = rate.tarifaPlenaDia;
+                formula = `${h}h + ${rem}m (Tope Día Pleno)`;
+            } else {
+                formula = `${h}h ($${rate.tarifaPorHora.toLocaleString('es-CO')}) + ${rem}m ($${(rem * rate.tarifaPorMinuto).toLocaleString('es-CO')})`;
+            }
+        }
+
+        return {
+            minutes: mins,
+            graceMin: grace,
+            billableMinutes: mins,
+            ratePerMinute: rate.tarifaPorMinuto,
+            ratePerHour: rate.tarifaPorHora,
+            ratePerDay: rate.tarifaPlenaDia,
+            mode: mode,
+            subtotal: total,
+            total: Math.round(total),
+            formula: formula,
+            isGrace: false,
+            isMaxDay: total >= rate.tarifaPlenaDia
+        };
+    }
+
+    // Modal de Cobro / Salida
+    function openCheckOutModal(ticketId) {
+        const ticket = saasState.tickets.find(t => t.id === ticketId);
+        if (!ticket) return;
+
+        saasState.pendingCheckOutTicket = ticket;
+        checkOutCalculationMode = 'MINUTE';
+
+        const entryTime = new Date(ticket.fechaIngreso).getTime();
+        const mins = Math.max(1, Math.round((Date.now() - entryTime) / 60000));
+        checkOutBaseMinutes = mins;
 
         document.getElementById('coPlateDisplay').textContent = ticket.placa;
         document.getElementById('coBayDisplay').textContent = ticket.spotCodigo;
-        document.getElementById('coDurationDisplay').textContent = `${mins} minutos (${(mins/60).toFixed(1)} hrs)`;
-        document.getElementById('coTotalAmountDisplay').textContent = `$${amount.toLocaleString('es-CO')} COP`;
+        
+        const typeDisplay = document.getElementById('coVehicleTypeDisplay');
+        if (typeDisplay) typeDisplay.textContent = ticket.tipoVehiculo;
 
+        const realDisplay = document.getElementById('coRealDurationDisplay');
+        if (realDisplay) realDisplay.textContent = `${mins}m`;
+
+        const minsInput = document.getElementById('coMinutesInput');
+        if (minsInput) minsInput.value = mins;
+
+        const btnMin = document.getElementById('btnRateModeMinute');
+        const btnMix = document.getElementById('btnRateModeMixed');
+        if (btnMin && btnMix) {
+            btnMin.className = 'btn btn-primary btn-sm';
+            btnMix.className = 'btn btn-secondary btn-sm';
+        }
+
+        recalculateCheckOutAmount(mins);
         openSaasModal('modalCheckOut');
+    }
+
+    function setCheckOutCalculationMode(mode) {
+        checkOutCalculationMode = mode;
+        const btnMin = document.getElementById('btnRateModeMinute');
+        const btnMix = document.getElementById('btnRateModeMixed');
+        if (btnMin && btnMix) {
+            if (mode === 'MINUTE') {
+                btnMin.className = 'btn btn-primary btn-sm';
+                btnMix.className = 'btn btn-secondary btn-sm';
+            } else {
+                btnMin.className = 'btn btn-secondary btn-sm';
+                btnMix.className = 'btn btn-primary btn-sm';
+            }
+        }
+        recalculateCheckOutAmount();
+    }
+
+    function onCheckOutMinutesInputChange(val) {
+        const m = Math.max(1, parseInt(val) || 1);
+        recalculateCheckOutAmount(m);
+    }
+
+    function adjustCheckOutMinutes(delta) {
+        const minsInput = document.getElementById('coMinutesInput');
+        if (!minsInput) return;
+        const current = parseInt(minsInput.value) || checkOutBaseMinutes;
+        const next = Math.max(1, current + delta);
+        minsInput.value = next;
+        recalculateCheckOutAmount(next);
+    }
+
+    function resetCheckOutToRealTime() {
+        const minsInput = document.getElementById('coMinutesInput');
+        if (minsInput) minsInput.value = checkOutBaseMinutes;
+        recalculateCheckOutAmount(checkOutBaseMinutes);
+    }
+
+    function recalculateCheckOutAmount(customMins) {
+        const t = saasState.pendingCheckOutTicket;
+        if (!t) return;
+
+        const minsInput = document.getElementById('coMinutesInput');
+        const mins = customMins !== undefined ? customMins : (minsInput ? (parseInt(minsInput.value) || checkOutBaseMinutes) : checkOutBaseMinutes);
+
+        const calc = calculateStayFee(t.tipoVehiculo, mins, checkOutCalculationMode);
+
+        t.calculatedMinutes = calc.minutes;
+        t.calculatedAmount = calc.total;
+        t.calculationMode = checkOutCalculationMode;
+
+        const rateMinEl = document.getElementById('coRatePerMinuteDisplay');
+        if (rateMinEl) rateMinEl.textContent = `$${calc.ratePerMinute.toLocaleString('es-CO')} / min`;
+
+        const graceEl = document.getElementById('coGraceDisplay');
+        if (graceEl) graceEl.textContent = `${calc.graceMin} min de cortesía`;
+
+        const billableEl = document.getElementById('coBillableMinsDisplay');
+        if (billableEl) billableEl.textContent = `${calc.billableMinutes} min`;
+
+        const formulaEl = document.getElementById('coFormulaDisplay');
+        if (formulaEl) formulaEl.textContent = calc.formula;
+
+        const totalEl = document.getElementById('coTotalAmountDisplay');
+        if (totalEl) totalEl.textContent = `$${calc.total.toLocaleString('es-CO')} COP`;
+
+        const durationDisplay = document.getElementById('coDurationDisplay');
+        if (durationDisplay) durationDisplay.textContent = `${calc.minutes} minutos (${(calc.minutes/60).toFixed(1)} hrs)`;
     }
 
     async function confirmCheckOutPayment() {
@@ -3125,15 +3549,16 @@
             }
 
             closeSaasModal('modalCheckOut');
-            showCheckOutReceipt(data.data);
+            showCheckOutReceipt(data.data, t);
             await syncAllFromDatabase();
         } catch (e) {
             alert('Error al liquidar cobro en MySQL: ' + e.message);
         }
     }
 
-    function showCheckOutReceipt(ticket) {
+    function showCheckOutReceipt(ticket, pendingInfo) {
         document.getElementById('saasReceiptHeaderTitle').textContent = 'Factura Electrónica Equivalente';
+        const rate = (saasState.rates && saasState.rates.find(r => r.tipoVehiculo === ticket.tipoVehiculo)) || { tarifaPorMinuto: 110 };
         const html = `
             <div class="saas-receipt">
                 <div class="receipt-brand">PARKFLOW CLOUD</div>
@@ -3142,20 +3567,135 @@
                 <div class="receipt-line"><span>PLACA:</span><strong style="color:#0284c7; font-size:1.15rem;">${ticket.placa}</strong></div>
                 <div class="receipt-line"><span>TIPO VEHÍCULO:</span><span>${ticket.tipoVehiculo}</span></div>
                 <div class="receipt-line"><span>BAHÍA LIBERADA:</span><strong>${ticket.spotCodigo}</strong></div>
-                <div class="receipt-line"><span>DURACIÓN TOTAL:</span><span>${ticket.minutosTranscurridos} minutos</span></div>
+                <div class="receipt-line"><span>DURACIÓN ESTADÍA:</span><strong>${ticket.minutosTranscurridos} minutos</strong></div>
+                <div class="receipt-line"><span>TARIFA / MINUTO:</span><span>$${rate.tarifaPorMinuto.toLocaleString('es-CO')}/min</span></div>
                 <div class="receipt-line"><span>MÉTODO PAGO:</span><span>${ticket.metodoPago}</span></div>
                 <div class="receipt-line"><span>FECHA SALIDA:</span><span>${new Date(ticket.fechaSalida).toLocaleString('es-CO')}</span></div>
                 <div class="receipt-total-bar">
-                    <span>TOTAL PAGADO:</span>
+                    <span>TOTAL LIQUIDADO:</span>
                     <span style="color:#10b981;">$${(ticket.valorPagado || 0).toLocaleString('es-CO')} COP</span>
                 </div>
                 <div style="text-align:center; margin-top:1rem; border-top:1px dashed #cbd5e1; padding-top:0.75rem; font-size:0.72rem; color:#64748b;">
-                    ¡Gracias por usar ParkFlow! Bahía liberada en MySQL.
+                    Cobro liquidado por minutos de estadía en ParkFlow. Bahía liberada en MySQL.
                 </div>
             </div>
         `;
         document.getElementById('saasReceiptBody').innerHTML = html;
         openSaasModal('modalReceiptSaas');
+    }
+
+    // =========================================================================
+    // CALCULADORA GENERAL & PORTAL DE ESTADÍA POR MINUTOS
+    // =========================================================================
+    function openMinuteCalculatorModal(tipoVehiculo, mins) {
+        if (tipoVehiculo) {
+            const vSelect = document.getElementById('modalCalcVehicleType');
+            if (vSelect) vSelect.value = tipoVehiculo;
+        }
+        if (mins) {
+            setModalCalcMinutes(mins);
+        } else {
+            updateModalMinuteCalculation();
+        }
+        openSaasModal('modalMinuteCalculator');
+    }
+
+    function updateModalMinuteCalculation() {
+        const vType = document.getElementById('modalCalcVehicleType')?.value || 'Automóvil';
+        const mode = document.getElementById('modalCalcMode')?.value || 'MINUTE';
+        const mins = parseInt(document.getElementById('modalCalcMinutesInput')?.value) || 45;
+
+        const calc = calculateStayFee(vType, mins, mode);
+
+        const hoursEl = document.getElementById('modalCalcHoursEquiv');
+        if (hoursEl) hoursEl.textContent = `≈ ${(mins/60).toFixed(1)}h`;
+
+        const rateMinEl = document.getElementById('modalCalcRateMinDisplay');
+        if (rateMinEl) rateMinEl.textContent = `$${calc.ratePerMinute.toLocaleString('es-CO')} / min`;
+
+        const graceEl = document.getElementById('modalCalcGraceDisplay');
+        if (graceEl) graceEl.textContent = `${calc.graceMin} min gratis`;
+
+        const billableEl = document.getElementById('modalCalcBillableDisplay');
+        if (billableEl) billableEl.textContent = `${calc.billableMinutes} mins`;
+
+        const formulaEl = document.getElementById('modalCalcFormulaDisplay');
+        if (formulaEl) formulaEl.textContent = calc.formula;
+
+        const totalEl = document.getElementById('modalCalcTotalDisplay');
+        if (totalEl) totalEl.textContent = `$${calc.total.toLocaleString('es-CO')} COP`;
+    }
+
+    function onModalCalcMinutesInputChange(val) {
+        const m = Math.max(1, parseInt(val) || 1);
+        const range = document.getElementById('modalCalcMinutesRange');
+        if (range && m <= 480) range.value = m;
+        updateModalMinuteCalculation();
+    }
+
+    function onModalCalcMinutesRangeChange(val) {
+        const input = document.getElementById('modalCalcMinutesInput');
+        if (input) input.value = val;
+        updateModalMinuteCalculation();
+    }
+
+    function setModalCalcMinutes(mins) {
+        const input = document.getElementById('modalCalcMinutesInput');
+        const range = document.getElementById('modalCalcMinutesRange');
+        if (input) input.value = mins;
+        if (range && mins <= 480) range.value = mins;
+        updateModalMinuteCalculation();
+    }
+
+    // Portal del Cliente - Calculadora de Minutos
+    function updatePortalMinuteCalculation() {
+        const vType = document.getElementById('calcPortalVehicleType')?.value || 'Automóvil';
+        const mode = document.getElementById('calcPortalMode')?.value || 'MINUTE';
+        const mins = parseInt(document.getElementById('calcPortalMinutesInput')?.value) || 45;
+
+        const calc = calculateStayFee(vType, mins, mode);
+
+        const hoursEl = document.getElementById('calcPortalHoursEquiv');
+        if (hoursEl) hoursEl.textContent = `≈ ${(mins/60).toFixed(1)} hrs`;
+
+        const minsDisplay = document.getElementById('calcPortalMinutesDisplay');
+        if (minsDisplay) minsDisplay.textContent = `${mins} minutos`;
+
+        const rateMinEl = document.getElementById('calcPortalRateMinDisplay');
+        if (rateMinEl) rateMinEl.textContent = `$${calc.ratePerMinute.toLocaleString('es-CO')} / min`;
+
+        const graceEl = document.getElementById('calcPortalGraceDisplay');
+        if (graceEl) graceEl.textContent = `${calc.graceMin} min gratis`;
+
+        const billableEl = document.getElementById('calcPortalBillableDisplay');
+        if (billableEl) billableEl.textContent = `${calc.billableMinutes} min`;
+
+        const formulaEl = document.getElementById('calcPortalFormulaDisplay');
+        if (formulaEl) formulaEl.textContent = calc.formula;
+
+        const totalEl = document.getElementById('calcPortalTotalDisplay');
+        if (totalEl) totalEl.textContent = `$${calc.total.toLocaleString('es-CO')} COP`;
+    }
+
+    function onPortalMinutesInputChange(val) {
+        const m = Math.max(1, parseInt(val) || 1);
+        const range = document.getElementById('calcPortalMinutesRange');
+        if (range && m <= 480) range.value = m;
+        updatePortalMinuteCalculation();
+    }
+
+    function onPortalMinutesRangeChange(val) {
+        const input = document.getElementById('calcPortalMinutesInput');
+        if (input) input.value = val;
+        updatePortalMinuteCalculation();
+    }
+
+    function setPortalMinutes(mins) {
+        const input = document.getElementById('calcPortalMinutesInput');
+        const range = document.getElementById('calcPortalMinutesRange');
+        if (input) input.value = mins;
+        if (range && mins <= 480) range.value = mins;
+        updatePortalMinuteCalculation();
     }
 
     // Simular cruce de medianoche
@@ -3851,34 +4391,54 @@
             card.style.display = 'block';
             card.innerHTML = `
                 <div style="color:var(--rose); font-weight:700; margin-bottom:0.25rem;">Vehículo no encontrado</div>
-                <p style="font-size:0.8rem; color:var(--text-muted);">La placa <strong>${plate}</strong> no tiene ingreso activo vigente.</p>
+                <p style="font-size:0.8rem; color:var(--text-muted);">La placa <strong>${plate}</strong> no tiene ingreso activo vigente en el parqueadero.</p>
             `;
             return;
         }
 
         const mins = Math.max(1, Math.round((Date.now() - new Date(active.fechaIngreso).getTime()) / 60000));
+        const calc = calculateStayFee(active.tipoVehiculo, mins, 'MINUTE');
+
         card.style.display = 'block';
         card.innerHTML = `
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
                 <div>
                     <span class="plate-pill" style="font-size:1.25rem;">${active.placa}</span>
-                    <span style="margin-left:0.5rem; color:var(--primary); font-size:0.85rem;">${active.tipoVehiculo}</span>
+                    <span style="margin-left:0.5rem; color:var(--primary); font-size:0.85rem; font-weight:700;">${active.tipoVehiculo}</span>
                 </div>
                 <span class="status-badge badge-active-live">Estancia en Curso</span>
             </div>
-            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem;">
+            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:0.75rem; margin-bottom:1rem;">
                 <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted);">Bahía Asignada</div>
-                    <div style="font-size:1.2rem; font-weight:800; color:var(--emerald);">${active.spotCodigo}</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Bahía Asignada</div>
+                    <div style="font-size:1.25rem; font-weight:800; color:var(--emerald);">${active.spotCodigo}</div>
                 </div>
                 <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted);">Hora Ingreso</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Hora Ingreso</div>
                     <div style="font-size:1rem; font-weight:700; color:var(--text-heading);">${new Date(active.fechaIngreso).toLocaleTimeString('es-CO')}</div>
                 </div>
                 <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted);">Tiempo Actual</div>
-                    <div style="font-size:1.2rem; font-weight:800; color:var(--primary);">${mins} mins</div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Tiempo Transcurrido</div>
+                    <div style="font-size:1.25rem; font-weight:800; color:var(--primary);">${mins} mins</div>
                 </div>
+                <div>
+                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Tarifa por Minuto</div>
+                    <div style="font-size:1.1rem; font-weight:800; color:var(--text-heading);">$${calc.ratePerMinute.toLocaleString('es-CO')}/min</div>
+                </div>
+            </div>
+            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+                <div>
+                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">Total Acumulado a Cobrar por Minutos:</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono';">${calc.formula}</div>
+                </div>
+                <div style="font-size:1.5rem; font-weight:900; color:var(--emerald); font-family:'JetBrains Mono';">
+                    $${calc.total.toLocaleString('es-CO')} COP
+                </div>
+            </div>
+            <div style="margin-top:0.75rem; text-align:right;">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="handleSaasClientSearch()" style="font-size:0.75rem;">
+                    🔄 Recalcular Minutos en Vivo
+                </button>
             </div>
         `;
     }
@@ -3910,10 +4470,34 @@
         }
     }
 
+    // Exportar funciones a window para soporte completo de eventos inline HTML
+    window.calculateStayFee = calculateStayFee;
+    window.openCheckOutModal = openCheckOutModal;
+    window.setCheckOutCalculationMode = setCheckOutCalculationMode;
+    window.onCheckOutMinutesInputChange = onCheckOutMinutesInputChange;
+    window.adjustCheckOutMinutes = adjustCheckOutMinutes;
+    window.resetCheckOutToRealTime = resetCheckOutToRealTime;
+    window.recalculateCheckOutAmount = recalculateCheckOutAmount;
+    window.confirmCheckOutPayment = confirmCheckOutPayment;
+    window.showCheckOutReceipt = showCheckOutReceipt;
+    window.openMinuteCalculatorModal = openMinuteCalculatorModal;
+    window.updateModalMinuteCalculation = updateModalMinuteCalculation;
+    window.onModalCalcMinutesInputChange = onModalCalcMinutesInputChange;
+    window.onModalCalcMinutesRangeChange = onModalCalcMinutesRangeChange;
+    window.setModalCalcMinutes = setModalCalcMinutes;
+    window.updatePortalMinuteCalculation = updatePortalMinuteCalculation;
+    window.onPortalMinutesInputChange = onPortalMinutesInputChange;
+    window.onPortalMinutesRangeChange = onPortalMinutesRangeChange;
+    window.setPortalMinutes = setPortalMinutes;
+    window.handleSaasClientSearch = handleSaasClientSearch;
+    window.handleGlobalSearch = handleGlobalSearch;
+    window.resetDatabaseFromSaas = resetDatabaseFromSaas;
+
     // Inicializar al cargar el DOM
     window.addEventListener('DOMContentLoaded', () => {
         checkAuthSession();
         syncAllFromDatabase();
+        updatePortalMinuteCalculation();
         // Polling cada 12 segundos para actualizar métricas en vivo
         setInterval(syncAllFromDatabase, 12000);
     });
