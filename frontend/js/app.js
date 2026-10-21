@@ -203,10 +203,16 @@
     // Matriz de Permisos RBAC (Role-Based Access Control)
     const RBAC_RULES = {
         'Administrador': {
-            name: 'Diana Katerine (Admin)',
-            avatar: 'A',
-            badge: 'Super Administrador',
+            name: 'Diana Katerine Pérez',
+            roleTitle: '👑 Super Administradora',
+            email: 'admin@parkflow.co',
+            avatar: 'DK',
+            avatarBg: 'linear-gradient(135deg, #00f5ff, #6366f1)',
+            avatarBorder: 'rgba(0, 245, 255, 0.45)',
+            badge: 'Super Administradora',
             badgeClass: 'pill-emerald',
+            sessionStatus: 'Sesión Activa (Control Total)',
+            statusDotColor: '#10b981',
             defaultView: 'view-overview',
             allowedViews: [
                 'view-overview',
@@ -226,10 +232,16 @@
             canResetDb: true
         },
         'Operador': {
-            name: 'Carlos Mendoza (Operador)',
-            avatar: 'O',
+            name: 'Carlos Mendoza',
+            roleTitle: '👷 Operador de Patio',
+            email: 'carlos.operador@parkflow.co',
+            avatar: 'CM',
+            avatarBg: 'linear-gradient(135deg, #10b981, #06b6d4)',
+            avatarBorder: 'rgba(16, 185, 129, 0.45)',
             badge: 'Operador de Patio',
             badgeClass: 'pill-primary',
+            sessionStatus: 'Turno Activo (Cabina de Entrada)',
+            statusDotColor: '#10b981',
             defaultView: 'view-operations',
             allowedViews: [
                 'view-overview',
@@ -247,10 +259,16 @@
             canResetDb: false
         },
         'Cliente': {
-            name: 'Conductor Ciudadano',
-            avatar: 'C',
+            name: 'Mateo Silva',
+            roleTitle: '👤 Conductor / KLM-456',
+            email: 'mateo.silva@gmail.com',
+            avatar: 'MS',
+            avatarBg: 'linear-gradient(135deg, #a855f7, #ec4899)',
+            avatarBorder: 'rgba(168, 85, 247, 0.45)',
             badge: 'Cliente / Autoservicio',
             badgeClass: 'pill-primary',
+            sessionStatus: 'En Línea (Portal Autoservicio)',
+            statusDotColor: '#10b981',
             defaultView: 'view-client-portal',
             allowedViews: [
                 'view-client-portal',
@@ -310,11 +328,24 @@
         const role = saasState.currentRole || 'Administrador';
         const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
 
-        // 1. Sidebar profile
+        // 1. Sidebar profile card updates
         const avatar = document.getElementById('sidebarAvatar');
         const userName = document.getElementById('sidebarUserName');
-        if (avatar) avatar.textContent = config.avatar;
+        const roleTag = document.getElementById('sidebarRoleTag');
+        const statusText = document.getElementById('sidebarStatusText');
+        const roleSelector = document.getElementById('saasRoleSelector');
+
+        if (avatar) {
+            avatar.textContent = config.avatar;
+            avatar.style.background = config.avatarBg;
+            avatar.style.borderColor = config.avatarBorder;
+        }
         if (userName) userName.textContent = config.name;
+        if (roleTag) roleTag.textContent = config.roleTitle;
+        if (statusText) statusText.textContent = config.sessionStatus;
+        if (roleSelector && roleSelector.value !== role) {
+            roleSelector.value = role;
+        }
 
         // 2. Navigation items
         document.querySelectorAll('.nav-item-btn').forEach(btn => {

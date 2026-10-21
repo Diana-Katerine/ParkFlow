@@ -202,34 +202,55 @@
             border-top: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
-            background: rgba(6, 9, 17, 0.75);
+            gap: 0.6rem;
+            background: rgba(6, 9, 17, 0.85);
             flex-shrink: 0;
         }
 
         .user-profile-card {
             display: flex;
             align-items: center;
-            gap: 0.65rem;
-            padding: 0.55rem 0.65rem;
+            gap: 0.75rem;
+            padding: 0.65rem 0.75rem;
             border-radius: var(--radius-md);
             background: var(--bg-surface-elevated);
             border: 1px solid var(--border);
-            width: 100%;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
+            transition: all 0.2s ease;
+        }
+
+        .user-avatar-wrap {
+            position: relative;
+            flex-shrink: 0;
         }
 
         .user-avatar {
-            width: 32px;
-            height: 32px;
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #38bdf8, #818cf8);
+            background: linear-gradient(135deg, #00f5ff, #6366f1);
+            border: 2px solid rgba(0, 245, 255, 0.45);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 800;
-            color: #060911;
+            color: #ffffff;
             font-size: 0.82rem;
-            flex-shrink: 0;
+            letter-spacing: 0.05em;
+            box-shadow: 0 0 12px rgba(0, 245, 255, 0.25);
+            transition: all 0.3s ease;
+        }
+
+        .user-status-indicator {
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--emerald);
+            border: 2px solid var(--bg-surface-elevated);
+            box-shadow: 0 0 6px var(--emerald);
         }
 
         .user-info {
@@ -237,11 +258,11 @@
             min-width: 0;
             display: flex;
             flex-direction: column;
-            gap: 0.2rem;
+            gap: 0.15rem;
         }
 
         .user-name {
-            font-size: 0.8rem;
+            font-size: 0.84rem;
             font-weight: 700;
             color: var(--text-heading);
             white-space: nowrap;
@@ -249,18 +270,57 @@
             text-overflow: ellipsis;
         }
 
-        .user-role-select {
-            background: rgba(0, 245, 255, 0.08);
-            border: 1px solid rgba(0, 245, 255, 0.2);
-            border-radius: var(--radius-sm);
-            color: var(--primary);
-            font-size: 0.72rem;
+        .user-role-tag {
+            font-size: 0.68rem;
             font-weight: 700;
+            color: var(--primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-session-status {
+            display: flex;
+            align-items: center;
+            gap: 0.35rem;
+            font-size: 0.66rem;
+            color: var(--text-muted);
+            margin-top: 0.1rem;
+        }
+
+        .role-switcher-box {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .role-switcher-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            padding-left: 0.2rem;
+        }
+
+        .user-role-select {
+            background: var(--bg-surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            color: var(--text-heading);
+            font-size: 0.75rem;
+            font-weight: 600;
             cursor: pointer;
             outline: none;
             font-family: inherit;
-            padding: 0.2rem 0.4rem;
+            padding: 0.35rem 0.6rem;
             width: 100%;
+            transition: all 0.2s;
+        }
+
+        .user-role-select:hover, .user-role-select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(0, 245, 255, 0.15);
         }
 
         .user-role-select option {
@@ -1421,8 +1481,6 @@
                 </div>
             </button>
 
-            <div class="nav-group-label">Arquitectura</div>
-
             <button type="button" class="nav-item-btn" onclick="switchSaasView('view-patterns', this)">
                 <div class="nav-item-left">
                     <span class="nav-item-icon">🧩</span>
@@ -1434,18 +1492,31 @@
 
         <!-- User Profile Card in Sidebar -->
         <div class="sidebar-footer">
-            <div class="user-profile-card">
-                <div class="user-avatar" id="sidebarAvatar">A</div>
+            <div class="user-profile-card" id="sidebarProfileCard">
+                <div class="user-avatar-wrap">
+                    <div class="user-avatar" id="sidebarAvatar">DK</div>
+                    <span class="user-status-indicator" id="sidebarStatusIndicator" title="En Línea"></span>
+                </div>
                 <div class="user-info">
-                    <div class="user-name" id="sidebarUserName">Diana Katerine</div>
-                    <select class="user-role-select" id="saasRoleSelector" onchange="handleRoleChange(this.value)">
-                        <option value="Administrador">👑 Rol: Administrador</option>
-                        <option value="Operador">👷 Rol: Operador</option>
-                        <option value="Cliente">👤 Rol: Cliente</option>
-                    </select>
+                    <div class="user-name" id="sidebarUserName">Diana Katerine Pérez</div>
+                    <div class="user-role-tag" id="sidebarRoleTag">👑 Super Administradora</div>
+                    <div class="user-session-status" id="sidebarSessionStatus">
+                        <span class="status-pulse-dot"></span>
+                        <span id="sidebarStatusText">Sesión Activa</span>
+                    </div>
                 </div>
             </div>
-            <button type="button" class="btn-logout" onclick="handleLogout()">
+
+            <div class="role-switcher-box">
+                <label for="saasRoleSelector" class="role-switcher-label">Perfil RBAC Activo:</label>
+                <select class="user-role-select" id="saasRoleSelector" onchange="handleRoleChange(this.value)">
+                    <option value="Administrador">👑 Diana Katerine (Admin)</option>
+                    <option value="Operador">👷 Carlos Mendoza (Operador)</option>
+                    <option value="Cliente">👤 Mateo Silva (Cliente)</option>
+                </select>
+            </div>
+
+            <button type="button" class="btn-logout" onclick="handleLogout()" title="Cerrar sesión activa de forma segura">
                 <span>🚪</span> Cerrar Sesión
             </button>
         </div>
@@ -3270,10 +3341,16 @@
     // Matriz de Permisos RBAC (Role-Based Access Control)
     const RBAC_RULES = {
         'Administrador': {
-            name: 'Diana Katerine (Admin)',
-            avatar: 'A',
-            badge: 'Super Administrador',
+            name: 'Diana Katerine Pérez',
+            roleTitle: '👑 Super Administradora',
+            email: 'admin@parkflow.co',
+            avatar: 'DK',
+            avatarBg: 'linear-gradient(135deg, #00f5ff, #6366f1)',
+            avatarBorder: 'rgba(0, 245, 255, 0.45)',
+            badge: 'Super Administradora',
             badgeClass: 'pill-emerald',
+            sessionStatus: 'Sesión Activa (Control Total)',
+            statusDotColor: '#10b981',
             defaultView: 'view-overview',
             allowedViews: [
                 'view-overview',
@@ -3293,10 +3370,16 @@
             canResetDb: true
         },
         'Operador': {
-            name: 'Carlos Mendoza (Operador)',
-            avatar: 'O',
+            name: 'Carlos Mendoza',
+            roleTitle: '👷 Operador de Patio',
+            email: 'carlos.operador@parkflow.co',
+            avatar: 'CM',
+            avatarBg: 'linear-gradient(135deg, #10b981, #06b6d4)',
+            avatarBorder: 'rgba(16, 185, 129, 0.45)',
             badge: 'Operador de Patio',
             badgeClass: 'pill-primary',
+            sessionStatus: 'Turno Activo (Cabina de Entrada)',
+            statusDotColor: '#10b981',
             defaultView: 'view-operations',
             allowedViews: [
                 'view-overview',
@@ -3314,10 +3397,16 @@
             canResetDb: false
         },
         'Cliente': {
-            name: 'Conductor Ciudadano',
-            avatar: 'C',
+            name: 'Mateo Silva',
+            roleTitle: '👤 Conductor / KLM-456',
+            email: 'mateo.silva@gmail.com',
+            avatar: 'MS',
+            avatarBg: 'linear-gradient(135deg, #a855f7, #ec4899)',
+            avatarBorder: 'rgba(168, 85, 247, 0.45)',
             badge: 'Cliente / Autoservicio',
             badgeClass: 'pill-primary',
+            sessionStatus: 'En Línea (Portal Autoservicio)',
+            statusDotColor: '#10b981',
             defaultView: 'view-client-portal',
             allowedViews: [
                 'view-client-portal',
@@ -3377,11 +3466,24 @@
         const role = saasState.currentRole || 'Administrador';
         const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
 
-        // 1. Sidebar profile
+        // 1. Sidebar profile card updates
         const avatar = document.getElementById('sidebarAvatar');
         const userName = document.getElementById('sidebarUserName');
-        if (avatar) avatar.textContent = config.avatar;
+        const roleTag = document.getElementById('sidebarRoleTag');
+        const statusText = document.getElementById('sidebarStatusText');
+        const roleSelector = document.getElementById('saasRoleSelector');
+
+        if (avatar) {
+            avatar.textContent = config.avatar;
+            avatar.style.background = config.avatarBg;
+            avatar.style.borderColor = config.avatarBorder;
+        }
         if (userName) userName.textContent = config.name;
+        if (roleTag) roleTag.textContent = config.roleTitle;
+        if (statusText) statusText.textContent = config.sessionStatus;
+        if (roleSelector && roleSelector.value !== role) {
+            roleSelector.value = role;
+        }
 
         // 2. Navigation items
         document.querySelectorAll('.nav-item-btn').forEach(btn => {

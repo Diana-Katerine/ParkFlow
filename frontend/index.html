@@ -160,8 +160,6 @@
                 </div>
             </button>
 
-            <div class="nav-group-label">Arquitectura</div>
-
             <button type="button" class="nav-item-btn" onclick="switchSaasView('view-patterns', this)">
                 <div class="nav-item-left">
                     <span class="nav-item-icon">🧩</span>
@@ -173,18 +171,31 @@
 
         <!-- User Profile Card in Sidebar -->
         <div class="sidebar-footer">
-            <div class="user-profile-card">
-                <div class="user-avatar" id="sidebarAvatar">A</div>
+            <div class="user-profile-card" id="sidebarProfileCard">
+                <div class="user-avatar-wrap">
+                    <div class="user-avatar" id="sidebarAvatar">DK</div>
+                    <span class="user-status-indicator" id="sidebarStatusIndicator" title="En Línea"></span>
+                </div>
                 <div class="user-info">
-                    <div class="user-name" id="sidebarUserName">Diana Katerine</div>
-                    <select class="user-role-select" id="saasRoleSelector" onchange="handleRoleChange(this.value)">
-                        <option value="Administrador">👑 Rol: Administrador</option>
-                        <option value="Operador">👷 Rol: Operador</option>
-                        <option value="Cliente">👤 Rol: Cliente</option>
-                    </select>
+                    <div class="user-name" id="sidebarUserName">Diana Katerine Pérez</div>
+                    <div class="user-role-tag" id="sidebarRoleTag">👑 Super Administradora</div>
+                    <div class="user-session-status" id="sidebarSessionStatus">
+                        <span class="status-pulse-dot"></span>
+                        <span id="sidebarStatusText">Sesión Activa</span>
+                    </div>
                 </div>
             </div>
-            <button type="button" class="btn-logout" onclick="handleLogout()">
+
+            <div class="role-switcher-box">
+                <label for="saasRoleSelector" class="role-switcher-label">Perfil RBAC Activo:</label>
+                <select class="user-role-select" id="saasRoleSelector" onchange="handleRoleChange(this.value)">
+                    <option value="Administrador">👑 Diana Katerine (Admin)</option>
+                    <option value="Operador">👷 Carlos Mendoza (Operador)</option>
+                    <option value="Cliente">👤 Mateo Silva (Cliente)</option>
+                </select>
+            </div>
+
+            <button type="button" class="btn-logout" onclick="handleLogout()" title="Cerrar sesión activa de forma segura">
                 <span>🚪</span> Cerrar Sesión
             </button>
         </div>
