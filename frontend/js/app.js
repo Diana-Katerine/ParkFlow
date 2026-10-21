@@ -235,6 +235,7 @@
                 'view-overview',
                 'view-operations',
                 'view-matrix',
+                'view-rates',
                 'view-client-portal',
                 'view-patterns'
             ],
@@ -254,6 +255,7 @@
             allowedViews: [
                 'view-client-portal',
                 'view-matrix',
+                'view-rates',
                 'view-patterns'
             ],
             canCheckIn: true,
@@ -268,8 +270,8 @@
     const MODULE_NAMES = {
         'view-overview': { name: 'Dashboard General', minRole: 'Operador' },
         'view-operations': { name: 'Flujo & Estancias', minRole: 'Operador' },
-        'view-matrix': { name: 'Telemetría de Bahías', minRole: 'Operador' },
-        'view-rates': { name: 'Matriz Tarifaria', minRole: 'Administrador' },
+        'view-matrix': { name: 'Telemetría de Bahías', minRole: 'Cliente' },
+        'view-rates': { name: 'Matriz Tarifaria', minRole: 'Cliente' },
         'view-users': { name: 'Cuentas & RBAC', minRole: 'Administrador' },
         'view-audit': { name: 'Seguridad & Logs', minRole: 'Administrador' },
         'view-client-portal': { name: 'Portal Ciudadano', minRole: 'Cliente' },
@@ -377,6 +379,9 @@
                 ? 'Búsqueda disponible en Portal Cliente...' 
                 : 'Buscar placa, ticket o bahía...';
         }
+
+        // 6. Refresh rates table buttons according to permissions
+        renderRatesTable();
     }
 
     // Control de Vistas / Pestañas SaaS
@@ -2414,6 +2419,10 @@
         const sortOrder = { 'Automóvil': 1, 'Motocicleta': 2, 'Camioneta': 3, 'Eléctrico EV': 4 };
         const sortedRates = [...(saasState.rates || [])].sort((a,b) => (sortOrder[a.tipoVehiculo] || 99) - (sortOrder[b.tipoVehiculo] || 99));
 
+        const role = saasState.currentRole || 'Administrador';
+        const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
+        const canEdit = !!config.canEditRates;
+
         tbody.innerHTML = sortedRates.map(r => `
             <tr>
                 <td><strong style="color:var(--text-heading); font-size:0.85rem;">${r.tipoVehiculo}</strong></td>
@@ -2423,9 +2432,13 @@
                 <td><span class="role-badge-tag" style="background:rgba(255,255,255,0.06); color:var(--text-body);">${r.fraccionGraciaMin} min</span></td>
                 <td style="color:var(--text-muted); font-size:0.75rem;">${r.actualizadoEn}</td>
                 <td style="text-align:right;">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="editRateModal('${r.id}', '${r.tipoVehiculo}', ${r.tarifaPorHora}, ${r.tarifaPorMinuto})">
-                        ✏️ Editar
-                    </button>
+                    ${canEdit ? `
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="editRateModal('${r.id}', '${r.tipoVehiculo}', ${r.tarifaPorHora}, ${r.tarifaPorMinuto})">
+                            ✏️ Editar
+                        </button>
+                    ` : `
+                        <span class="role-badge-tag pill-emerald" style="padding:0.25rem 0.6rem; font-size:0.72rem;">✓ Vigente</span>
+                    `}
                 </td>
             </tr>
         `).join('');

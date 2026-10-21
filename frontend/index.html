@@ -178,15 +178,15 @@
                 <div class="user-info">
                     <div class="user-name" id="sidebarUserName">Diana Katerine</div>
                     <select class="user-role-select" id="saasRoleSelector" onchange="handleRoleChange(this.value)">
-                        <option value="Administrador">Rol: Administrador</option>
-                        <option value="Operador">Rol: Operador</option>
-                        <option value="Cliente">Rol: Cliente</option>
+                        <option value="Administrador">👑 Rol: Administrador</option>
+                        <option value="Operador">👷 Rol: Operador</option>
+                        <option value="Cliente">👤 Rol: Cliente</option>
                     </select>
                 </div>
-                        <button type="button" class="btn-logout" onclick="handleLogout()">
+            </div>
+            <button type="button" class="btn-logout" onclick="handleLogout()">
                 <span>🚪</span> Cerrar Sesión
             </button>
-            </div>
         </div>
     </aside>
 
@@ -213,9 +213,6 @@
             <div class="topbar-right">
                 <button type="button" class="btn btn-secondary btn-sm" onclick="openMinuteCalculatorModal()" title="Calcular total por minutos de estadía">
                     <span>⏱️</span> Calc. Minutos
-                </button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="handleLogout()" title="Cerrar sesión segura">
-                    <span>🚪</span> Salir
                 </button>
                 <!-- Primary Action -->
                 <button type="button" class="btn btn-primary btn-sm" onclick="openSaasModal('modalCheckIn')">
@@ -548,12 +545,12 @@
             <!-- 3. VIEW: TELEMETRÍA DE BAHÍAS (MAPA 2D INTERACTIVO)     -->
             <!-- ======================================================== -->
             <div id="view-matrix" class="view-panel">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem;">
                     <div>
                         <h2 style="font-size:1.15rem; font-weight:800; color:var(--text-heading);">Matriz de Ocupación por Zonas</h2>
                         <p style="font-size:0.75rem; color:var(--text-muted);">Haz clic en cualquier bahía para cambiar su disponibilidad o inspeccionar el vehículo</p>
                     </div>
-                    <div style="display:flex; gap:0.75rem; font-size:0.75rem;">
+                    <div style="display:flex; gap:0.85rem; font-size:0.75rem; font-weight:600; background:var(--bg-surface); padding:0.4rem 0.85rem; border-radius:var(--radius-md); border:1px solid var(--border);">
                         <span style="color:var(--emerald);">● Disponible</span>
                         <span style="color:var(--rose);">● Ocupado</span>
                         <span style="color:#94a3b8;">● Bloqueado</span>
@@ -792,7 +789,7 @@
                                 </div>
                                 <div style="display:flex; flex-direction:column; justify-content:center;">
                                     <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Total Estimado de Reserva:</span>
-                                    <span id="reserveCostEstimate" style="font-size:1.4rem; font-weight:800; color:var(--amber); font-family:'JetBrains Mono';">.600 COP</span>
+                                    <span id="reserveCostEstimate" style="font-size:1.4rem; font-weight:800; color:var(--amber); font-family:'JetBrains Mono';">$3.600 COP</span>
                                 </div>
                             </div>
 

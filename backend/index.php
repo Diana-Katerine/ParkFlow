@@ -202,18 +202,20 @@
             border-top: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            gap: 0.65rem;
-            background: rgba(6, 9, 17, 0.4);
+            gap: 0.5rem;
+            background: rgba(6, 9, 17, 0.75);
+            flex-shrink: 0;
         }
 
         .user-profile-card {
             display: flex;
             align-items: center;
             gap: 0.65rem;
-            padding: 0.5rem;
+            padding: 0.55rem 0.65rem;
             border-radius: var(--radius-md);
             background: var(--bg-surface-elevated);
             border: 1px solid var(--border);
+            width: 100%;
         }
 
         .user-avatar {
@@ -227,12 +229,15 @@
             font-weight: 800;
             color: #060911;
             font-size: 0.82rem;
-            shrink-0: 0;
+            flex-shrink: 0;
         }
 
         .user-info {
             flex: 1;
             min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
         }
 
         .user-name {
@@ -245,15 +250,22 @@
         }
 
         .user-role-select {
-            background: transparent;
-            border: none;
+            background: rgba(0, 245, 255, 0.08);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: var(--radius-sm);
             color: var(--primary);
             font-size: 0.72rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             outline: none;
             font-family: inherit;
-            padding: 0;
+            padding: 0.2rem 0.4rem;
+            width: 100%;
+        }
+
+        .user-role-select option {
+            background: #0f172a;
+            color: #f1f5f9;
         }
 
         /* Main View Area */
@@ -269,22 +281,25 @@
         /* SaaS Topbar */
         header.saas-topbar {
             height: 64px;
-            background: rgba(11, 17, 32, 0.85);
-            backdrop-filter: blur(16px);
+            min-height: 64px;
+            background: #0b1120;
             border-bottom: 1px solid var(--border);
             padding: 0 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 1rem;
             position: sticky;
             top: 0;
-            z-index: 40;
+            z-index: 1000;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
         }
 
         .topbar-left {
             display: flex;
             align-items: center;
-            gap: 1.25rem;
+            gap: 0.75rem;
+            flex-shrink: 0;
         }
 
         .mobile-toggle {
@@ -302,6 +317,7 @@
             align-items: center;
             gap: 0.5rem;
             font-size: 0.82rem;
+            white-space: nowrap;
         }
 
         .breadcrumb-item { color: var(--text-muted); font-weight: 500; }
@@ -311,7 +327,9 @@
         /* Quick Search Bar in Topbar */
         .topbar-search {
             position: relative;
-            width: 260px;
+            flex: 1;
+            max-width: 320px;
+            min-width: 140px;
         }
 
         .topbar-search input {
@@ -323,14 +341,13 @@
             border-radius: var(--radius-md);
             font-size: 0.8rem;
             outline: none;
-            transition: all 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
             font-family: inherit;
         }
 
         .topbar-search input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.12);
-            width: 300px;
         }
 
         .search-icon-abs {
@@ -346,7 +363,8 @@
         .topbar-right {
             display: flex;
             align-items: center;
-            gap: 0.85rem;
+            gap: 0.5rem;
+            flex-shrink: 0;
         }
 
         /* Server Heartbeat Badge */
@@ -1165,7 +1183,7 @@
     font-family: inherit;
     width: 100%;
     justify-content: center;
-    margin-top: 0.5rem;
+    margin-top: 0;
 }
 .btn-logout:hover {
     background: rgba(244, 63, 94, 0.25);
@@ -1421,15 +1439,15 @@
                 <div class="user-info">
                     <div class="user-name" id="sidebarUserName">Diana Katerine</div>
                     <select class="user-role-select" id="saasRoleSelector" onchange="handleRoleChange(this.value)">
-                        <option value="Administrador">Rol: Administrador</option>
-                        <option value="Operador">Rol: Operador</option>
-                        <option value="Cliente">Rol: Cliente</option>
+                        <option value="Administrador">👑 Rol: Administrador</option>
+                        <option value="Operador">👷 Rol: Operador</option>
+                        <option value="Cliente">👤 Rol: Cliente</option>
                     </select>
                 </div>
-                        <button type="button" class="btn-logout" onclick="handleLogout()">
+            </div>
+            <button type="button" class="btn-logout" onclick="handleLogout()">
                 <span>🚪</span> Cerrar Sesión
             </button>
-            </div>
         </div>
     </aside>
 
@@ -1456,9 +1474,6 @@
             <div class="topbar-right">
                 <button type="button" class="btn btn-secondary btn-sm" onclick="openMinuteCalculatorModal()" title="Calcular total por minutos de estadía">
                     <span>⏱️</span> Calc. Minutos
-                </button>
-                <button type="button" class="btn btn-secondary btn-sm" onclick="handleLogout()" title="Cerrar sesión segura">
-                    <span>🚪</span> Salir
                 </button>
                 <!-- Primary Action -->
                 <button type="button" class="btn btn-primary btn-sm" onclick="openSaasModal('modalCheckIn')">
@@ -1791,12 +1806,12 @@
             <!-- 3. VIEW: TELEMETRÍA DE BAHÍAS (MAPA 2D INTERACTIVO)     -->
             <!-- ======================================================== -->
             <div id="view-matrix" class="view-panel">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem;">
                     <div>
                         <h2 style="font-size:1.15rem; font-weight:800; color:var(--text-heading);">Matriz de Ocupación por Zonas</h2>
                         <p style="font-size:0.75rem; color:var(--text-muted);">Haz clic en cualquier bahía para cambiar su disponibilidad o inspeccionar el vehículo</p>
                     </div>
-                    <div style="display:flex; gap:0.75rem; font-size:0.75rem;">
+                    <div style="display:flex; gap:0.85rem; font-size:0.75rem; font-weight:600; background:var(--bg-surface); padding:0.4rem 0.85rem; border-radius:var(--radius-md); border:1px solid var(--border);">
                         <span style="color:var(--emerald);">● Disponible</span>
                         <span style="color:var(--rose);">● Ocupado</span>
                         <span style="color:#94a3b8;">● Bloqueado</span>
@@ -2035,7 +2050,7 @@
                                 </div>
                                 <div style="display:flex; flex-direction:column; justify-content:center;">
                                     <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Total Estimado de Reserva:</span>
-                                    <span id="reserveCostEstimate" style="font-size:1.4rem; font-weight:800; color:var(--amber); font-family:'JetBrains Mono';">.600 COP</span>
+                                    <span id="reserveCostEstimate" style="font-size:1.4rem; font-weight:800; color:var(--amber); font-family:'JetBrains Mono';">$3.600 COP</span>
                                 </div>
                             </div>
 
@@ -3287,6 +3302,7 @@
                 'view-overview',
                 'view-operations',
                 'view-matrix',
+                'view-rates',
                 'view-client-portal',
                 'view-patterns'
             ],
@@ -3306,6 +3322,7 @@
             allowedViews: [
                 'view-client-portal',
                 'view-matrix',
+                'view-rates',
                 'view-patterns'
             ],
             canCheckIn: true,
@@ -3320,8 +3337,8 @@
     const MODULE_NAMES = {
         'view-overview': { name: 'Dashboard General', minRole: 'Operador' },
         'view-operations': { name: 'Flujo & Estancias', minRole: 'Operador' },
-        'view-matrix': { name: 'Telemetría de Bahías', minRole: 'Operador' },
-        'view-rates': { name: 'Matriz Tarifaria', minRole: 'Administrador' },
+        'view-matrix': { name: 'Telemetría de Bahías', minRole: 'Cliente' },
+        'view-rates': { name: 'Matriz Tarifaria', minRole: 'Cliente' },
         'view-users': { name: 'Cuentas & RBAC', minRole: 'Administrador' },
         'view-audit': { name: 'Seguridad & Logs', minRole: 'Administrador' },
         'view-client-portal': { name: 'Portal Ciudadano', minRole: 'Cliente' },
@@ -3429,6 +3446,9 @@
                 ? 'Búsqueda disponible en Portal Cliente...' 
                 : 'Buscar placa, ticket o bahía...';
         }
+
+        // 6. Refresh rates table buttons according to permissions
+        renderRatesTable();
     }
 
     // Control de Vistas / Pestañas SaaS
@@ -5466,6 +5486,10 @@
         const sortOrder = { 'Automóvil': 1, 'Motocicleta': 2, 'Camioneta': 3, 'Eléctrico EV': 4 };
         const sortedRates = [...(saasState.rates || [])].sort((a,b) => (sortOrder[a.tipoVehiculo] || 99) - (sortOrder[b.tipoVehiculo] || 99));
 
+        const role = saasState.currentRole || 'Administrador';
+        const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
+        const canEdit = !!config.canEditRates;
+
         tbody.innerHTML = sortedRates.map(r => `
             <tr>
                 <td><strong style="color:var(--text-heading); font-size:0.85rem;">${r.tipoVehiculo}</strong></td>
@@ -5475,9 +5499,13 @@
                 <td><span class="role-badge-tag" style="background:rgba(255,255,255,0.06); color:var(--text-body);">${r.fraccionGraciaMin} min</span></td>
                 <td style="color:var(--text-muted); font-size:0.75rem;">${r.actualizadoEn}</td>
                 <td style="text-align:right;">
-                    <button type="button" class="btn btn-secondary btn-sm" onclick="editRateModal('${r.id}', '${r.tipoVehiculo}', ${r.tarifaPorHora}, ${r.tarifaPorMinuto})">
-                        ✏️ Editar
-                    </button>
+                    ${canEdit ? `
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="editRateModal('${r.id}', '${r.tipoVehiculo}', ${r.tarifaPorHora}, ${r.tarifaPorMinuto})">
+                            ✏️ Editar
+                        </button>
+                    ` : `
+                        <span class="role-badge-tag pill-emerald" style="padding:0.25rem 0.6rem; font-size:0.72rem;">✓ Vigente</span>
+                    `}
                 </td>
             </tr>
         `).join('');

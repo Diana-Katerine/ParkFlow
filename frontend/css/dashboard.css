@@ -192,18 +192,20 @@
             border-top: 1px solid var(--border);
             display: flex;
             flex-direction: column;
-            gap: 0.65rem;
-            background: rgba(6, 9, 17, 0.4);
+            gap: 0.5rem;
+            background: rgba(6, 9, 17, 0.75);
+            flex-shrink: 0;
         }
 
         .user-profile-card {
             display: flex;
             align-items: center;
             gap: 0.65rem;
-            padding: 0.5rem;
+            padding: 0.55rem 0.65rem;
             border-radius: var(--radius-md);
             background: var(--bg-surface-elevated);
             border: 1px solid var(--border);
+            width: 100%;
         }
 
         .user-avatar {
@@ -217,12 +219,15 @@
             font-weight: 800;
             color: #060911;
             font-size: 0.82rem;
-            shrink-0: 0;
+            flex-shrink: 0;
         }
 
         .user-info {
             flex: 1;
             min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 0.2rem;
         }
 
         .user-name {
@@ -235,15 +240,22 @@
         }
 
         .user-role-select {
-            background: transparent;
-            border: none;
+            background: rgba(0, 245, 255, 0.08);
+            border: 1px solid rgba(0, 245, 255, 0.2);
+            border-radius: var(--radius-sm);
             color: var(--primary);
             font-size: 0.72rem;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             outline: none;
             font-family: inherit;
-            padding: 0;
+            padding: 0.2rem 0.4rem;
+            width: 100%;
+        }
+
+        .user-role-select option {
+            background: #0f172a;
+            color: #f1f5f9;
         }
 
         /* Main View Area */
@@ -259,22 +271,25 @@
         /* SaaS Topbar */
         header.saas-topbar {
             height: 64px;
-            background: rgba(11, 17, 32, 0.85);
-            backdrop-filter: blur(16px);
+            min-height: 64px;
+            background: #0b1120;
             border-bottom: 1px solid var(--border);
             padding: 0 1.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: 1rem;
             position: sticky;
             top: 0;
-            z-index: 40;
+            z-index: 1000;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
         }
 
         .topbar-left {
             display: flex;
             align-items: center;
-            gap: 1.25rem;
+            gap: 0.75rem;
+            flex-shrink: 0;
         }
 
         .mobile-toggle {
@@ -292,6 +307,7 @@
             align-items: center;
             gap: 0.5rem;
             font-size: 0.82rem;
+            white-space: nowrap;
         }
 
         .breadcrumb-item { color: var(--text-muted); font-weight: 500; }
@@ -301,7 +317,9 @@
         /* Quick Search Bar in Topbar */
         .topbar-search {
             position: relative;
-            width: 260px;
+            flex: 1;
+            max-width: 320px;
+            min-width: 140px;
         }
 
         .topbar-search input {
@@ -313,14 +331,13 @@
             border-radius: var(--radius-md);
             font-size: 0.8rem;
             outline: none;
-            transition: all 0.2s;
+            transition: border-color 0.2s, box-shadow 0.2s;
             font-family: inherit;
         }
 
         .topbar-search input:focus {
             border-color: var(--primary);
             box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.12);
-            width: 300px;
         }
 
         .search-icon-abs {
@@ -336,7 +353,8 @@
         .topbar-right {
             display: flex;
             align-items: center;
-            gap: 0.85rem;
+            gap: 0.5rem;
+            flex-shrink: 0;
         }
 
         /* Server Heartbeat Badge */
@@ -1155,7 +1173,7 @@
     font-family: inherit;
     width: 100%;
     justify-content: center;
-    margin-top: 0.5rem;
+    margin-top: 0;
 }
 .btn-logout:hover {
     background: rgba(244, 63, 94, 0.25);
