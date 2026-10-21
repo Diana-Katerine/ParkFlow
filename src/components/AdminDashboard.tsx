@@ -142,10 +142,18 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const startOfToday = new Date();
     startOfToday.setHours(0, 0, 0, 0);
 
+    const parseTime = (dateStr?: string | null): number => {
+      if (!dateStr) return 0;
+      const str = String(dateStr).trim();
+      const isoStr = str.includes(' ') && !str.includes('T') ? str.replace(' ', 'T') : str;
+      const ts = new Date(isoStr).getTime();
+      return isNaN(ts) ? new Date(str).getTime() : ts;
+    };
+
     return logs.filter((log) => {
       // Filtro de Fecha
-      const logEntryTime = new Date(log.fechaIngreso).getTime();
-      const logExitTime = log.fechaSalida ? new Date(log.fechaSalida).getTime() : logEntryTime;
+      const logEntryTime = parseTime(log.fechaIngreso);
+      const logExitTime = log.fechaSalida ? parseTime(log.fechaSalida) : logEntryTime;
       const relevantTime = log.estado === 'FINALIZADO' ? logExitTime : logEntryTime;
 
       if (dateRangePreset === 'HOY') {
@@ -192,14 +200,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
     movementSearch,
   ]);
 
-  // Si para "HOY" no hay registros completados por ser fecha simulada, mostramos fallback controlado si hay registros
-  const effectiveReportLogs = useMemo(() => {
-    if (dateRangePreset === 'HOY' && filteredReportLogs.length === 0 && logs.length > 0) {
-      // Devolver los más recientes con aviso en interfaz
-      return logs.slice(0, 8);
-    }
-    return filteredReportLogs;
-  }, [filteredReportLogs, dateRangePreset, logs]);
+  const effectiveReportLogs = filteredReportLogs;
 
   const completedReportLogs = useMemo(
     () => effectiveReportLogs.filter((l) => l.estado === 'FINALIZADO'),

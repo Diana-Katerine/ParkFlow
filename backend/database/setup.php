@@ -120,7 +120,7 @@ try {
     };
 
     $tickets = [
-        // Activos
+        // Activos (En patio)
         ['LOG-1001', 'TCK-2026-8839', 'MDE-314', 'Automóvil', 'A-03', $isoAgo(1005), null, null, null, null, 'ACTIVO', 'Mateo Restrepo', null, 1, 'Carlos E. Giraldo'],
         ['LOG-1002', 'TCK-2026-8840', 'SUV-779', 'Camioneta', 'D-01', $isoAgo(260), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Inversiones Del Norte'],
         ['LOG-1003', 'TCK-2026-8841', 'BGT-902', 'Automóvil', 'A-01', $isoAgo(135), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Laura Castellanos'],
@@ -129,13 +129,34 @@ try {
         ['LOG-1006', 'TCK-2026-8844', 'EVX-108', 'Eléctrico EV', 'B-04', $isoAgo(29), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Valeria Duque'],
         ['LOG-1007', 'TCK-2026-8845', 'QWE-45F', 'Motocicleta', 'C-05', $isoAgo(18), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Andrés Felipe Mora'],
 
-        // Finalizados (Histórico)
-        ['LOG-0991', 'TCK-2026-8810', 'KLM-456', 'Eléctrico EV', 'B-02', $isoAgo(1620), $isoAgo(1495), 125, 10475.00, 'QR Digital', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 0, 'Diana K. Pérez'],
-        ['LOG-0992', 'TCK-2026-8815', 'KLM-456', 'Eléctrico EV', 'B-01', $isoAgo(3100), $isoAgo(2920), 180, 15000.00, 'Tarjeta', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Diana K. Pérez'],
-        ['LOG-0993', 'TCK-2026-8821', 'JKL-901', 'Camioneta', 'D-02', $isoAgo(640), $isoAgo(400), 240, 28800.00, 'Tarjeta', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 0, 'Roberto Gómez'],
-        ['LOG-0994', 'TCK-2026-8825', 'ZXC-332', 'Automóvil', 'A-04', $isoAgo(1800), $isoAgo(960), 840, 42000.00, 'Efectivo', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 1, 'Elena Martínez'],
+        // Finalizados - HOY (Últimas 24h) -> Subtotal Hoy: $46.875 COP (4 tickets)
+        ['LOG-0996', 'TCK-2026-8834', 'HJK-512', 'Automóvil', 'A-02', $isoAgo(210), $isoAgo(90), 120, 11600.00, 'QR Digital', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Patricia Londoño'],
         ['LOG-0995', 'TCK-2026-8830', 'TYU-19B', 'Motocicleta', 'C-02', $isoAgo(320), $isoAgo(230), 90, 5350.00, 'Efectivo', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Julián Castro'],
-        ['LOG-0996', 'TCK-2026-8834', 'HJK-512', 'Automóvil', 'A-02', $isoAgo(210), $isoAgo(90), 120, 11600.00, 'QR Digital', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Patricia Londoño']
+        ['LOG-0993', 'TCK-2026-8821', 'JKL-901', 'Camioneta', 'D-02', $isoAgo(640), $isoAgo(400), 240, 28800.00, 'Tarjeta', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 0, 'Roberto Gómez'],
+        ['LOG-0990', 'TCK-2026-8818', 'BIC-001', 'Bicicleta', 'E-01', $isoAgo(120), $isoAgo(60), 60, 1125.00, 'Efectivo', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Esteban Morales'],
+
+        // Finalizados - ESTA SEMANA (Hace 2 a 6 días) -> Total Semana acumulado: $158.550 COP (9 tickets)
+        ['LOG-0992', 'TCK-2026-8815', 'KLM-456', 'Eléctrico EV', 'B-01', $isoAgo(2920 + 180), $isoAgo(2920), 180, 15000.00, 'Tarjeta', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Diana K. Pérez'],
+        ['LOG-0991', 'TCK-2026-8810', 'KLM-456', 'Eléctrico EV', 'B-02', $isoAgo(4320 + 125), $isoAgo(4320), 125, 10475.00, 'QR Digital', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 0, 'Diana K. Pérez'],
+        ['LOG-0994', 'TCK-2026-8805', 'ZXC-332', 'Automóvil', 'A-04', $isoAgo(5760 + 840), $isoAgo(5760), 840, 42000.00, 'Efectivo', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 1, 'Elena Martínez'],
+        ['LOG-0989', 'TCK-2026-8802', 'MTO-77C', 'Motocicleta', 'C-03', $isoAgo(7200 + 140), $isoAgo(7200), 140, 8200.00, 'Tarjeta', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Fernando Ruiz'],
+        ['LOG-0988', 'TCK-2026-8798', 'CAM-552', 'Camioneta', 'D-03', $isoAgo(8640 + 300), $isoAgo(8640), 300, 36000.00, 'Efectivo', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 0, 'Gloria Estupiñán'],
+
+        // Finalizados - ESTE MES (Hace 10 a 28 días) -> Total Mes acumulado: $294.150 COP (15 tickets)
+        ['LOG-0987', 'TCK-2026-8785', 'AUT-112', 'Automóvil', 'A-05', $isoAgo(14400 + 220), $isoAgo(14400), 220, 24500.00, 'Tarjeta', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Mauricio Vega'],
+        ['LOG-0986', 'TCK-2026-8772', 'EVX-220', 'Eléctrico EV', 'B-03', $isoAgo(20160 + 190), $isoAgo(20160), 190, 18900.00, 'QR Digital', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 0, 'Sandra Ospina'],
+        ['LOG-0985', 'TCK-2026-8760', 'SUV-331', 'Camioneta', 'D-04', $isoAgo(25920 + 380), $isoAgo(25920), 380, 42000.00, 'Efectivo', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Óscar Jiménez'],
+        ['LOG-0984', 'TCK-2026-8751', 'BIC-002', 'Bicicleta', 'E-02', $isoAgo(31680 + 140), $isoAgo(31680), 140, 3200.00, 'QR Digital', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 0, 'Lucas Benítez'],
+        ['LOG-0983', 'TCK-2026-8740', 'AUT-990', 'Automóvil', 'A-06', $isoAgo(36000 + 310), $isoAgo(36000), 310, 35000.00, 'Tarjeta', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Paola Quintero'],
+        ['LOG-0982', 'TCK-2026-8732', 'MTO-12D', 'Motocicleta', 'C-04', $isoAgo(40320 + 200), $isoAgo(40320), 200, 12000.00, 'Efectivo', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 0, 'Diego Restrepo'],
+
+        // Finalizados - TODO EL HISTORIAL (> 30 días) -> Total Historial: $518.150 COP (21 tickets)
+        ['LOG-0981', 'TCK-2026-8710', 'SUV-888', 'Camioneta', 'D-05', $isoAgo(50400 + 400), $isoAgo(50400), 400, 48000.00, 'Tarjeta', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Alfonso Castro'],
+        ['LOG-0980', 'TCK-2026-8695', 'AUT-444', 'Automóvil', 'A-01', $isoAgo(64800 + 420), $isoAgo(64800), 420, 42000.00, 'Efectivo', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 0, 'Carmen Villalobos'],
+        ['LOG-0979', 'TCK-2026-8680', 'EVX-901', 'Eléctrico EV', 'B-05', $isoAgo(79200 + 320), $isoAgo(79200), 320, 29500.00, 'QR Digital', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Rodrigo Lara'],
+        ['LOG-0978', 'TCK-2026-8665', 'MTO-66E', 'Motocicleta', 'C-06', $isoAgo(93600 + 250), $isoAgo(93600), 250, 14500.00, 'Tarjeta', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 0, 'Alejandra Santos'],
+        ['LOG-0977', 'TCK-2026-8650', 'AUT-777', 'Automóvil', 'A-02', $isoAgo(108000 + 450), $isoAgo(108000), 450, 42000.00, 'Efectivo', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Gustavo Rojas'],
+        ['LOG-0976', 'TCK-2026-8630', 'CAM-999', 'Camioneta', 'D-06', $isoAgo(122400 + 480), $isoAgo(122400), 480, 48000.00, 'QR Digital', 'FINALIZADO', 'Mateo Restrepo', 'Camila Mendoza', 0, 'Isabel Cuéllar']
     ];
 
     $stmtTck = $pdo->prepare("INSERT INTO `tickets` (`id`, `ticket_codigo`, `placa`, `tipo_vehiculo`, `spot_codigo`, `fecha_ingreso`, `fecha_salida`, `minutos_transcurridos`, `valor_pagado`, `metodo_pago`, `estado`, `operador_entrada`, `operador_salida`, `cruzo_medianoche`, `propietario_nombre`) 

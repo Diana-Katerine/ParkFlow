@@ -512,6 +512,16 @@
         updateDddCapacityMetrics();
     }
 
+    // Helper seguro para interpretar fechas en formato SQL (YYYY-MM-DD HH:mm:ss) o ISO
+    function parseDateToTimestamp(dateVal) {
+        if (!dateVal) return 0;
+        if (dateVal instanceof Date) return dateVal.getTime();
+        const str = String(dateVal).trim();
+        const isoStr = str.includes(' ') && !str.includes('T') ? str.replace(' ', 'T') : str;
+        const ts = new Date(isoStr).getTime();
+        return isNaN(ts) ? new Date(str).getTime() : ts;
+    }
+
     // Filtro de Período para el Administrador
     function setAdminPeriodFilter(period) {
         saasState.adminPeriodFilter = period;
@@ -531,6 +541,7 @@
         if (activeBtn) activeBtn.className = 'btn btn-primary btn-sm';
 
         renderKpis();
+        renderAdminMovements();
     }
 
     // Renderizar KPIs Financieros y Operativos del Administrador
@@ -550,16 +561,12 @@
         const allCompleted = saasState.tickets.filter(t => t.estado === 'FINALIZADO');
         let periodTickets = allCompleted.filter(t => {
             if (period === 'all') return true;
-            const exitTime = new Date(t.fechaSalida || t.fechaIngreso).getTime();
+            const exitTime = parseDateToTimestamp(t.fechaSalida || t.fechaIngreso);
             if (period === 'today') return exitTime >= startOfToday;
             if (period === 'week') return exitTime >= sevenDaysAgo;
             if (period === 'month') return exitTime >= thirtyDaysAgo;
             return true;
         });
-
-        if (period === 'today' && periodTickets.length === 0 && allCompleted.length > 0) {
-            periodTickets = allCompleted.slice(0, 5);
-        }
 
         const periodLabelMap = {
             'today': `Ingresos de hoy (${periodTickets.length} cobros)`,
@@ -763,14 +770,43 @@
         if (!tbody) return;
 
         const filter = saasState.adminMovementFilter || 'ALL';
+        const period = saasState.adminPeriodFilter || 'today';
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const sevenDaysAgo = now.getTime() - (7 * 24 * 60 * 60 * 1000);
+        const thirtyDaysAgo = now.getTime() - (30 * 24 * 60 * 60 * 1000);
+
+        const periodNames = {
+            'today': 'Hoy',
+            'week': 'Esta Semana (Últimos 7 Días)',
+            'month': 'Este Mes (Últimos 30 Días)',
+            'all': 'Todo el Historial'
+        };
+
+        const periodBadge = document.getElementById('adminMovementsPeriodBadge');
+        if (periodBadge) {
+            periodBadge.textContent = `· Período: ${periodNames[period] || 'Hoy'}`;
+        }
+
+        // 1. Filtrar los tickets que corresponden al período seleccionado
+        const periodTickets = (saasState.tickets || []).filter(t => {
+            if (period === 'all') return true;
+            const relevantTime = parseDateToTimestamp(t.estado === 'FINALIZADO' ? (t.fechaSalida || t.fechaIngreso) : t.fechaIngreso);
+            if (period === 'today') return relevantTime >= startOfToday;
+            if (period === 'week') return relevantTime >= sevenDaysAgo;
+            if (period === 'month') return relevantTime >= thirtyDaysAgo;
+            return true;
+        });
+
         const movements = [];
 
-        // 1. Tickets Activos (Ingresos en curso)
-        (saasState.tickets || []).forEach(t => {
+        // 2. Construir objetos de movimiento
+        periodTickets.forEach(t => {
             if (t.estado === 'ACTIVO') {
+                const ts = parseDateToTimestamp(t.fechaIngreso);
                 movements.push({
                     id: t.id,
-                    fecha: new Date(t.fechaIngreso),
+                    fecha: new Date(ts),
                     ticketCodigo: t.ticketCodigo,
                     placa: t.placa,
                     categoria: t.tipoVehiculo,
@@ -778,14 +814,15 @@
                     tipo: t.cruzoMedianoche ? 'NOCTURNO' : 'INGRESO',
                     tipoLabel: t.cruzoMedianoche ? '🌙 Cruce Nocturno' : '🎟️ Ingreso Vehicular',
                     tipoClass: t.cruzoMedianoche ? 'pill-amber' : 'pill-primary',
-                    operador: 'Operador de Patio',
+                    operador: t.operadorEntrada || 'Operador de Patio',
                     monto: '<span style="color:var(--text-muted); font-size:0.75rem;">En curso...</span>',
                     estadoBadge: '<span class="status-badge badge-active-live">Activo</span>'
                 });
             } else if (t.estado === 'FINALIZADO') {
+                const ts = parseDateToTimestamp(t.fechaSalida || t.fechaIngreso);
                 movements.push({
                     id: t.id,
-                    fecha: new Date(t.fechaSalida || t.fechaIngreso),
+                    fecha: new Date(ts),
                     ticketCodigo: t.ticketCodigo,
                     placa: t.placa,
                     categoria: t.tipoVehiculo,
@@ -793,17 +830,17 @@
                     tipo: 'SALIDA',
                     tipoLabel: `💳 Cobro & Salida (${t.metodoPago || 'Efectivo'})`,
                     tipoClass: 'pill-emerald',
-                    operador: 'Administrador / Caja',
-                    monto: `<strong style="color:var(--emerald); font-family:'JetBrains Mono';">$${(t.valorPagado || 0).toLocaleString('es-CO')}</strong>`,
+                    operador: t.operadorSalida || 'Administrador / Caja',
+                    monto: `<strong style="color:var(--emerald); font-family:'JetBrains Mono';">$${(parseFloat(t.valorPagado) || 0).toLocaleString('es-CO')} COP</strong>`,
                     estadoBadge: '<span class="status-badge badge-completed">Liquidado</span>'
                 });
             }
         });
 
-        // 2. Ordenar cronológicamente (más recientes primero)
+        // 3. Ordenar cronológicamente (más recientes primero)
         movements.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
 
-        // 3. Aplicar filtro
+        // 4. Aplicar filtro de tipo (ALL, INGRESO, SALIDA, NOCTURNO)
         const filtered = movements.filter(m => {
             if (filter === 'ALL') return true;
             if (filter === 'INGRESO') return m.tipo === 'INGRESO';
@@ -813,7 +850,9 @@
         });
 
         if (filtered.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1.5rem;">No se encontraron movimientos registrados con este filtro.</td></tr>';
+            tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:2rem;">
+                No se encontraron movimientos registrados en <strong>${periodNames[period] || 'este período'}</strong> con el filtro seleccionado.
+            </td></tr>`;
             return;
         }
 
