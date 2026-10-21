@@ -447,6 +447,10 @@
         const target = document.getElementById(viewId);
         if (target) target.classList.add('active');
 
+        // Reset scroll position to top
+        const saasContent = document.querySelector('.saas-content');
+        if (saasContent) saasContent.scrollTop = 0;
+
         if (btnElement) {
             btnElement.classList.add('active');
         } else {

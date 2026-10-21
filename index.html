@@ -40,13 +40,16 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+html, body {
+            height: 100vh;
+            overflow: hidden;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             background-color: var(--bg-base);
             color: var(--text-body);
-            min-height: 100vh;
             display: flex;
-            overflow-x: hidden;
             font-size: 14px;
             line-height: 1.5;
         }
@@ -55,7 +58,8 @@
         .saas-layout {
             display: flex;
             width: 100%;
-            min-height: 100vh;
+            height: 100vh;
+            overflow: hidden;
         }
 
         /* Modern Sidebar */
@@ -332,16 +336,21 @@
         .saas-main {
             margin-left: var(--sidebar-width);
             flex: 1;
+            height: 100vh;
             display: flex;
             flex-direction: column;
             min-width: 0;
-            min-height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background: var(--bg-base);
         }
 
         /* SaaS Topbar */
         header.saas-topbar {
             height: 64px;
             min-height: 64px;
+            max-height: 64px;
+            flex-shrink: 0;
             background: #0b1120;
             border-bottom: 1px solid var(--border);
             padding: 0 1.5rem;
@@ -349,9 +358,7 @@
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            z-index: 100;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
         }
 
@@ -522,8 +529,10 @@
 
         /* SaaS Content Container */
         .saas-content {
-            padding: 1.5rem 1.75rem 3rem;
             flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 1.5rem 1.75rem 3rem;
             max-width: 1560px;
             width: 100%;
             margin: 0 auto;
@@ -3584,6 +3593,10 @@
 
         const target = document.getElementById(viewId);
         if (target) target.classList.add('active');
+
+        // Reset scroll position to top
+        const saasContent = document.querySelector('.saas-content');
+        if (saasContent) saasContent.scrollTop = 0;
 
         if (btnElement) {
             btnElement.classList.add('active');
