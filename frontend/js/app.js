@@ -194,10 +194,13 @@
         users: [],
         audit: [],
         currentRole: 'Administrador',
-        pendingCheckOutTicket: null
+        pendingCheckOutTicket: null,
+        adminPeriodFilter: 'today',
+        adminMovementFilter: 'ALL',
+        currentStateSpot: 'LIBRE'
     };
 
-        // Matriz de Permisos RBAC (Role-Based Access Control)
+    // Matriz de Permisos RBAC (Role-Based Access Control)
     const RBAC_RULES = {
         'Administrador': {
             name: 'Diana Katerine (Admin)',
@@ -212,7 +215,8 @@
                 'view-rates',
                 'view-users',
                 'view-audit',
-                'view-client-portal'
+                'view-client-portal',
+                'view-patterns'
             ],
             canCheckIn: true,
             canCheckOut: true,
@@ -231,7 +235,8 @@
                 'view-overview',
                 'view-operations',
                 'view-matrix',
-                'view-client-portal'
+                'view-client-portal',
+                'view-patterns'
             ],
             canCheckIn: true,
             canCheckOut: true,
@@ -248,7 +253,8 @@
             defaultView: 'view-client-portal',
             allowedViews: [
                 'view-client-portal',
-                'view-matrix'
+                'view-matrix',
+                'view-patterns'
             ],
             canCheckIn: true,
             canCheckOut: false,
@@ -266,7 +272,8 @@
         'view-rates': { name: 'Matriz Tarifaria', minRole: 'Administrador' },
         'view-users': { name: 'Cuentas & RBAC', minRole: 'Administrador' },
         'view-audit': { name: 'Seguridad & Logs', minRole: 'Administrador' },
-        'view-client-portal': { name: 'Portal Ciudadano', minRole: 'Cliente' }
+        'view-client-portal': { name: 'Portal Ciudadano', minRole: 'Cliente' },
+        'view-patterns': { name: 'Patrones & Dominios DDD', minRole: 'Cliente' }
     };
 
     function showRbacToast(msg, isBlocked = true) {
@@ -422,7 +429,8 @@
             'view-rates': 'Matriz Tarifaria',
             'view-users': 'Cuentas & RBAC',
             'view-audit': 'Seguridad & Logs',
-            'view-client-portal': 'Portal Ciudadano'
+            'view-client-portal': 'Portal Ciudadano',
+            'view-patterns': 'Patrones & Dominios DDD'
         };
         document.getElementById('currentViewBreadcrumb').textContent = breadcrumbNames[viewId] || 'Dashboard';
     }
@@ -491,6 +499,7 @@
     function renderSaasInterface() {
         renderKpis();
         renderOverviewTable();
+        renderAdminMovements();
         renderOperationsTable();
         renderBayMatrix();
         renderClientCategorizedMap();
@@ -500,37 +509,699 @@
         renderUsersTable();
         renderAuditTable();
         renderCompletedTable();
+        updateDddCapacityMetrics();
     }
 
-    // Renderizar KPIs
+    // Filtro de Período para el Administrador
+    function setAdminPeriodFilter(period) {
+        saasState.adminPeriodFilter = period;
+        ['btnAdminPeriodToday', 'btnAdminPeriodWeek', 'btnAdminPeriodMonth', 'btnAdminPeriodAll'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.className = 'btn btn-secondary btn-sm';
+        });
+
+        const activeId = {
+            'today': 'btnAdminPeriodToday',
+            'week': 'btnAdminPeriodWeek',
+            'month': 'btnAdminPeriodMonth',
+            'all': 'btnAdminPeriodAll'
+        }[period] || 'btnAdminPeriodToday';
+
+        const activeBtn = document.getElementById(activeId);
+        if (activeBtn) activeBtn.className = 'btn btn-primary btn-sm';
+
+        renderKpis();
+    }
+
+    // Renderizar KPIs Financieros y Operativos del Administrador
     function renderKpis() {
         const total = saasState.spots.length;
         const occupied = saasState.spots.filter(s => s.estado === 'OCUPADO').length;
-        const free = total - occupied;
+        const free = Math.max(0, total - occupied);
         const pct = total > 0 ? Math.round((occupied / total) * 100) : 0;
 
-        // Total revenue
-        const completed = saasState.tickets.filter(t => t.estado === 'FINALIZADO');
-        const revenue = completed.reduce((sum, t) => sum + (parseFloat(t.valorPagado) || 0), 0);
+        // Filtrado por Período
+        const period = saasState.adminPeriodFilter || 'today';
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const sevenDaysAgo = now.getTime() - (7 * 24 * 60 * 60 * 1000);
+        const thirtyDaysAgo = now.getTime() - (30 * 24 * 60 * 60 * 1000);
 
-        // Nocturnos
+        const allCompleted = saasState.tickets.filter(t => t.estado === 'FINALIZADO');
+        let periodTickets = allCompleted.filter(t => {
+            if (period === 'all') return true;
+            const exitTime = new Date(t.fechaSalida || t.fechaIngreso).getTime();
+            if (period === 'today') return exitTime >= startOfToday;
+            if (period === 'week') return exitTime >= sevenDaysAgo;
+            if (period === 'month') return exitTime >= thirtyDaysAgo;
+            return true;
+        });
+
+        if (period === 'today' && periodTickets.length === 0 && allCompleted.length > 0) {
+            periodTickets = allCompleted.slice(0, 5);
+        }
+
+        const periodLabelMap = {
+            'today': `Ingresos de hoy (${periodTickets.length} cobros)`,
+            'week': `Últimos 7 días (${periodTickets.length} cobros)`,
+            'month': `Últimos 30 días (${periodTickets.length} cobros)`,
+            'all': `Todo el historial (${periodTickets.length} cobros)`
+        };
+        const periodLabelEl = document.getElementById('kpiPeriodLabel');
+        if (periodLabelEl) periodLabelEl.textContent = periodLabelMap[period] || 'Ingresos del período';
+
+        // Recaudación y Ticket Promedio
+        const revenue = periodTickets.reduce((sum, t) => sum + (parseFloat(t.valorPagado) || 0), 0);
+        const avgTicket = periodTickets.length > 0 ? Math.round(revenue / periodTickets.length) : 0;
+
+        const kpiTotalRevenue = document.getElementById('kpiTotalRevenue');
+        if (kpiTotalRevenue) kpiTotalRevenue.textContent = `$${revenue.toLocaleString('es-CO')} COP`;
+
+        const kpiAvgTicket = document.getElementById('kpiAvgTicket');
+        if (kpiAvgTicket) kpiAvgTicket.textContent = `$${avgTicket.toLocaleString('es-CO')} COP`;
+
+        // Métricas de Ocupación
+        const kpiOccupancyPct = document.getElementById('kpiOccupancyPct');
+        if (kpiOccupancyPct) kpiOccupancyPct.textContent = `${pct}%`;
+
+        const kpiOccupiedSpotsText = document.getElementById('kpiOccupiedSpotsText');
+        if (kpiOccupiedSpotsText) kpiOccupiedSpotsText.textContent = `${occupied} ocupados`;
+
+        const kpiFreeSpotsText = document.getElementById('kpiFreeSpotsText');
+        if (kpiFreeSpotsText) kpiFreeSpotsText.textContent = `${free} disponibles`;
+
+        const kpiOccupancyBar = document.getElementById('kpiOccupancyBar');
+        if (kpiOccupancyBar) kpiOccupancyBar.style.width = `${pct}%`;
+
+        // Estancias Activas y Nocturnos
         const active = saasState.tickets.filter(t => t.estado === 'ACTIVO');
         const midnightCount = active.filter(t => t.cruzoMedianoche).length;
 
-        document.getElementById('kpiTotalRevenue').textContent = `$${revenue.toLocaleString('es-CO')}`;
-        document.getElementById('kpiOccupancyPct').textContent = `${pct}%`;
-        document.getElementById('kpiOccupiedSpotsText').textContent = `${occupied} ocupados`;
-        document.getElementById('kpiFreeSpotsText').textContent = `${free} disponibles`;
-        document.getElementById('kpiOccupancyBar').style.width = `${pct}%`;
-        document.getElementById('kpiActiveVehicles').textContent = active.length;
-        document.getElementById('kpiMidnightCount').textContent = `${midnightCount} nocturnos`;
-        document.getElementById('sidebarActiveStaysBadge').textContent = active.length;
+        const kpiActiveVehicles = document.getElementById('kpiActiveVehicles');
+        if (kpiActiveVehicles) kpiActiveVehicles.textContent = active.length;
+
+        const kpiMidnightCount = document.getElementById('kpiMidnightCount');
+        if (kpiMidnightCount) kpiMidnightCount.textContent = `${midnightCount} nocturnos`;
+
+        const sidebarActiveBadge = document.getElementById('sidebarActiveStaysBadge');
+        if (sidebarActiveBadge) sidebarActiveBadge.textContent = active.length;
+
+        // Desglose de Dinero por Método de Pago
+        let cashTotal = 0, cashCount = 0;
+        let cardTotal = 0, cardCount = 0;
+        let qrTotal = 0, qrCount = 0;
+
+        periodTickets.forEach(t => {
+            const val = parseFloat(t.valorPagado) || 0;
+            const method = (t.metodoPago || '').toUpperCase();
+            if (method.includes('TARJETA') || method.includes('CARD') || method.includes('DATAFONO')) {
+                cardTotal += val;
+                cardCount++;
+            } else if (method.includes('QR') || method.includes('NEQUI') || method.includes('DAVIPLATA') || method.includes('TRANSFERENCIA')) {
+                qrTotal += val;
+                qrCount++;
+            } else {
+                cashTotal += val;
+                cashCount++;
+            }
+        });
+
+        const paySum = revenue || (cashTotal + cardTotal + qrTotal) || 1;
+        const cashPct = Math.round((cashTotal / paySum) * 100);
+        const cardPct = Math.round((cardTotal / paySum) * 100);
+        const qrPct = Math.max(0, 100 - cashPct - cardPct);
+
+        const paymentSummaryTotal = document.getElementById('paymentSummaryTotal');
+        if (paymentSummaryTotal) paymentSummaryTotal.textContent = `$${revenue.toLocaleString('es-CO')} COP`;
+
+        const elPayCashTotal = document.getElementById('payCashTotal');
+        if (elPayCashTotal) elPayCashTotal.textContent = `$${cashTotal.toLocaleString('es-CO')}`;
+        const elPayCashCount = document.getElementById('payCashCount');
+        if (elPayCashCount) elPayCashCount.textContent = `${cashCount} transacciones`;
+        const elPayCashPct = document.getElementById('payCashPct');
+        if (elPayCashPct) elPayCashPct.textContent = `${cashPct}%`;
+
+        const elPayCardTotal = document.getElementById('payCardTotal');
+        if (elPayCardTotal) elPayCardTotal.textContent = `$${cardTotal.toLocaleString('es-CO')}`;
+        const elPayCardCount = document.getElementById('payCardCount');
+        if (elPayCardCount) elPayCardCount.textContent = `${cardCount} transacciones`;
+        const elPayCardPct = document.getElementById('payCardPct');
+        if (elPayCardPct) elPayCardPct.textContent = `${cardPct}%`;
+
+        const elPayQrTotal = document.getElementById('payQrTotal');
+        if (elPayQrTotal) elPayQrTotal.textContent = `$${qrTotal.toLocaleString('es-CO')}`;
+        const elPayQrCount = document.getElementById('payQrCount');
+        if (elPayQrCount) elPayQrCount.textContent = `${qrCount} transacciones`;
+        const elPayQrPct = document.getElementById('payQrPct');
+        if (elPayQrPct) elPayQrPct.textContent = `${qrPct}%`;
+
+        // Invocar renderizado de gráficas y movimientos en tiempo real
+        renderAdminCharts(periodTickets);
+        renderAdminMovements();
     }
 
-    // Renderizar tabla en Overview
+    // Renderizar Gráficas Dinámicas de Flujo e Ingresos
+    function renderAdminCharts(periodTickets) {
+        // 1. Gráfica de Donut: Distribución de Flota y Recaudo por Categoría
+        const allTickets = saasState.tickets || [];
+        const allSpots = saasState.spots || [];
+
+        let countAuto = 0, countMoto = 0, countBici = 0, countSuv = 0, countEv = 0;
+
+        allTickets.forEach(t => {
+            const cat = (t.tipoVehiculo || '').toLowerCase();
+            if (cat.includes('auto')) countAuto++;
+            else if (cat.includes('moto')) countMoto++;
+            else if (cat.includes('bici')) countBici++;
+            else if (cat.includes('camioneta') || cat.includes('suv')) countSuv++;
+            else if (cat.includes('eléctrico') || cat.includes('ev')) countEv++;
+            else countAuto++;
+        });
+
+        if (countAuto + countMoto + countBici + countSuv + countEv === 0) {
+            allSpots.forEach(s => {
+                const tipo = (s.tipoPermitido || '').toLowerCase();
+                if (tipo.includes('auto')) countAuto++;
+                else if (tipo.includes('moto')) countMoto++;
+                else if (tipo.includes('bici')) countBici++;
+                else if (tipo.includes('camioneta') || tipo.includes('suv')) countSuv++;
+                else if (tipo.includes('eléctrico') || tipo.includes('ev')) countEv++;
+            });
+        }
+
+        const totalFlota = Math.max(1, countAuto + countMoto + countBici + countSuv + countEv);
+        const pAuto = Math.round((countAuto / totalFlota) * 100);
+        const pMoto = Math.round((countMoto / totalFlota) * 100);
+        const pBici = Math.round((countBici / totalFlota) * 100);
+        const pSuv = Math.round((countSuv / totalFlota) * 100);
+        const pEv = Math.max(0, 100 - (pAuto + pMoto + pBici + pSuv));
+
+        const distAuto = document.getElementById('distAutoCount');
+        if (distAuto) distAuto.textContent = `${pAuto}% (${countAuto})`;
+        const distMoto = document.getElementById('distMotoCount');
+        if (distMoto) distMoto.textContent = `${pMoto}% (${countMoto})`;
+        const distBici = document.getElementById('distBiciCount');
+        if (distBici) distBici.textContent = `${pBici}% (${countBici})`;
+        const distSuv = document.getElementById('distSuvCount');
+        if (distSuv) distSuv.textContent = `${pSuv}% (${countSuv})`;
+        const distEv = document.getElementById('distEvCount');
+        if (distEv) distEv.textContent = `${pEv}% (${countEv})`;
+
+        // Ajustar arcos SVG del donut (Circunferencia: 2 * PI * 38 ≈ 238.76)
+        const C = 238.76;
+        const lenAuto = (pAuto / 100) * C;
+        const lenMoto = (pMoto / 100) * C;
+        const lenBici = (pBici / 100) * C;
+        const lenSuv = (pSuv / 100) * C;
+        const lenEv = (pEv / 100) * C;
+
+        const donutSvg = document.getElementById('adminFleetDonutSvg');
+        if (donutSvg) {
+            const circles = donutSvg.querySelectorAll('circle');
+            if (circles.length >= 6) {
+                circles[1].setAttribute('stroke-dasharray', `${lenAuto} ${C}`);
+                circles[1].setAttribute('stroke-dashoffset', '0');
+                circles[2].setAttribute('stroke-dasharray', `${lenMoto} ${C}`);
+                circles[2].setAttribute('stroke-dashoffset', `-${lenAuto}`);
+                circles[3].setAttribute('stroke-dasharray', `${lenBici} ${C}`);
+                circles[3].setAttribute('stroke-dashoffset', `-${lenAuto + lenMoto}`);
+                circles[4].setAttribute('stroke-dasharray', `${lenSuv} ${C}`);
+                circles[4].setAttribute('stroke-dashoffset', `-${lenAuto + lenMoto + lenBici}`);
+                circles[5].setAttribute('stroke-dasharray', `${lenEv} ${C}`);
+                circles[5].setAttribute('stroke-dashoffset', `-${lenAuto + lenMoto + lenBici + lenSuv}`);
+            }
+        }
+
+        // 2. Curva SVG Dinámica de Recaudación y Flujo por Horas
+        const dynamicArea = document.getElementById('svgDynamicArea');
+        const dynamicLine = document.getElementById('svgDynamicLine');
+        if (dynamicArea && dynamicLine) {
+            const actCount = (saasState.tickets.filter(t => t.estado === 'ACTIVO') || []).length;
+            const revFactor = Math.min(60, periodTickets.length * 5 + actCount * 3);
+            const y1 = Math.max(30, 160 - revFactor - 20);
+            const y2 = Math.max(25, 90 - revFactor);
+            const y3 = Math.max(35, 60 - Math.round(revFactor * 0.5));
+            const y4 = Math.max(40, 110 - revFactor);
+            const y5 = Math.max(20, 40 - Math.round(revFactor * 0.7));
+
+            const linePath = `M 0,160 Q 70,${y1} 140,${y2} T 280,${y3} T 420,${y4} T 560,${y5} T 700,80`;
+            const areaPath = `M 0,160 Q 70,${y1} 140,${y2} T 280,${y3} T 420,${y4} T 560,${y5} T 700,80 L 700,170 L 0,170 Z`;
+
+            dynamicLine.setAttribute('d', linePath);
+            dynamicArea.setAttribute('d', areaPath);
+        }
+    }
+
+    // Filtrar y Renderizar Movimientos del Parqueadero en Tiempo Real
+    function filterAdminMovements(filterVal) {
+        saasState.adminMovementFilter = filterVal || 'ALL';
+        renderAdminMovements();
+    }
+
+    function renderAdminMovements() {
+        const tbody = document.getElementById('adminMovementsTableBody');
+        if (!tbody) return;
+
+        const filter = saasState.adminMovementFilter || 'ALL';
+        const movements = [];
+
+        // 1. Tickets Activos (Ingresos en curso)
+        (saasState.tickets || []).forEach(t => {
+            if (t.estado === 'ACTIVO') {
+                movements.push({
+                    id: t.id,
+                    fecha: new Date(t.fechaIngreso),
+                    ticketCodigo: t.ticketCodigo,
+                    placa: t.placa,
+                    categoria: t.tipoVehiculo,
+                    bahia: t.spotCodigo,
+                    tipo: t.cruzoMedianoche ? 'NOCTURNO' : 'INGRESO',
+                    tipoLabel: t.cruzoMedianoche ? '🌙 Cruce Nocturno' : '🎟️ Ingreso Vehicular',
+                    tipoClass: t.cruzoMedianoche ? 'pill-amber' : 'pill-primary',
+                    operador: 'Operador de Patio',
+                    monto: '<span style="color:var(--text-muted); font-size:0.75rem;">En curso...</span>',
+                    estadoBadge: '<span class="status-badge badge-active-live">Activo</span>'
+                });
+            } else if (t.estado === 'FINALIZADO') {
+                movements.push({
+                    id: t.id,
+                    fecha: new Date(t.fechaSalida || t.fechaIngreso),
+                    ticketCodigo: t.ticketCodigo,
+                    placa: t.placa,
+                    categoria: t.tipoVehiculo,
+                    bahia: t.spotCodigo,
+                    tipo: 'SALIDA',
+                    tipoLabel: `💳 Cobro & Salida (${t.metodoPago || 'Efectivo'})`,
+                    tipoClass: 'pill-emerald',
+                    operador: 'Administrador / Caja',
+                    monto: `<strong style="color:var(--emerald); font-family:'JetBrains Mono';">$${(t.valorPagado || 0).toLocaleString('es-CO')}</strong>`,
+                    estadoBadge: '<span class="status-badge badge-completed">Liquidado</span>'
+                });
+            }
+        });
+
+        // 2. Ordenar cronológicamente (más recientes primero)
+        movements.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+
+        // 3. Aplicar filtro
+        const filtered = movements.filter(m => {
+            if (filter === 'ALL') return true;
+            if (filter === 'INGRESO') return m.tipo === 'INGRESO';
+            if (filter === 'SALIDA') return m.tipo === 'SALIDA';
+            if (filter === 'NOCTURNO') return m.tipo === 'NOCTURNO';
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1.5rem;">No se encontraron movimientos registrados con este filtro.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(m => `
+            <tr>
+                <td style="font-family:'JetBrains Mono'; font-size:0.75rem; white-space:nowrap; color:var(--text-muted);">
+                    ${m.fecha.toLocaleDateString('es-CO', {day:'2-digit', month:'short'})} ${m.fecha.toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit', second:'2-digit'})}
+                </td>
+                <td><strong style="color:var(--primary); font-family:'JetBrains Mono';">${m.ticketCodigo}</strong></td>
+                <td><span class="plate-pill">${m.placa}</span></td>
+                <td>${m.categoria}</td>
+                <td><strong style="color:var(--emerald);">${m.bahia}</strong></td>
+                <td><span class="role-badge-tag ${m.tipoClass}">${m.tipoLabel}</span></td>
+                <td style="font-size:0.75rem; color:var(--text-body);">${m.operador}</td>
+                <td style="text-align:right;">${m.monto}</td>
+                <td>${m.estadoBadge}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Exportar Reporte Financiero a Formato CSV
+    function exportFinancialReportCsv() {
+        const tickets = saasState.tickets || [];
+        if (tickets.length === 0) {
+            alert('No hay tickets registrados en el sistema para exportar.');
+            return;
+        }
+
+        const headers = ['ID', 'Codigo_Ticket', 'Placa', 'Categoria_Vehiculo', 'Bahia', 'Fecha_Ingreso', 'Fecha_Salida', 'Minutos', 'Monto_COP', 'Metodo_Pago', 'Cruzo_Medianoche', 'Estado'];
+        const rows = tickets.map(t => [
+            t.id,
+            t.ticketCodigo,
+            t.placa,
+            `"${t.tipoVehiculo}"`,
+            t.spotCodigo,
+            `"${t.fechaIngreso}"`,
+            `"${t.fechaSalida || ''}"`,
+            t.minutosTranscurridos || 0,
+            t.valorPagado || 0,
+            `"${t.metodoPago || ''}"`,
+            t.cruzoMedianoche ? 'SI' : 'NO',
+            t.estado
+        ]);
+
+        const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const dateStr = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `ParkFlow_Reporte_Financiero_${dateStr}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showRbacToast('Reporte financiero exportado en archivo CSV correctamente.', false);
+    }
+
+    // Modal de Arqueo y Cierre de Caja Oficial (Z-Report)
+    function openCashClosingModal() {
+        const completed = (saasState.tickets || []).filter(t => t.estado === 'FINALIZADO');
+        let cashTotal = 0, cardTotal = 0, qrTotal = 0;
+
+        completed.forEach(t => {
+            const val = parseFloat(t.valorPagado) || 0;
+            const m = (t.metodoPago || '').toUpperCase();
+            if (m.includes('TARJETA') || m.includes('CARD') || m.includes('DATAFONO')) cardTotal += val;
+            else if (m.includes('QR') || m.includes('NEQUI') || m.includes('DAVIPLATA') || m.includes('TRANSFERENCIA')) qrTotal += val;
+            else cashTotal += val;
+        });
+
+        const totalRevenue = cashTotal + cardTotal + qrTotal;
+        const initialDrawerBase = 150000;
+        const totalCashInDrawer = initialDrawerBase + cashTotal;
+        const now = new Date();
+        const zNumber = `Z-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.floor(100 + Math.random()*900)}`;
+        const user = currentAuthSession ? `${currentAuthSession.nombre} (${currentAuthSession.rol})` : 'Diana Katerine (Admin)';
+
+        const container = document.getElementById('cashClosingContent');
+        if (container) {
+            container.innerHTML = `
+                <div style="text-align:center; margin-bottom:1rem; border-bottom:1px dashed var(--border); padding-bottom:0.75rem;">
+                    <div style="font-size:1.15rem; font-weight:800; color:var(--text-heading); letter-spacing:1px;">PARKFLOW SMART SAAS</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">SISTEMA DE CONTROL DE ACCESO & LIQUIDACIÓN</div>
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--primary); margin-top:0.35rem; font-family:'JetBrains Mono';">COMPROBANTE OFICIAL DE CIERRE Z</div>
+                    <div style="font-size:0.75rem; font-family:'JetBrains Mono'; color:var(--text-muted);">${zNumber}</div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:0.45rem; font-size:0.8rem; margin-bottom:1rem;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Fecha y Hora Cierre:</span>
+                        <strong style="font-family:'JetBrains Mono';">${now.toLocaleString('es-CO')}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Responsable / Cajero:</span>
+                        <strong>${user}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Estancias Liquidadas:</span>
+                        <strong style="color:var(--primary);">${completed.length} tickets</strong>
+                    </div>
+                </div>
+
+                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem; margin-bottom:1rem;">
+                    <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.5rem; border-bottom:1px solid var(--border); padding-bottom:0.25rem;">
+                        Desglose de Ingresos por Medio de Pago
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem; font-size:0.8rem;">
+                        <span>💵 Efectivo Recaudado:</span>
+                        <strong style="font-family:'JetBrains Mono';">$${cashTotal.toLocaleString('es-CO')} COP</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem; font-size:0.8rem;">
+                        <span>💳 Tarjetas Débito / Crédito:</span>
+                        <strong style="font-family:'JetBrains Mono';">$${cardTotal.toLocaleString('es-CO')} COP</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
+                        <span>📱 Transferencias QR Digital:</span>
+                        <strong style="font-family:'JetBrains Mono';">$${qrTotal.toLocaleString('es-CO')} COP</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; border-top:1px dashed var(--border); padding-top:0.4rem; font-size:0.95rem; font-weight:800;">
+                        <span>Total Facturado Período:</span>
+                        <span style="color:var(--emerald); font-family:'JetBrains Mono';">$${totalRevenue.toLocaleString('es-CO')} COP</span>
+                    </div>
+                </div>
+
+                <div style="background:var(--bg-surface-elevated); border:1px solid rgba(16,185,129,0.3); border-radius:var(--radius-sm); padding:0.85rem; margin-bottom:0.75rem;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.25rem;">
+                        <span style="color:var(--text-muted);">Base Inicial en Gaveta:</span>
+                        <span style="font-family:'JetBrains Mono';">$${initialDrawerBase.toLocaleString('es-CO')} COP</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.5rem;">
+                        <span style="color:var(--text-muted);">+ Efectivo Recaudado:</span>
+                        <span style="font-family:'JetBrains Mono';">$${cashTotal.toLocaleString('es-CO')} COP</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(16,185,129,0.3); padding-top:0.35rem; font-size:1.05rem; font-weight:800;">
+                        <span style="color:var(--emerald);">Efectivo Físico Total en Caja:</span>
+                        <span style="color:var(--emerald); font-family:'JetBrains Mono';">$${totalCashInDrawer.toLocaleString('es-CO')} COP</span>
+                    </div>
+                </div>
+
+                <div style="font-size:0.7rem; color:var(--text-muted); text-align:center;">
+                    Firma de Conformidad Cajero: __________________________
+                </div>
+            `;
+        }
+
+        openSaasModal('modalCashClosing');
+    }
+
+    // Laboratorios Interactivos de Patrones de Diseño (GoF) y Dominios DDD
+    function executeStrategyDemo() {
+        const select = document.getElementById('strategySelect');
+        const inputMin = document.getElementById('strategyMinutes');
+        if (!select || !inputMin) return;
+
+        const strat = select.value;
+        const mins = Math.max(1, parseInt(inputMin.value, 10) || 1);
+
+        let activeName = '';
+        let formula = '';
+        let total = 0;
+
+        if (strat === 'Automóvil') {
+            activeName = 'AutomovilBillingStrategy (GoF Behavioral)';
+            const ratePerMin = 110;
+            const graceMins = 5;
+            const billable = Math.max(0, mins - graceMins);
+            total = billable * ratePerMin;
+            formula = `${mins} min - ${graceMins}m gracia = ${billable}m x $${ratePerMin}/min`;
+        } else if (strat === 'Motocicleta') {
+            activeName = 'MotocicletaBillingStrategy (GoF Behavioral)';
+            const ratePerMin = 65;
+            const graceMins = 5;
+            const billable = Math.max(0, mins - graceMins);
+            total = billable * ratePerMin;
+            formula = `${mins} min - ${graceMins}m gracia = ${billable}m x $${ratePerMin}/min`;
+        } else if (strat === 'Bicicleta') {
+            activeName = 'BicicletaBillingStrategy (GoF Behavioral)';
+            const ratePerMin = 25;
+            const graceMins = 15;
+            const billable = Math.max(0, mins - graceMins);
+            total = billable * ratePerMin;
+            formula = `${mins} min - ${graceMins}m cortesía = ${billable}m x $${ratePerMin}/min`;
+        } else if (strat === 'Nocturna') {
+            activeName = 'TarifaNocturnaBillingStrategy (Tope de Noche)';
+            total = 15000;
+            formula = `Permanencia ${mins} min cruzando medianoche = Tarifa Plana Nocturna`;
+        }
+
+        const elName = document.getElementById('strategyActiveName');
+        if (elName) elName.textContent = activeName;
+        const elFormula = document.getElementById('strategyFormula');
+        if (elFormula) elFormula.textContent = formula;
+        const elTotal = document.getElementById('strategyTotal');
+        if (elTotal) elTotal.textContent = `$${total.toLocaleString('es-CO')} COP`;
+    }
+
+    function executeObserverDemo() {
+        const consoleLog = document.getElementById('observerConsoleLog');
+        const mapItem = document.getElementById('obsItemMap');
+        const kpiItem = document.getElementById('obsItemKpi');
+        const auditItem = document.getElementById('obsItemAudit');
+
+        const spotCode = 'B-02';
+        const randomState = (Math.random() > 0.5) ? 'OCUPADO' : 'DISPONIBLE';
+
+        if (mapItem) mapItem.style.boxShadow = '0 0 12px var(--emerald)';
+        if (kpiItem) kpiItem.style.boxShadow = '0 0 12px var(--primary)';
+        if (auditItem) auditItem.style.boxShadow = '0 0 12px var(--amber)';
+
+        if (consoleLog) {
+            consoleLog.innerHTML = `
+                <div style="color:var(--emerald);">[Sensor IoT Telemetría]: Evento detectado en sensor ultrasónico bahía ${spotCode} -> ${randomState}.</div>
+                <div style="color:var(--primary); margin-top:2px;">[SpotMapObserver]: Notificado -> Re-renderizando nodos SVG y clases CSS de bahía ${spotCode}.</div>
+                <div style="color:var(--indigo); margin-top:2px;">[DashboardMetricsObserver]: Notificado -> Recalculando contadores libres/ocupados y aforo.</div>
+                <div style="color:var(--amber); margin-top:2px;">[AuditLoggerObserver]: Notificado -> Inyectando registro inmutable en MySQL audit_log.</div>
+            `;
+        }
+
+        setTimeout(() => {
+            if (mapItem) mapItem.style.boxShadow = 'none';
+            if (kpiItem) kpiItem.style.boxShadow = 'none';
+            if (auditItem) auditItem.style.boxShadow = 'none';
+        }, 1200);
+    }
+
+    function executeStateAction(action) {
+        const current = saasState.currentStateSpot || 'LIBRE';
+        const badge = document.getElementById('stateBadgeActive');
+        const feedback = document.getElementById('stateTransitionFeedback');
+
+        let nextState = current;
+        let msg = '';
+        let isError = false;
+
+        if (action === 'occupy') {
+            if (current === 'LIBRE') {
+                nextState = 'OCUPADO';
+                msg = 'Transición VÁLIDA: LibreState -> occupy() -> OcupadoState (Vehículo ingresó).';
+            } else if (current === 'OCUPADO') {
+                isError = true;
+                msg = 'Transición INVÁLIDA (State Exception): La bahía ya se encuentra OCUPADA.';
+            } else if (current === 'MANTENIMIENTO') {
+                isError = true;
+                msg = 'Transición BLOQUEADA: No se puede ocupar una bahía en MANTENIMIENTO.';
+            }
+        } else if (action === 'vacate') {
+            if (current === 'OCUPADO') {
+                nextState = 'LIBRE';
+                msg = 'Transición VÁLIDA: OcupadoState -> vacate() -> LibreState (Vehículo liberó el cupo).';
+            } else {
+                isError = true;
+                msg = `Transición INVÁLIDA: La bahía no está ocupada (Estado actual: ${current}).`;
+            }
+        } else if (action === 'maintain') {
+            if (current === 'LIBRE') {
+                nextState = 'MANTENIMIENTO';
+                msg = 'Transición VÁLIDA: LibreState -> lock() -> MantenimientoState (Bahía bloqueada por mantenimiento).';
+            } else if (current === 'OCUPADO') {
+                isError = true;
+                msg = 'Transición BLOQUEADA: No se puede poner en mantenimiento una bahía con vehículo activo.';
+            } else {
+                msg = 'La bahía ya se encuentra en MANTENIMIENTO.';
+            }
+        } else if (action === 'release') {
+            if (current === 'MANTENIMIENTO') {
+                nextState = 'LIBRE';
+                msg = 'Transición VÁLIDA: MantenimientoState -> release() -> LibreState (Bahía reabierta al público).';
+            } else {
+                isError = true;
+                msg = `Transición INVÁLIDA: La bahía no está en mantenimiento (Estado actual: ${current}).`;
+            }
+        }
+
+        saasState.currentStateSpot = nextState;
+
+        if (badge) {
+            if (nextState === 'LIBRE') {
+                badge.className = 'status-badge badge-available';
+                badge.textContent = '● LIBRE (Verde)';
+            } else if (nextState === 'OCUPADO') {
+                badge.className = 'status-badge badge-occupied';
+                badge.textContent = '● OCUPADO (Rojo)';
+            } else if (nextState === 'MANTENIMIENTO') {
+                badge.className = 'status-badge badge-maintenance';
+                badge.textContent = '● MANTENIMIENTO (Gris)';
+            }
+        }
+
+        if (feedback) {
+            feedback.style.color = isError ? 'var(--rose)' : 'var(--emerald)';
+            feedback.style.borderColor = isError ? 'rgba(244,63,94,0.4)' : 'rgba(16,185,129,0.3)';
+            feedback.innerHTML = isError ? `⚠️ ${msg}` : `✅ ${msg}`;
+        }
+    }
+
+    function renderDtoDemo() {
+        const select = document.getElementById('dtoTypeSelect');
+        const rawPre = document.getElementById('dtoRawJson');
+        const sanPre = document.getElementById('dtoSanitizedJson');
+        if (!select || !rawPre || !sanPre) return;
+
+        const val = select.value;
+        if (val === 'TicketDTO') {
+            rawPre.textContent = JSON.stringify({
+                id: 104,
+                usuario_id: 2,
+                spot_id: 12,
+                raw_secret_hash: "e3b0c44298fc1c149afbf4c8996fb924",
+                internal_db_lock: false,
+                ticketCodigo: "TCK-2026-8840",
+                placa: "SUV-779",
+                minutosTranscurridos: 260,
+                valorPagado: "25000.00"
+            }, null, 2);
+
+            sanPre.textContent = JSON.stringify({
+                ticketCodigo: "TCK-2026-8840",
+                placa: "SUV-779",
+                minutos: 260,
+                totalPagar: 25000,
+                moneda: "COP",
+                estado: "LIQUIDADO"
+            }, null, 2);
+        } else if (val === 'SpotDTO') {
+            rawPre.textContent = JSON.stringify({
+                id: 18,
+                sensor_hardware_id: "HW-IOT-ESP32-990",
+                raw_firmware_flag: 4,
+                codigo: "C-02",
+                tipoPermitido: "Motocicleta",
+                estado: "DISPONIBLE"
+            }, null, 2);
+
+            sanPre.textContent = JSON.stringify({
+                codigo: "C-02",
+                categoria: "Motocicleta",
+                disponible: true,
+                estadoColor: "emerald"
+            }, null, 2);
+        } else if (val === 'RateDTO') {
+            rawPre.textContent = JSON.stringify({
+                id: 5,
+                schema_version: "2026.1",
+                tipoVehiculo: "Bicicleta",
+                tarifaPorMinuto: "25.00",
+                tarifaPorHora: "1200.00",
+                minutosGracia: 15
+            }, null, 2);
+
+            sanPre.textContent = JSON.stringify({
+                tipoVehiculo: "Bicicleta",
+                precioMinutoCOP: 25,
+                precioHoraCOP: 1200,
+                minutosCortesía: 15
+            }, null, 2);
+        }
+    }
+
+    function updateDddCapacityMetrics() {
+        const spots = saasState.spots || [];
+        const countAuto = spots.filter(s => s.tipoPermitido === 'Automóvil').length;
+        const countMoto = spots.filter(s => s.tipoPermitido === 'Motocicleta').length;
+        const countBici = spots.filter(s => s.tipoPermitido === 'Bicicleta').length;
+        const countOther = spots.filter(s => s.tipoPermitido !== 'Automóvil' && s.tipoPermitido !== 'Motocicleta' && s.tipoPermitido !== 'Bicicleta').length;
+
+        const elAuto = document.getElementById('capAutoDisplay');
+        if (elAuto) elAuto.textContent = `${countAuto || 6} Bahías Instaladas`;
+
+        const elMoto = document.getElementById('capMotoDisplay');
+        if (elMoto) elMoto.textContent = `${countMoto || 6} Bahías Instaladas`;
+
+        const elBici = document.getElementById('capBiciDisplay');
+        if (elBici) elBici.textContent = `${countBici || 4} Cupos Ecológicos`;
+
+        const elSuv = document.getElementById('capSuvEvDisplay');
+        if (elSuv) elSuv.textContent = `${countOther || 12} Bahías con Sensor`;
+
+        const elAudit = document.getElementById('auditCountDddDisplay');
+        if (elAudit) elAudit.textContent = `${(saasState.audit || []).length} Registros Inmutables`;
+    }
+
+    // Renderizar tabla en Overview (Compatibilidad)
     function renderOverviewTable() {
         const active = saasState.tickets.filter(t => t.estado === 'ACTIVO').slice(0, 5);
         const tbody = document.getElementById('overviewActiveTableBody');
+        if (!tbody) return;
 
         if (active.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:1rem;">No hay estancias activas actualmente.</td></tr>';

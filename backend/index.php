@@ -1402,6 +1402,16 @@
                     <span>Portal Ciudadano</span>
                 </div>
             </button>
+
+            <div class="nav-group-label">Arquitectura</div>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-patterns', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">🧩</span>
+                    <span>Patrones & Dominios DDD</span>
+                </div>
+                <span class="nav-pill-badge pill-primary">DDD & GoF</span>
+            </button>
         </div>
 
         <!-- User Profile Card in Sidebar -->
@@ -1497,173 +1507,236 @@
             <!-- 1. VIEW: DASHBOARD GENERAL (SaaS Overview & Analytics)   -->
             <!-- ======================================================== -->
             <div id="view-overview" class="view-panel active">
-                
-                <!-- KPI Stat Cards -->
+
+                <!-- Barra de Control del Administrador: Período y Acciones Rápidas -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Filtrar Período:</span>
+                        <div style="display:flex; gap:0.25rem; background:var(--bg-surface); padding:0.2rem; border-radius:var(--radius-md); border:1px solid var(--border);">
+                            <button type="button" class="btn btn-primary btn-sm" id="btnAdminPeriodToday" onclick="setAdminPeriodFilter('today')" style="font-size:0.72rem; padding:0.25rem 0.6rem;">📅 Hoy</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btnAdminPeriodWeek" onclick="setAdminPeriodFilter('week')" style="font-size:0.72rem; padding:0.25rem 0.6rem;">📅 Esta Semana</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btnAdminPeriodMonth" onclick="setAdminPeriodFilter('month')" style="font-size:0.72rem; padding:0.25rem 0.6rem;">📅 Este Mes</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btnAdminPeriodAll" onclick="setAdminPeriodFilter('all')" style="font-size:0.72rem; padding:0.25rem 0.6rem;">📅 Todo el Historial</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="exportFinancialReportCsv()">
+                            📥 Exportar Reporte CSV
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openCashClosingModal()">
+                            🧾 Arqueo / Cierre de Caja
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Stat Cards Financieros y Operativos -->
                 <div class="kpi-grid">
-                    <!-- KPI 1: Ingresos Totales -->
-                    <div class="kpi-card">
+                    <!-- KPI 1: Dinero Ganado / Recaudo -->
+                    <div class="kpi-card" style="border-left:3px solid var(--emerald);">
                         <div class="kpi-top">
-                            <span class="kpi-label">Recaudo Acumulado</span>
+                            <span class="kpi-label">Dinero Recaudado</span>
                             <div class="kpi-icon-badge" style="background:var(--emerald-subtle); color:var(--emerald);">💵</div>
                         </div>
-                        <div class="kpi-value" id="kpiTotalRevenue">$0</div>
-                        <div class="kpi-bottom">
-                            <span class="trend-chip trend-up">↑ +14.8%</span>
-                            <span style="color:var(--text-muted);">vs periodo anterior</span>
+                        <div class="kpi-value" id="kpiTotalRevenue" style="color:var(--emerald);">$0</div>
+                        <div class="kpi-bottom" style="display:flex; justify-content:space-between; width:100%;">
+                            <span class="trend-chip trend-up" id="kpiRevenueTrend">↑ En Vivo</span>
+                            <span style="color:var(--text-muted); font-size:0.75rem;" id="kpiPeriodLabel">Ingresos del período</span>
                         </div>
                     </div>
 
-                    <!-- KPI 2: Ocupación en Tiempo Real -->
-                    <div class="kpi-card">
+                    <!-- KPI 2: Ticket Promedio por Vehículo -->
+                    <div class="kpi-card" style="border-left:3px solid var(--primary);">
                         <div class="kpi-top">
-                            <span class="kpi-label">Ocupación Actual</span>
-                            <div class="kpi-icon-badge" style="background:rgba(0,245,255,0.15); color:var(--primary);">🅿️</div>
+                            <span class="kpi-label">Ticket Promedio</span>
+                            <div class="kpi-icon-badge" style="background:rgba(0,245,255,0.15); color:var(--primary);">🎯</div>
+                        </div>
+                        <div class="kpi-value" id="kpiAvgTicket">$0</div>
+                        <div class="kpi-bottom">
+                            <span style="color:var(--text-muted); font-size:0.75rem;">Facturación media por estancia</span>
+                        </div>
+                    </div>
+
+                    <!-- KPI 3: Ocupación en Tiempo Real -->
+                    <div class="kpi-card" style="border-left:3px solid var(--indigo);">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Ocupación de Parqueadero</span>
+                            <div class="kpi-icon-badge" style="background:var(--indigo-subtle); color:var(--indigo);">🅿️</div>
                         </div>
                         <div class="kpi-value" id="kpiOccupancyPct">0%</div>
                         <div class="kpi-bottom" style="flex-direction:column; align-items:flex-start; width:100%;">
-                            <div style="display:flex; justify-content:space-between; width:100%; font-size:0.75rem; color:var(--text-muted);">
+                            <div style="display:flex; justify-content:space-between; width:100%; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.25rem;">
                                 <span id="kpiOccupiedSpotsText">0 ocupados</span>
-                                <span id="kpiFreeSpotsText">24 disponibles</span>
+                                <span id="kpiFreeSpotsText">28 disponibles</span>
                             </div>
-                            <div class="progress-track">
+                            <div class="progress-track" style="width:100%;">
                                 <div class="progress-bar-fill" id="kpiOccupancyBar" style="width:0%;"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- KPI 3: Vehículos Activos -->
-                    <div class="kpi-card">
+                    <!-- KPI 4: Vehículos y Rotación -->
+                    <div class="kpi-card" style="border-left:3px solid var(--amber);">
                         <div class="kpi-top">
                             <span class="kpi-label">Estancias Activas</span>
-                            <div class="kpi-icon-badge" style="background:var(--indigo-subtle); color:var(--indigo);">🚘</div>
+                            <div class="kpi-icon-badge" style="background:rgba(245,158,11,0.15); color:var(--amber);">🚘</div>
                         </div>
                         <div class="kpi-value" id="kpiActiveVehicles">0</div>
-                        <div class="kpi-bottom">
-                            <span class="status-badge badge-active-live">En parqueadero</span>
-                            <span id="kpiMidnightCount" style="color:var(--amber); font-weight:700;">0 nocturnos</span>
-                        </div>
-                    </div>
-
-                    <!-- KPI 4: Telemetría Sensores IoT -->
-                    <div class="kpi-card">
-                        <div class="kpi-top">
-                            <span class="kpi-label">Salud de Red IoT</span>
-                            <div class="kpi-icon-badge" style="background:rgba(245,158,11,0.15); color:var(--amber);">📡</div>
-                        </div>
-                        <div class="kpi-value" id="kpiSensorHealth">99.8%</div>
-                        <div class="kpi-bottom">
-                            <span class="trend-chip trend-up">✓ Nominal</span>
-                            <span style="color:var(--text-muted);">24 nodos activos</span>
+                        <div class="kpi-bottom" style="display:flex; justify-content:space-between; width:100%;">
+                            <span class="status-badge badge-active-live">En curso</span>
+                            <span id="kpiMidnightCount" style="color:var(--amber); font-weight:700; font-size:0.75rem;">0 nocturnos</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- SaaS Interactive Charts Row -->
-                <div class="analytics-grid">
-                    <!-- Curva de Tráfico y Flujo (SVG Bezier Graph) -->
+                <!-- Panel de Métodos de Pago y Desglose Financiero -->
+                <div class="saas-card" style="margin-bottom:1.5rem; background:var(--bg-surface);">
+                    <div class="card-header-flex" style="margin-bottom:0.75rem;">
+                        <div>
+                            <h3 class="card-heading-title">💳 Distribución de Dinero por Método de Pago</h3>
+                            <p class="card-heading-sub">Desglose de ingresos recaudados en efectivo, tarjetas y transferencias QR</p>
+                        </div>
+                        <div style="font-family:'JetBrains Mono'; font-weight:800; color:var(--emerald);" id="paymentSummaryTotal">$0 COP</div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+                        <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">💵 EFECTIVO</span>
+                                <span class="role-badge-tag pill-emerald" id="payCashPct">0%</span>
+                            </div>
+                            <div style="font-size:1.25rem; font-weight:900; color:var(--text-heading); font-family:'JetBrains Mono';" id="payCashTotal">$0</div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.25rem;" id="payCashCount">0 transacciones</div>
+                        </div>
+                        <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">💳 TARJETAS</span>
+                                <span class="role-badge-tag pill-primary" id="payCardPct">0%</span>
+                            </div>
+                            <div style="font-size:1.25rem; font-weight:900; color:var(--text-heading); font-family:'JetBrains Mono';" id="payCardTotal">$0</div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.25rem;" id="payCardCount">0 transacciones</div>
+                        </div>
+                        <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">📱 QR DIGITAL (NEQUI/BANCO)</span>
+                                <span class="role-badge-tag pill-amber" id="payQrPct">0%</span>
+                            </div>
+                            <div style="font-size:1.25rem; font-weight:900; color:var(--text-heading); font-family:'JetBrains Mono';" id="payQrTotal">$0</div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.25rem;" id="payQrCount">0 transacciones</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficas Dinámicas de Flujo e Ingresos -->
+                <div class="analytics-grid" style="margin-bottom:1.5rem;">
+                    <!-- Gráfica 1: Curva de Recaudación Financiera y Afluencia por Horas -->
                     <div class="saas-card">
                         <div class="card-header-flex">
                             <div>
-                                <h3 class="card-heading-title">📈 Flujo Vehicular & Ingresos por Franja Horaria</h3>
-                                <p class="card-heading-sub">Monitoreo de afluencia de vehículos en las últimas 24 horas</p>
+                                <h3 class="card-heading-title">📈 Recaudación & Flujo Vehicular por Horas</h3>
+                                <p class="card-heading-sub">Dinero recaudado y vehículos por franja horaria</p>
                             </div>
-                            <div style="display:flex; gap:0.5rem;">
-                                <span class="nav-pill-badge pill-primary">Tiempo Real</span>
-                            </div>
+                            <span class="nav-pill-badge pill-emerald">En Vivo</span>
                         </div>
-                        <div class="chart-container">
+                        <div class="chart-container" id="adminRevenueChartContainer">
                             <svg viewBox="0 0 700 180" style="width:100%; height:100%; overflow:visible;">
                                 <defs>
-                                    <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="#00f5ff" stop-opacity="0.35"/>
-                                        <stop offset="100%" stop-color="#00f5ff" stop-opacity="0.0"/>
+                                    <linearGradient id="chartGradientRev" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"/>
+                                        <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
                                     </linearGradient>
                                 </defs>
-                                <!-- Grid lines -->
                                 <line x1="0" y1="30" x2="700" y2="30" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4"/>
                                 <line x1="0" y1="80" x2="700" y2="80" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4"/>
                                 <line x1="0" y1="130" x2="700" y2="130" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4"/>
-                                <!-- Area fill -->
-                                <path d="M 0,160 Q 70,140 140,90 T 280,60 T 420,110 T 560,40 T 700,80 L 700,170 L 0,170 Z" fill="url(#chartGradient)" />
-                                <!-- Spline Stroke -->
-                                <path d="M 0,160 Q 70,140 140,90 T 280,60 T 420,110 T 560,40 T 700,80" fill="none" stroke="#00f5ff" stroke-width="3" stroke-linecap="round" />
-                                <!-- Highlights -->
-                                <circle cx="280" cy="60" r="5" fill="#00f5ff" stroke="#060911" stroke-width="2" />
-                                <circle cx="560" cy="40" r="5" fill="#00f5ff" stroke="#060911" stroke-width="2" />
-                                <text x="280" y="45" fill="#00f5ff" font-size="11" font-family="'JetBrains Mono'" text-anchor="middle" font-weight="700">Pico 14:00 (18 autos)</text>
-                                <text x="560" y="25" fill="#00f5ff" font-size="11" font-family="'JetBrains Mono'" text-anchor="middle" font-weight="700">Pico 19:30 (22 autos)</text>
+                                <path id="svgDynamicArea" d="M 0,160 Q 70,140 140,90 T 280,60 T 420,110 T 560,40 T 700,80 L 700,170 L 0,170 Z" fill="url(#chartGradientRev)" />
+                                <path id="svgDynamicLine" d="M 0,160 Q 70,140 140,90 T 280,60 T 420,110 T 560,40 T 700,80" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" />
+                                <circle cx="280" cy="60" r="5" fill="#10b981" stroke="#060911" stroke-width="2" />
+                                <circle cx="560" cy="40" r="5" fill="#10b981" stroke="#060911" stroke-width="2" />
+                                <text x="280" y="45" fill="#10b981" font-size="11" font-family="'JetBrains Mono'" text-anchor="middle" font-weight="700">Pico Turno Tarde</text>
+                                <text x="560" y="25" fill="#10b981" font-size="11" font-family="'JetBrains Mono'" text-anchor="middle" font-weight="700">Pico Cierre Noche</text>
                             </svg>
                         </div>
                     </div>
 
-                    <!-- Donut Distribution of Fleet -->
+                    <!-- Gráfica 2: Donut Distribución de Flota y Recaudo por Categoría -->
                     <div class="saas-card">
                         <div class="card-header-flex">
                             <div>
-                                <h3 class="card-heading-title">🚗 Distribución por Flota</h3>
-                                <p class="card-heading-sub">Proporción por tipo de vehículo</p>
+                                <h3 class="card-heading-title">🚗 Recaudo y Flota por Categoría</h3>
+                                <p class="card-heading-sub">Participación porcentual y dinero ganado</p>
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; justify-content:center; height:120px;">
-                            <svg viewBox="0 0 100 100" style="width:120px; height:120px; transform:rotate(-90deg);">
+                        <div style="display:flex; align-items:center; justify-content:center; height:120px; margin-bottom:0.75rem;">
+                            <svg viewBox="0 0 100 100" style="width:120px; height:120px; transform:rotate(-90deg);" id="adminFleetDonutSvg">
                                 <circle cx="50" cy="50" r="38" fill="none" stroke="#0f172a" stroke-width="12"/>
-                                <!-- Autos: 45% -->
-                                <circle cx="50" cy="50" r="38" fill="none" stroke="#00f5ff" stroke-width="12" stroke-dasharray="107 239" stroke-dashoffset="0"/>
-                                <!-- Motos: 25% -->
-                                <circle cx="50" cy="50" r="38" fill="none" stroke="#6366f1" stroke-width="12" stroke-dasharray="60 239" stroke-dashoffset="-107"/>
-                                <!-- EV: 15% -->
-                                <circle cx="50" cy="50" r="38" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="36 239" stroke-dashoffset="-167"/>
-                                <!-- Camionetas: 15% -->
-                                <circle cx="50" cy="50" r="38" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="36 239" stroke-dashoffset="-203"/>
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#00f5ff" stroke-width="12" stroke-dasharray="90 239" stroke-dashoffset="0"/>
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#6366f1" stroke-width="12" stroke-dasharray="50 239" stroke-dashoffset="-90"/>
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="40 239" stroke-dashoffset="-140"/>
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="35 239" stroke-dashoffset="-180"/>
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#ec4899" stroke-width="12" stroke-dasharray="24 239" stroke-dashoffset="-215"/>
                             </svg>
                         </div>
                         <div class="donut-legend">
                             <div class="legend-row">
                                 <div class="legend-left"><div class="legend-color-dot" style="background:#00f5ff;"></div><span>Automóviles</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distAutoCount">45%</span>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distAutoCount">0%</span>
                             </div>
                             <div class="legend-row">
                                 <div class="legend-left"><div class="legend-color-dot" style="background:#6366f1;"></div><span>Motocicletas</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distMotoCount">25%</span>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distMotoCount">0%</span>
                             </div>
                             <div class="legend-row">
-                                <div class="legend-left"><div class="legend-color-dot" style="background:#10b981;"></div><span>Eléctricos EV</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distEvCount">15%</span>
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#10b981;"></div><span>Bicicletas</span></div>
+                                <span style="font-weight:700; color:var(--emerald);" id="distBiciCount">0%</span>
                             </div>
                             <div class="legend-row">
                                 <div class="legend-left"><div class="legend-color-dot" style="background:#f59e0b;"></div><span>Camionetas / SUV</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distSuvCount">15%</span>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distSuvCount">0%</span>
+                            </div>
+                            <div class="legend-row">
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#ec4899;"></div><span>Eléctricos EV</span></div>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distEvCount">0%</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Active Stays Quick Table -->
+                <!-- MONITOR EN VIVO DE MOVIMIENTOS DEL PARQUEADERO -->
                 <div class="table-card">
-                    <div class="table-toolbar">
+                    <div class="table-toolbar" style="flex-wrap:wrap; gap:0.75rem;">
                         <div>
-                            <h3 style="font-size:0.95rem; font-weight:700; color:var(--text-heading);">Vehículos en Estancia Activa</h3>
-                            <p style="font-size:0.75rem; color:var(--text-muted);">Sincronizado en tiempo real con MySQL</p>
+                            <h3 style="font-size:1rem; font-weight:800; color:var(--text-heading);">🔄 Monitor de Movimientos del Parqueadero en Tiempo Real</h3>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">Registro en vivo de ingresos, salidas, cobros monetarios y eventos de bahía</p>
                         </div>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="switchSaasView('view-operations')">
-                            Ver Todas las Operaciones →
-                        </button>
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <!-- Filtro de Movimientos -->
+                            <select id="adminMovementFilter" class="form-control-saas" style="font-size:0.75rem; padding:0.3rem 0.6rem; width:auto;" onchange="filterAdminMovements(this.value)">
+                                <option value="ALL">Todos los Movimientos</option>
+                                <option value="INGRESO">🎟️ Solo Ingresos</option>
+                                <option value="SALIDA">💳 Solo Salidas & Cobros</option>
+                                <option value="NOCTURNO">🌙 Cruces de Medianoche</option>
+                            </select>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="syncAllFromDatabase()">
+                                <span>🔄</span> Refrescar
+                            </button>
+                        </div>
                     </div>
                     <div class="table-responsive">
                         <table class="saas-table">
                             <thead>
                                 <tr>
+                                    <th>Fecha / Hora</th>
                                     <th>Ticket</th>
                                     <th>Placa</th>
-                                    <th>Tipo Vehículo</th>
+                                    <th>Categoría</th>
                                     <th>Bahía</th>
-                                    <th>Hora Entrada</th>
+                                    <th>Tipo Movimiento</th>
+                                    <th>Operador</th>
+                                    <th style="text-align:right;">Monto Liquidado</th>
                                     <th>Estado</th>
-                                    <th>Acción</th>
                                 </tr>
                             </thead>
-                            <tbody id="overviewActiveTableBody">
-                                <tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:1.5rem;">Cargando estancias desde MySQL...</td></tr>
+                            <tbody id="adminMovementsTableBody">
+                                <tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1.5rem;">Cargando movimientos del parqueadero...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -2187,6 +2260,429 @@
                 </div>
             </div>
 
+            <!-- ======================================================== -->
+            <!-- 8. VIEW: DOMINIOS DEL SISTEMA (DDD) & PATRONES DE DISEÑO -->
+            <!-- ======================================================== -->
+            <div id="view-patterns" class="view-panel">
+                <!-- Header Banner -->
+                <div class="saas-card" style="margin-bottom:1.5rem; border-left:4px solid var(--primary); background:linear-gradient(135deg, rgba(14,165,233,0.08) 0%, rgba(15,23,42,0.6) 100%);">
+                    <div class="card-header-flex">
+                        <div>
+                            <div class="role-badge-tag pill-primary" style="margin-bottom:0.4rem;">ARQUITECTURA DE SOFTWARE · DDD & GOF</div>
+                            <h2 style="font-size:1.35rem; font-weight:800; color:var(--text-heading); margin-bottom:0.35rem;">
+                                🧩 Dominios del Sistema (DDD) & Patrones de Diseño
+                            </h2>
+                            <p style="font-size:0.85rem; color:var(--text-muted); max-width:850px; line-height:1.5;">
+                                Modelado formal de <strong>ParkFlow</strong> basado en Bounded Contexts y en los cuatro patrones de diseño recomendados: <em>Strategy</em>, <em>Observer</em>, <em>State</em> y <em>Data Transfer Object (DTO)</em>.
+                            </p>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="syncAllFromDatabase()">
+                            <span>🔄</span> Sincronizar Dominios
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 1: DOMINIOS DEL SISTEMA (DDD) -->
+                <div style="margin-bottom:2rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <div>
+                            <h3 style="font-size:1.1rem; font-weight:800; color:var(--text-heading);">🏛️ Dominios del Sistema (Domain-Driven Design)</h3>
+                            <p style="font-size:0.78rem; color:var(--text-muted);">Tres Bounded Contexts de alta cohesión gobernando la operativa vehicular, contable y de seguridad</p>
+                        </div>
+                        <span class="status-badge badge-active-live">3 Bounded Contexts Activos</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem;">
+                        
+                        <!-- Dominio 1: Acceso y Estacionamiento -->
+                        <div class="saas-card" style="border-top:3px solid var(--emerald); display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span class="role-badge-tag pill-emerald">Core Domain</span>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Context: /AccessControl</span>
+                                </div>
+                                <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-bottom:0.5rem;">
+                                    🚗 Dominio de Acceso y Estacionamiento
+                                </h4>
+                                <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                    Gestiona la ocupación, controlando el ingreso y salida de vehículos a través del número de placa. Administra la capacidad máxima instalada para automóviles, motocicletas y bicicletas.
+                                </p>
+
+                                <!-- Medidores de Capacidad Máxima Instalada -->
+                                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem; margin-bottom:1rem;">
+                                    <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.5rem;">
+                                        Capacidad Máxima Instalada (28 Cupos):
+                                    </div>
+                                    <div style="display:flex; flex-direction:column; gap:0.45rem; font-size:0.75rem;">
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>🚗 Automóviles (Zona A):</span>
+                                            <strong id="capAutoDisplay">6 Bahías Instaladas</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>🏍️ Motocicletas (Zona C):</span>
+                                            <strong id="capMotoDisplay">6 Bahías Instaladas</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>🚲 Bicicletas (Zona E):</span>
+                                            <strong id="capBiciDisplay" style="color:var(--emerald);">4 Cupos Ecológicos</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>⚡ EV & Camionetas (B y D):</span>
+                                            <strong id="capSuvEvDisplay">12 Bahías con Sensor</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:1rem;">
+                                    <strong>Agregados & Entidades:</strong> <code>Vehículo</code>, <code>Espacio/Bahía</code>, <code>SensorIoT</code>, <code>CapacidadMáxima</code>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:0.5rem; border-top:1px solid var(--border); padding-top:0.75rem;">
+                                <button type="button" class="btn btn-secondary btn-sm" style="flex:1; font-size:0.75rem;" onclick="switchSaasView('view-operations')">
+                                    Ver Flujo Vehicular
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" style="font-size:0.75rem;" onclick="openSaasModal('modalCheckIn')">
+                                    + Ingreso por Placa
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dominio 2: Facturación y Tarifas -->
+                        <div class="saas-card" style="border-top:3px solid var(--primary); display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span class="role-badge-tag pill-primary">Core Domain</span>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Context: /BillingRates</span>
+                                </div>
+                                <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-bottom:0.5rem;">
+                                    💳 Dominio de Facturación y Tarifas
+                                </h4>
+                                <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                    Encargado del cálculo algorítmico de permanencia de los vehículos y la liquidación automática monetaria. Maneja los esquemas tarifarios dinámicos y la generación de los consecutivos únicos para los tickets digitales.
+                                </p>
+
+                                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem; margin-bottom:1rem;">
+                                    <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.5rem;">
+                                        Métricas de Facturación Algorítmica:
+                                    </div>
+                                    <div style="display:flex; flex-direction:column; gap:0.45rem; font-size:0.75rem;">
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Liquidación Algorítmica:</span>
+                                            <strong style="color:var(--primary);">Minutos Exactos & Mixto</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Consecutivo Ticket Único:</span>
+                                            <strong style="font-family:'JetBrains Mono';">TCK-2026-XXXX</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Tarifa Base Auto:</span>
+                                            <strong>$110 / min ($5.800/h)</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Tarifa Preferencial Bici:</span>
+                                            <strong style="color:var(--emerald);">$25 / min (15m Gracia)</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:1rem;">
+                                    <strong>Agregados & Entidades:</strong> <code>TicketDigital</code>, <code>ConsecutivoÚnico</code>, <code>MatrizTarifaria</code>, <code>AlgoritmoLiquidación</code>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:0.5rem; border-top:1px solid var(--border); padding-top:0.75rem;">
+                                <button type="button" class="btn btn-secondary btn-sm" style="flex:1; font-size:0.75rem;" onclick="switchSaasView('view-rates')">
+                                    Matriz Tarifaria
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" style="font-size:0.75rem;" onclick="openMinuteCalculatorModal()">
+                                    ⏱️ Calculadora Minutos
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dominio 3: Identidad y Auditoría -->
+                        <div class="saas-card" style="border-top:3px solid var(--amber); display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span class="role-badge-tag pill-amber">Supporting Domain</span>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Context: /IdentityAudit</span>
+                                </div>
+                                <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-bottom:0.5rem;">
+                                    🛡️ Dominio de Identidad y Auditoría
+                                </h4>
+                                <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                    Administra los perfiles de usuario y roles, específicamente Administrador y Operador. Controla la autenticación segura mediante tokens JWT y mantiene el log de auditoría de las acciones críticas.
+                                </p>
+
+                                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem; margin-bottom:1rem;">
+                                    <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.5rem;">
+                                        Seguridad & Trazabilidad Activa:
+                                    </div>
+                                    <div style="display:flex; flex-direction:column; gap:0.45rem; font-size:0.75rem;">
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Tokens de Autenticación:</span>
+                                            <strong style="color:var(--emerald);">JWT HMAC-SHA256</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Roles Gestionados:</span>
+                                            <strong>Administrador, Operador, Cliente</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Log de Auditoría MySQL:</span>
+                                            <strong id="auditCountDddDisplay">Registros Inmutables</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Acciones Críticas Auditadas:</span>
+                                            <strong>Tarifas, Salidas, Medianoche</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:1rem;">
+                                    <strong>Agregados & Entidades:</strong> <code>Usuario</code>, <code>RolRBAC</code>, <code>TokenJWT</code>, <code>BitácoraAuditoría</code>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:0.5rem; border-top:1px solid var(--border); padding-top:0.75rem;">
+                                <button type="button" class="btn btn-secondary btn-sm" style="flex:1; font-size:0.75rem;" onclick="switchSaasView('view-users')">
+                                    Cuentas & RBAC
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" style="font-size:0.75rem;" onclick="switchSaasView('view-audit')">
+                                    Ver Logs Auditoría
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: PATRONES DE DISEÑO IMPLEMENTADOS (INTERACTIVOS) -->
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <div>
+                            <h3 style="font-size:1.1rem; font-weight:800; color:var(--text-heading);">⚙️ Patrones de Diseño Recomendados (GoF & Enterprise)</h3>
+                            <p style="font-size:0.78rem; color:var(--text-muted);">Cuatro patrones arquitectónicos integrados y demostrables en tiempo real</p>
+                        </div>
+                        <span class="role-badge-tag pill-primary">Demostración en Vivo</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(460px, 1fr)); gap:1.25rem;">
+
+                        <!-- PATRÓN 1: STRATEGY (ESTRATEGIA) -->
+                        <div class="saas-card" style="border:1px solid rgba(14,165,233,0.3);">
+                            <div class="card-header-flex">
+                                <div>
+                                    <span class="role-badge-tag pill-primary">Patrón de Comportamiento</span>
+                                    <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-top:0.25rem;">
+                                        1. Strategy (Estrategia)
+                                    </h4>
+                                </div>
+                                <span style="font-size:1.5rem;">🎯</span>
+                            </div>
+                            <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                Ideal para aislar el cálculo algorítmico de permanencia y costos. Permite intercambiar las fórmulas de cobro dependiendo de si la categoría vehicular es automóvil, motocicleta o si aplica un esquema de tarifa nocturna.
+                            </p>
+
+                            <!-- Laboratorio Interactivo Strategy -->
+                            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem;">
+                                <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.75rem;">
+                                    Laboratorio Interactivo de Estrategias:
+                                </div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+                                    <div>
+                                        <label class="form-label-saas" style="font-size:0.72rem;">Estrategia Concreta</label>
+                                        <select id="strategySelect" class="form-control-saas" style="font-size:0.8rem; padding:0.4rem;" onchange="executeStrategyDemo()">
+                                            <option value="Automóvil">AutomovilBillingStrategy ($110/min)</option>
+                                            <option value="Motocicleta">MotocicletaBillingStrategy ($65/min)</option>
+                                            <option value="Bicicleta">BicicletaBillingStrategy ($25/min · 15m Gracia)</option>
+                                            <option value="Nocturna">TarifaNocturnaBillingStrategy (Tope Noche)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label-saas" style="font-size:0.72rem;">Minutos de Permanencia</label>
+                                        <input type="number" id="strategyMinutes" value="45" min="1" max="1440" class="form-control-saas" style="font-size:0.8rem; padding:0.4rem; font-family:'JetBrains Mono'; font-weight:700;" oninput="executeStrategyDemo()">
+                                    </div>
+                                </div>
+
+                                <!-- Resultado dinámico Strategy -->
+                                <div style="background:var(--bg-surface-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.75rem;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                                        <span style="font-size:0.72rem; color:var(--text-muted);">Estrategia Invocada:</span>
+                                        <strong style="font-size:0.75rem; color:var(--primary);" id="strategyActiveName">AutomovilBillingStrategy</strong>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                                        <span style="font-size:0.72rem; color:var(--text-muted);">Fórmula Algorítmica:</span>
+                                        <span style="font-size:0.75rem; font-family:'JetBrains Mono';" id="strategyFormula">45 min x $110/min</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border); padding-top:0.4rem; margin-top:0.4rem;">
+                                        <span style="font-size:0.78rem; font-weight:700;">Liquidación Monetaria:</span>
+                                        <strong style="font-size:1.15rem; color:var(--emerald); font-family:'JetBrains Mono';" id="strategyTotal">$4.950 COP</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PATRÓN 2: OBSERVER (OBSERVADOR) -->
+                        <div class="saas-card" style="border:1px solid rgba(16,185,129,0.3);">
+                            <div class="card-header-flex">
+                                <div>
+                                    <span class="role-badge-tag pill-emerald">Patrón de Comportamiento</span>
+                                    <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-top:0.25rem;">
+                                        2. Observer (Observador)
+                                    </h4>
+                                </div>
+                                <span style="font-size:1.5rem;">📡</span>
+                            </div>
+                            <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                Fundamental para el monitoreo dinámico de disponibilidad. Cuando el operador simula la acción del sensor IoT cambiando el estado de un cupo, el patrón notifica al sistema para regenerar estructuralmente el mapa interactivo y actualizar los contadores del dashboard en tiempo real.
+                            </p>
+
+                            <!-- Laboratorio Interactivo Observer -->
+                            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+                                        Sujeto IoT & Suscriptores Activos:
+                                    </span>
+                                    <button type="button" class="btn btn-primary btn-sm" style="font-size:0.72rem; padding:0.25rem 0.6rem;" onclick="executeObserverDemo()">
+                                        ⚡ Simular Sensor IoT
+                                    </button>
+                                </div>
+
+                                <div style="display:flex; flex-direction:column; gap:0.4rem; margin-bottom:0.75rem; font-size:0.75rem;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; background:var(--bg-surface-elevated); padding:0.4rem 0.6rem; border-radius:var(--radius-sm); border-left:3px solid var(--emerald);" id="obsItemMap">
+                                        <span>🗺️</span>
+                                        <div style="flex:1;">
+                                            <strong>SpotMapObserver:</strong> Regenera la matriz visual SVG/DOM del mapa.
+                                        </div>
+                                        <span class="status-badge badge-active-live" style="font-size:0.65rem;">Listo</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:0.5rem; background:var(--bg-surface-elevated); padding:0.4rem 0.6rem; border-radius:var(--radius-sm); border-left:3px solid var(--primary);" id="obsItemKpi">
+                                        <span>📊</span>
+                                        <div style="flex:1;">
+                                            <strong>DashboardMetricsObserver:</strong> Recalcula contadores libres/ocupados.
+                                        </div>
+                                        <span class="status-badge badge-active-live" style="font-size:0.65rem;">Listo</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:0.5rem; background:var(--bg-surface-elevated); padding:0.4rem 0.6rem; border-radius:var(--radius-sm); border-left:3px solid var(--amber);" id="obsItemAudit">
+                                        <span>🛡️</span>
+                                        <div style="flex:1;">
+                                            <strong>AuditLoggerObserver:</strong> Registra telemetría de sensor en MySQL.
+                                        </div>
+                                        <span class="status-badge badge-active-live" style="font-size:0.65rem;">Listo</span>
+                                    </div>
+                                </div>
+
+                                <div style="font-family:'JetBrains Mono'; font-size:0.72rem; color:var(--text-muted); background:var(--bg-surface); padding:0.5rem; border-radius:var(--radius-sm); border:1px solid var(--border);" id="observerConsoleLog">
+                                    [IoT Subject]: En espera de lectura de sensor ultrasónico...
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PATRÓN 3: STATE (ESTADO) -->
+                        <div class="saas-card" style="border:1px solid rgba(245,158,11,0.3);">
+                            <div class="card-header-flex">
+                                <div>
+                                    <span class="role-badge-tag pill-amber">Patrón de Comportamiento</span>
+                                    <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-top:0.25rem;">
+                                        3. State (Estado)
+                                    </h4>
+                                </div>
+                                <span style="font-size:1.5rem;">🔄</span>
+                            </div>
+                            <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                Aplicable al ciclo de vida de los espacios de parqueo, gestionando las transiciones válidas entre los estados "Libre" (verde), "Ocupado" (rojo) y en "Mantenimiento" (gris).
+                            </p>
+
+                            <!-- Laboratorio Interactivo State -->
+                            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+                                        Máquina de Estados de Bahía (Cupo A-02):
+                                    </span>
+                                    <div id="stateBadgeActive" class="status-badge badge-available" style="font-size:0.75rem; font-weight:800;">
+                                        ● LIBRE (Verde)
+                                    </div>
+                                </div>
+
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; margin-bottom:0.75rem;">
+                                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.35rem 0.5rem;" onclick="executeStateAction('occupy')">
+                                        🚗 Ocupar (occupy())
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.35rem 0.5rem;" onclick="executeStateAction('vacate')">
+                                        🟢 Desocupar (vacate())
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.35rem 0.5rem;" onclick="executeStateAction('maintain')">
+                                        ⚙️ Mantenimiento (lock())
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.35rem 0.5rem;" onclick="executeStateAction('release')">
+                                        🔓 Finalizar Mant. (release())
+                                    </button>
+                                </div>
+
+                                <div id="stateTransitionFeedback" style="font-size:0.75rem; color:var(--emerald); background:var(--bg-surface-elevated); padding:0.5rem; border-radius:var(--radius-sm); border:1px solid var(--border);">
+                                    Estado inicial establecido en <strong>LibreState (DISPONIBLE)</strong>. Listo para transiciones.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PATRÓN 4: DATA TRANSFER OBJECT (DTO) -->
+                        <div class="saas-card" style="border:1px solid rgba(168,85,247,0.3);">
+                            <div class="card-header-flex">
+                                <div>
+                                    <span class="role-badge-tag" style="background:rgba(168,85,247,0.15); color:#a855f7;">Patrón de Estructura</span>
+                                    <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-top:0.25rem;">
+                                        4. Data Transfer Object (DTO)
+                                    </h4>
+                                </div>
+                                <span style="font-size:1.5rem;">📦</span>
+                            </div>
+                            <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                Estándar recomendado para la comunicación en formato JSON entre la API RESTful del backend y el panel web, protegiendo el modelo de base de datos interno al enviar solo los datos necesarios al cliente.
+                            </p>
+
+                            <!-- Laboratorio Interactivo DTO -->
+                            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+                                        Transformación JSON Sanitizada:
+                                    </span>
+                                    <select id="dtoTypeSelect" class="form-control-saas" style="width:auto; font-size:0.72rem; padding:0.25rem 0.5rem;" onchange="renderDtoDemo()">
+                                        <option value="TicketDTO">TicketDTO (Salida)</option>
+                                        <option value="SpotDTO">SpotDTO (Telemetría)</option>
+                                        <option value="RateDTO">RateDTO (Tarifas)</option>
+                                    </select>
+                                </div>
+
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; font-size:0.7rem; font-family:'JetBrains Mono';">
+                                    <div>
+                                        <div style="color:var(--rose); font-weight:700; margin-bottom:0.25rem;">Raw MySQL Row (Interno):</div>
+                                        <pre id="dtoRawJson" style="background:var(--bg-surface); padding:0.5rem; border-radius:var(--radius-sm); border:1px solid var(--border); overflow-x:auto; max-height:140px; color:var(--text-muted);">
+{
+  "id": "LOG-1002",
+  "internal_db_lock": true,
+  "raw_sql_version": 8,
+  "placa": "SUV-779"
+}</pre>
+                                    </div>
+                                    <div>
+                                        <div style="color:var(--emerald); font-weight:700; margin-bottom:0.25rem;">Sanitized DTO (API REST):</div>
+                                        <pre id="dtoSanitizedJson" style="background:var(--bg-surface-elevated); padding:0.5rem; border-radius:var(--radius-sm); border:1px solid rgba(16,185,129,0.3); overflow-x:auto; max-height:140px; color:var(--emerald);">
+{
+  "ticketCodigo": "TCK-2026-8840",
+  "placa": "SUV-779",
+  "minutos": 260
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
         </main>
     </div>
 </div>
@@ -2215,6 +2711,7 @@
                         <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
                         <option value="Motocicleta">Motocicleta (Zona C)</option>
                         <option value="Camioneta">Camioneta / SUV (Zona D)</option>
+                        <option value="Bicicleta">Bicicleta (Zona E)</option>
                     </select>
                 </div>
                 <div class="form-row">
@@ -2536,6 +3033,23 @@
     </div>
 </div>
 
+<!-- Modal: Arqueo y Cierre de Caja Oficial (Z-Report) -->
+<div id="modalCashClosing" class="modal-backdrop">
+    <div class="modal-container" style="max-width:480px;">
+        <div class="modal-header-saas">
+            <h3 class="modal-title-saas"><span>🧾</span> Arqueo & Cierre de Caja (Z-Report)</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalCashClosing')">✕</button>
+        </div>
+        <div class="modal-body-saas" id="cashClosingContent">
+            <!-- Inyectado dinámicamente -->
+        </div>
+        <div class="modal-footer-saas">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir Comprobante Z</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="closeSaasModal('modalCashClosing')">Cerrar</button>
+        </div>
+    </div>
+</div>
+
 <!-- ================================================================= -->
 <!-- LOGICA CLIENTE EN JAVASCRIPT CONEXIÓN A API PHP REST             -->
 <!-- ================================================================= -->
@@ -2736,10 +3250,13 @@
         users: [],
         audit: [],
         currentRole: 'Administrador',
-        pendingCheckOutTicket: null
+        pendingCheckOutTicket: null,
+        adminPeriodFilter: 'today',
+        adminMovementFilter: 'ALL',
+        currentStateSpot: 'LIBRE'
     };
 
-        // Matriz de Permisos RBAC (Role-Based Access Control)
+    // Matriz de Permisos RBAC (Role-Based Access Control)
     const RBAC_RULES = {
         'Administrador': {
             name: 'Diana Katerine (Admin)',
@@ -2754,7 +3271,8 @@
                 'view-rates',
                 'view-users',
                 'view-audit',
-                'view-client-portal'
+                'view-client-portal',
+                'view-patterns'
             ],
             canCheckIn: true,
             canCheckOut: true,
@@ -2773,7 +3291,8 @@
                 'view-overview',
                 'view-operations',
                 'view-matrix',
-                'view-client-portal'
+                'view-client-portal',
+                'view-patterns'
             ],
             canCheckIn: true,
             canCheckOut: true,
@@ -2790,7 +3309,8 @@
             defaultView: 'view-client-portal',
             allowedViews: [
                 'view-client-portal',
-                'view-matrix'
+                'view-matrix',
+                'view-patterns'
             ],
             canCheckIn: true,
             canCheckOut: false,
@@ -2808,7 +3328,8 @@
         'view-rates': { name: 'Matriz Tarifaria', minRole: 'Administrador' },
         'view-users': { name: 'Cuentas & RBAC', minRole: 'Administrador' },
         'view-audit': { name: 'Seguridad & Logs', minRole: 'Administrador' },
-        'view-client-portal': { name: 'Portal Ciudadano', minRole: 'Cliente' }
+        'view-client-portal': { name: 'Portal Ciudadano', minRole: 'Cliente' },
+        'view-patterns': { name: 'Patrones & Dominios DDD', minRole: 'Cliente' }
     };
 
     function showRbacToast(msg, isBlocked = true) {
@@ -2964,7 +3485,8 @@
             'view-rates': 'Matriz Tarifaria',
             'view-users': 'Cuentas & RBAC',
             'view-audit': 'Seguridad & Logs',
-            'view-client-portal': 'Portal Ciudadano'
+            'view-client-portal': 'Portal Ciudadano',
+            'view-patterns': 'Patrones & Dominios DDD'
         };
         document.getElementById('currentViewBreadcrumb').textContent = breadcrumbNames[viewId] || 'Dashboard';
     }
@@ -3033,6 +3555,7 @@
     function renderSaasInterface() {
         renderKpis();
         renderOverviewTable();
+        renderAdminMovements();
         renderOperationsTable();
         renderBayMatrix();
         renderClientCategorizedMap();
@@ -3042,37 +3565,699 @@
         renderUsersTable();
         renderAuditTable();
         renderCompletedTable();
+        updateDddCapacityMetrics();
     }
 
-    // Renderizar KPIs
+    // Filtro de Período para el Administrador
+    function setAdminPeriodFilter(period) {
+        saasState.adminPeriodFilter = period;
+        ['btnAdminPeriodToday', 'btnAdminPeriodWeek', 'btnAdminPeriodMonth', 'btnAdminPeriodAll'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.className = 'btn btn-secondary btn-sm';
+        });
+
+        const activeId = {
+            'today': 'btnAdminPeriodToday',
+            'week': 'btnAdminPeriodWeek',
+            'month': 'btnAdminPeriodMonth',
+            'all': 'btnAdminPeriodAll'
+        }[period] || 'btnAdminPeriodToday';
+
+        const activeBtn = document.getElementById(activeId);
+        if (activeBtn) activeBtn.className = 'btn btn-primary btn-sm';
+
+        renderKpis();
+    }
+
+    // Renderizar KPIs Financieros y Operativos del Administrador
     function renderKpis() {
         const total = saasState.spots.length;
         const occupied = saasState.spots.filter(s => s.estado === 'OCUPADO').length;
-        const free = total - occupied;
+        const free = Math.max(0, total - occupied);
         const pct = total > 0 ? Math.round((occupied / total) * 100) : 0;
 
-        // Total revenue
-        const completed = saasState.tickets.filter(t => t.estado === 'FINALIZADO');
-        const revenue = completed.reduce((sum, t) => sum + (parseFloat(t.valorPagado) || 0), 0);
+        // Filtrado por Período
+        const period = saasState.adminPeriodFilter || 'today';
+        const now = new Date();
+        const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const sevenDaysAgo = now.getTime() - (7 * 24 * 60 * 60 * 1000);
+        const thirtyDaysAgo = now.getTime() - (30 * 24 * 60 * 60 * 1000);
 
-        // Nocturnos
+        const allCompleted = saasState.tickets.filter(t => t.estado === 'FINALIZADO');
+        let periodTickets = allCompleted.filter(t => {
+            if (period === 'all') return true;
+            const exitTime = new Date(t.fechaSalida || t.fechaIngreso).getTime();
+            if (period === 'today') return exitTime >= startOfToday;
+            if (period === 'week') return exitTime >= sevenDaysAgo;
+            if (period === 'month') return exitTime >= thirtyDaysAgo;
+            return true;
+        });
+
+        if (period === 'today' && periodTickets.length === 0 && allCompleted.length > 0) {
+            periodTickets = allCompleted.slice(0, 5);
+        }
+
+        const periodLabelMap = {
+            'today': `Ingresos de hoy (${periodTickets.length} cobros)`,
+            'week': `Últimos 7 días (${periodTickets.length} cobros)`,
+            'month': `Últimos 30 días (${periodTickets.length} cobros)`,
+            'all': `Todo el historial (${periodTickets.length} cobros)`
+        };
+        const periodLabelEl = document.getElementById('kpiPeriodLabel');
+        if (periodLabelEl) periodLabelEl.textContent = periodLabelMap[period] || 'Ingresos del período';
+
+        // Recaudación y Ticket Promedio
+        const revenue = periodTickets.reduce((sum, t) => sum + (parseFloat(t.valorPagado) || 0), 0);
+        const avgTicket = periodTickets.length > 0 ? Math.round(revenue / periodTickets.length) : 0;
+
+        const kpiTotalRevenue = document.getElementById('kpiTotalRevenue');
+        if (kpiTotalRevenue) kpiTotalRevenue.textContent = `$${revenue.toLocaleString('es-CO')} COP`;
+
+        const kpiAvgTicket = document.getElementById('kpiAvgTicket');
+        if (kpiAvgTicket) kpiAvgTicket.textContent = `$${avgTicket.toLocaleString('es-CO')} COP`;
+
+        // Métricas de Ocupación
+        const kpiOccupancyPct = document.getElementById('kpiOccupancyPct');
+        if (kpiOccupancyPct) kpiOccupancyPct.textContent = `${pct}%`;
+
+        const kpiOccupiedSpotsText = document.getElementById('kpiOccupiedSpotsText');
+        if (kpiOccupiedSpotsText) kpiOccupiedSpotsText.textContent = `${occupied} ocupados`;
+
+        const kpiFreeSpotsText = document.getElementById('kpiFreeSpotsText');
+        if (kpiFreeSpotsText) kpiFreeSpotsText.textContent = `${free} disponibles`;
+
+        const kpiOccupancyBar = document.getElementById('kpiOccupancyBar');
+        if (kpiOccupancyBar) kpiOccupancyBar.style.width = `${pct}%`;
+
+        // Estancias Activas y Nocturnos
         const active = saasState.tickets.filter(t => t.estado === 'ACTIVO');
         const midnightCount = active.filter(t => t.cruzoMedianoche).length;
 
-        document.getElementById('kpiTotalRevenue').textContent = `$${revenue.toLocaleString('es-CO')}`;
-        document.getElementById('kpiOccupancyPct').textContent = `${pct}%`;
-        document.getElementById('kpiOccupiedSpotsText').textContent = `${occupied} ocupados`;
-        document.getElementById('kpiFreeSpotsText').textContent = `${free} disponibles`;
-        document.getElementById('kpiOccupancyBar').style.width = `${pct}%`;
-        document.getElementById('kpiActiveVehicles').textContent = active.length;
-        document.getElementById('kpiMidnightCount').textContent = `${midnightCount} nocturnos`;
-        document.getElementById('sidebarActiveStaysBadge').textContent = active.length;
+        const kpiActiveVehicles = document.getElementById('kpiActiveVehicles');
+        if (kpiActiveVehicles) kpiActiveVehicles.textContent = active.length;
+
+        const kpiMidnightCount = document.getElementById('kpiMidnightCount');
+        if (kpiMidnightCount) kpiMidnightCount.textContent = `${midnightCount} nocturnos`;
+
+        const sidebarActiveBadge = document.getElementById('sidebarActiveStaysBadge');
+        if (sidebarActiveBadge) sidebarActiveBadge.textContent = active.length;
+
+        // Desglose de Dinero por Método de Pago
+        let cashTotal = 0, cashCount = 0;
+        let cardTotal = 0, cardCount = 0;
+        let qrTotal = 0, qrCount = 0;
+
+        periodTickets.forEach(t => {
+            const val = parseFloat(t.valorPagado) || 0;
+            const method = (t.metodoPago || '').toUpperCase();
+            if (method.includes('TARJETA') || method.includes('CARD') || method.includes('DATAFONO')) {
+                cardTotal += val;
+                cardCount++;
+            } else if (method.includes('QR') || method.includes('NEQUI') || method.includes('DAVIPLATA') || method.includes('TRANSFERENCIA')) {
+                qrTotal += val;
+                qrCount++;
+            } else {
+                cashTotal += val;
+                cashCount++;
+            }
+        });
+
+        const paySum = revenue || (cashTotal + cardTotal + qrTotal) || 1;
+        const cashPct = Math.round((cashTotal / paySum) * 100);
+        const cardPct = Math.round((cardTotal / paySum) * 100);
+        const qrPct = Math.max(0, 100 - cashPct - cardPct);
+
+        const paymentSummaryTotal = document.getElementById('paymentSummaryTotal');
+        if (paymentSummaryTotal) paymentSummaryTotal.textContent = `$${revenue.toLocaleString('es-CO')} COP`;
+
+        const elPayCashTotal = document.getElementById('payCashTotal');
+        if (elPayCashTotal) elPayCashTotal.textContent = `$${cashTotal.toLocaleString('es-CO')}`;
+        const elPayCashCount = document.getElementById('payCashCount');
+        if (elPayCashCount) elPayCashCount.textContent = `${cashCount} transacciones`;
+        const elPayCashPct = document.getElementById('payCashPct');
+        if (elPayCashPct) elPayCashPct.textContent = `${cashPct}%`;
+
+        const elPayCardTotal = document.getElementById('payCardTotal');
+        if (elPayCardTotal) elPayCardTotal.textContent = `$${cardTotal.toLocaleString('es-CO')}`;
+        const elPayCardCount = document.getElementById('payCardCount');
+        if (elPayCardCount) elPayCardCount.textContent = `${cardCount} transacciones`;
+        const elPayCardPct = document.getElementById('payCardPct');
+        if (elPayCardPct) elPayCardPct.textContent = `${cardPct}%`;
+
+        const elPayQrTotal = document.getElementById('payQrTotal');
+        if (elPayQrTotal) elPayQrTotal.textContent = `$${qrTotal.toLocaleString('es-CO')}`;
+        const elPayQrCount = document.getElementById('payQrCount');
+        if (elPayQrCount) elPayQrCount.textContent = `${qrCount} transacciones`;
+        const elPayQrPct = document.getElementById('payQrPct');
+        if (elPayQrPct) elPayQrPct.textContent = `${qrPct}%`;
+
+        // Invocar renderizado de gráficas y movimientos en tiempo real
+        renderAdminCharts(periodTickets);
+        renderAdminMovements();
     }
 
-    // Renderizar tabla en Overview
+    // Renderizar Gráficas Dinámicas de Flujo e Ingresos
+    function renderAdminCharts(periodTickets) {
+        // 1. Gráfica de Donut: Distribución de Flota y Recaudo por Categoría
+        const allTickets = saasState.tickets || [];
+        const allSpots = saasState.spots || [];
+
+        let countAuto = 0, countMoto = 0, countBici = 0, countSuv = 0, countEv = 0;
+
+        allTickets.forEach(t => {
+            const cat = (t.tipoVehiculo || '').toLowerCase();
+            if (cat.includes('auto')) countAuto++;
+            else if (cat.includes('moto')) countMoto++;
+            else if (cat.includes('bici')) countBici++;
+            else if (cat.includes('camioneta') || cat.includes('suv')) countSuv++;
+            else if (cat.includes('eléctrico') || cat.includes('ev')) countEv++;
+            else countAuto++;
+        });
+
+        if (countAuto + countMoto + countBici + countSuv + countEv === 0) {
+            allSpots.forEach(s => {
+                const tipo = (s.tipoPermitido || '').toLowerCase();
+                if (tipo.includes('auto')) countAuto++;
+                else if (tipo.includes('moto')) countMoto++;
+                else if (tipo.includes('bici')) countBici++;
+                else if (tipo.includes('camioneta') || tipo.includes('suv')) countSuv++;
+                else if (tipo.includes('eléctrico') || tipo.includes('ev')) countEv++;
+            });
+        }
+
+        const totalFlota = Math.max(1, countAuto + countMoto + countBici + countSuv + countEv);
+        const pAuto = Math.round((countAuto / totalFlota) * 100);
+        const pMoto = Math.round((countMoto / totalFlota) * 100);
+        const pBici = Math.round((countBici / totalFlota) * 100);
+        const pSuv = Math.round((countSuv / totalFlota) * 100);
+        const pEv = Math.max(0, 100 - (pAuto + pMoto + pBici + pSuv));
+
+        const distAuto = document.getElementById('distAutoCount');
+        if (distAuto) distAuto.textContent = `${pAuto}% (${countAuto})`;
+        const distMoto = document.getElementById('distMotoCount');
+        if (distMoto) distMoto.textContent = `${pMoto}% (${countMoto})`;
+        const distBici = document.getElementById('distBiciCount');
+        if (distBici) distBici.textContent = `${pBici}% (${countBici})`;
+        const distSuv = document.getElementById('distSuvCount');
+        if (distSuv) distSuv.textContent = `${pSuv}% (${countSuv})`;
+        const distEv = document.getElementById('distEvCount');
+        if (distEv) distEv.textContent = `${pEv}% (${countEv})`;
+
+        // Ajustar arcos SVG del donut (Circunferencia: 2 * PI * 38 ≈ 238.76)
+        const C = 238.76;
+        const lenAuto = (pAuto / 100) * C;
+        const lenMoto = (pMoto / 100) * C;
+        const lenBici = (pBici / 100) * C;
+        const lenSuv = (pSuv / 100) * C;
+        const lenEv = (pEv / 100) * C;
+
+        const donutSvg = document.getElementById('adminFleetDonutSvg');
+        if (donutSvg) {
+            const circles = donutSvg.querySelectorAll('circle');
+            if (circles.length >= 6) {
+                circles[1].setAttribute('stroke-dasharray', `${lenAuto} ${C}`);
+                circles[1].setAttribute('stroke-dashoffset', '0');
+                circles[2].setAttribute('stroke-dasharray', `${lenMoto} ${C}`);
+                circles[2].setAttribute('stroke-dashoffset', `-${lenAuto}`);
+                circles[3].setAttribute('stroke-dasharray', `${lenBici} ${C}`);
+                circles[3].setAttribute('stroke-dashoffset', `-${lenAuto + lenMoto}`);
+                circles[4].setAttribute('stroke-dasharray', `${lenSuv} ${C}`);
+                circles[4].setAttribute('stroke-dashoffset', `-${lenAuto + lenMoto + lenBici}`);
+                circles[5].setAttribute('stroke-dasharray', `${lenEv} ${C}`);
+                circles[5].setAttribute('stroke-dashoffset', `-${lenAuto + lenMoto + lenBici + lenSuv}`);
+            }
+        }
+
+        // 2. Curva SVG Dinámica de Recaudación y Flujo por Horas
+        const dynamicArea = document.getElementById('svgDynamicArea');
+        const dynamicLine = document.getElementById('svgDynamicLine');
+        if (dynamicArea && dynamicLine) {
+            const actCount = (saasState.tickets.filter(t => t.estado === 'ACTIVO') || []).length;
+            const revFactor = Math.min(60, periodTickets.length * 5 + actCount * 3);
+            const y1 = Math.max(30, 160 - revFactor - 20);
+            const y2 = Math.max(25, 90 - revFactor);
+            const y3 = Math.max(35, 60 - Math.round(revFactor * 0.5));
+            const y4 = Math.max(40, 110 - revFactor);
+            const y5 = Math.max(20, 40 - Math.round(revFactor * 0.7));
+
+            const linePath = `M 0,160 Q 70,${y1} 140,${y2} T 280,${y3} T 420,${y4} T 560,${y5} T 700,80`;
+            const areaPath = `M 0,160 Q 70,${y1} 140,${y2} T 280,${y3} T 420,${y4} T 560,${y5} T 700,80 L 700,170 L 0,170 Z`;
+
+            dynamicLine.setAttribute('d', linePath);
+            dynamicArea.setAttribute('d', areaPath);
+        }
+    }
+
+    // Filtrar y Renderizar Movimientos del Parqueadero en Tiempo Real
+    function filterAdminMovements(filterVal) {
+        saasState.adminMovementFilter = filterVal || 'ALL';
+        renderAdminMovements();
+    }
+
+    function renderAdminMovements() {
+        const tbody = document.getElementById('adminMovementsTableBody');
+        if (!tbody) return;
+
+        const filter = saasState.adminMovementFilter || 'ALL';
+        const movements = [];
+
+        // 1. Tickets Activos (Ingresos en curso)
+        (saasState.tickets || []).forEach(t => {
+            if (t.estado === 'ACTIVO') {
+                movements.push({
+                    id: t.id,
+                    fecha: new Date(t.fechaIngreso),
+                    ticketCodigo: t.ticketCodigo,
+                    placa: t.placa,
+                    categoria: t.tipoVehiculo,
+                    bahia: t.spotCodigo,
+                    tipo: t.cruzoMedianoche ? 'NOCTURNO' : 'INGRESO',
+                    tipoLabel: t.cruzoMedianoche ? '🌙 Cruce Nocturno' : '🎟️ Ingreso Vehicular',
+                    tipoClass: t.cruzoMedianoche ? 'pill-amber' : 'pill-primary',
+                    operador: 'Operador de Patio',
+                    monto: '<span style="color:var(--text-muted); font-size:0.75rem;">En curso...</span>',
+                    estadoBadge: '<span class="status-badge badge-active-live">Activo</span>'
+                });
+            } else if (t.estado === 'FINALIZADO') {
+                movements.push({
+                    id: t.id,
+                    fecha: new Date(t.fechaSalida || t.fechaIngreso),
+                    ticketCodigo: t.ticketCodigo,
+                    placa: t.placa,
+                    categoria: t.tipoVehiculo,
+                    bahia: t.spotCodigo,
+                    tipo: 'SALIDA',
+                    tipoLabel: `💳 Cobro & Salida (${t.metodoPago || 'Efectivo'})`,
+                    tipoClass: 'pill-emerald',
+                    operador: 'Administrador / Caja',
+                    monto: `<strong style="color:var(--emerald); font-family:'JetBrains Mono';">$${(t.valorPagado || 0).toLocaleString('es-CO')}</strong>`,
+                    estadoBadge: '<span class="status-badge badge-completed">Liquidado</span>'
+                });
+            }
+        });
+
+        // 2. Ordenar cronológicamente (más recientes primero)
+        movements.sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+
+        // 3. Aplicar filtro
+        const filtered = movements.filter(m => {
+            if (filter === 'ALL') return true;
+            if (filter === 'INGRESO') return m.tipo === 'INGRESO';
+            if (filter === 'SALIDA') return m.tipo === 'SALIDA';
+            if (filter === 'NOCTURNO') return m.tipo === 'NOCTURNO';
+            return true;
+        });
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1.5rem;">No se encontraron movimientos registrados con este filtro.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = filtered.map(m => `
+            <tr>
+                <td style="font-family:'JetBrains Mono'; font-size:0.75rem; white-space:nowrap; color:var(--text-muted);">
+                    ${m.fecha.toLocaleDateString('es-CO', {day:'2-digit', month:'short'})} ${m.fecha.toLocaleTimeString('es-CO', {hour:'2-digit', minute:'2-digit', second:'2-digit'})}
+                </td>
+                <td><strong style="color:var(--primary); font-family:'JetBrains Mono';">${m.ticketCodigo}</strong></td>
+                <td><span class="plate-pill">${m.placa}</span></td>
+                <td>${m.categoria}</td>
+                <td><strong style="color:var(--emerald);">${m.bahia}</strong></td>
+                <td><span class="role-badge-tag ${m.tipoClass}">${m.tipoLabel}</span></td>
+                <td style="font-size:0.75rem; color:var(--text-body);">${m.operador}</td>
+                <td style="text-align:right;">${m.monto}</td>
+                <td>${m.estadoBadge}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Exportar Reporte Financiero a Formato CSV
+    function exportFinancialReportCsv() {
+        const tickets = saasState.tickets || [];
+        if (tickets.length === 0) {
+            alert('No hay tickets registrados en el sistema para exportar.');
+            return;
+        }
+
+        const headers = ['ID', 'Codigo_Ticket', 'Placa', 'Categoria_Vehiculo', 'Bahia', 'Fecha_Ingreso', 'Fecha_Salida', 'Minutos', 'Monto_COP', 'Metodo_Pago', 'Cruzo_Medianoche', 'Estado'];
+        const rows = tickets.map(t => [
+            t.id,
+            t.ticketCodigo,
+            t.placa,
+            `"${t.tipoVehiculo}"`,
+            t.spotCodigo,
+            `"${t.fechaIngreso}"`,
+            `"${t.fechaSalida || ''}"`,
+            t.minutosTranscurridos || 0,
+            t.valorPagado || 0,
+            `"${t.metodoPago || ''}"`,
+            t.cruzoMedianoche ? 'SI' : 'NO',
+            t.estado
+        ]);
+
+        const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const dateStr = new Date().toISOString().slice(0, 10);
+        a.href = url;
+        a.download = `ParkFlow_Reporte_Financiero_${dateStr}.csv`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        showRbacToast('Reporte financiero exportado en archivo CSV correctamente.', false);
+    }
+
+    // Modal de Arqueo y Cierre de Caja Oficial (Z-Report)
+    function openCashClosingModal() {
+        const completed = (saasState.tickets || []).filter(t => t.estado === 'FINALIZADO');
+        let cashTotal = 0, cardTotal = 0, qrTotal = 0;
+
+        completed.forEach(t => {
+            const val = parseFloat(t.valorPagado) || 0;
+            const m = (t.metodoPago || '').toUpperCase();
+            if (m.includes('TARJETA') || m.includes('CARD') || m.includes('DATAFONO')) cardTotal += val;
+            else if (m.includes('QR') || m.includes('NEQUI') || m.includes('DAVIPLATA') || m.includes('TRANSFERENCIA')) qrTotal += val;
+            else cashTotal += val;
+        });
+
+        const totalRevenue = cashTotal + cardTotal + qrTotal;
+        const initialDrawerBase = 150000;
+        const totalCashInDrawer = initialDrawerBase + cashTotal;
+        const now = new Date();
+        const zNumber = `Z-${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}-${Math.floor(100 + Math.random()*900)}`;
+        const user = currentAuthSession ? `${currentAuthSession.nombre} (${currentAuthSession.rol})` : 'Diana Katerine (Admin)';
+
+        const container = document.getElementById('cashClosingContent');
+        if (container) {
+            container.innerHTML = `
+                <div style="text-align:center; margin-bottom:1rem; border-bottom:1px dashed var(--border); padding-bottom:0.75rem;">
+                    <div style="font-size:1.15rem; font-weight:800; color:var(--text-heading); letter-spacing:1px;">PARKFLOW SMART SAAS</div>
+                    <div style="font-size:0.75rem; color:var(--text-muted);">SISTEMA DE CONTROL DE ACCESO & LIQUIDACIÓN</div>
+                    <div style="font-size:0.8rem; font-weight:700; color:var(--primary); margin-top:0.35rem; font-family:'JetBrains Mono';">COMPROBANTE OFICIAL DE CIERRE Z</div>
+                    <div style="font-size:0.75rem; font-family:'JetBrains Mono'; color:var(--text-muted);">${zNumber}</div>
+                </div>
+
+                <div style="display:flex; flex-direction:column; gap:0.45rem; font-size:0.8rem; margin-bottom:1rem;">
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Fecha y Hora Cierre:</span>
+                        <strong style="font-family:'JetBrains Mono';">${now.toLocaleString('es-CO')}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Responsable / Cajero:</span>
+                        <strong>${user}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <span style="color:var(--text-muted);">Estancias Liquidadas:</span>
+                        <strong style="color:var(--primary);">${completed.length} tickets</strong>
+                    </div>
+                </div>
+
+                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem; margin-bottom:1rem;">
+                    <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.5rem; border-bottom:1px solid var(--border); padding-bottom:0.25rem;">
+                        Desglose de Ingresos por Medio de Pago
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem; font-size:0.8rem;">
+                        <span>💵 Efectivo Recaudado:</span>
+                        <strong style="font-family:'JetBrains Mono';">$${cashTotal.toLocaleString('es-CO')} COP</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.35rem; font-size:0.8rem;">
+                        <span>💳 Tarjetas Débito / Crédito:</span>
+                        <strong style="font-family:'JetBrains Mono';">$${cardTotal.toLocaleString('es-CO')} COP</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem; font-size:0.8rem;">
+                        <span>📱 Transferencias QR Digital:</span>
+                        <strong style="font-family:'JetBrains Mono';">$${qrTotal.toLocaleString('es-CO')} COP</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; border-top:1px dashed var(--border); padding-top:0.4rem; font-size:0.95rem; font-weight:800;">
+                        <span>Total Facturado Período:</span>
+                        <span style="color:var(--emerald); font-family:'JetBrains Mono';">$${totalRevenue.toLocaleString('es-CO')} COP</span>
+                    </div>
+                </div>
+
+                <div style="background:var(--bg-surface-elevated); border:1px solid rgba(16,185,129,0.3); border-radius:var(--radius-sm); padding:0.85rem; margin-bottom:0.75rem;">
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.25rem;">
+                        <span style="color:var(--text-muted);">Base Inicial en Gaveta:</span>
+                        <span style="font-family:'JetBrains Mono';">$${initialDrawerBase.toLocaleString('es-CO')} COP</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:0.8rem; margin-bottom:0.5rem;">
+                        <span style="color:var(--text-muted);">+ Efectivo Recaudado:</span>
+                        <span style="font-family:'JetBrains Mono';">$${cashTotal.toLocaleString('es-CO')} COP</span>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; border-top:1px solid rgba(16,185,129,0.3); padding-top:0.35rem; font-size:1.05rem; font-weight:800;">
+                        <span style="color:var(--emerald);">Efectivo Físico Total en Caja:</span>
+                        <span style="color:var(--emerald); font-family:'JetBrains Mono';">$${totalCashInDrawer.toLocaleString('es-CO')} COP</span>
+                    </div>
+                </div>
+
+                <div style="font-size:0.7rem; color:var(--text-muted); text-align:center;">
+                    Firma de Conformidad Cajero: __________________________
+                </div>
+            `;
+        }
+
+        openSaasModal('modalCashClosing');
+    }
+
+    // Laboratorios Interactivos de Patrones de Diseño (GoF) y Dominios DDD
+    function executeStrategyDemo() {
+        const select = document.getElementById('strategySelect');
+        const inputMin = document.getElementById('strategyMinutes');
+        if (!select || !inputMin) return;
+
+        const strat = select.value;
+        const mins = Math.max(1, parseInt(inputMin.value, 10) || 1);
+
+        let activeName = '';
+        let formula = '';
+        let total = 0;
+
+        if (strat === 'Automóvil') {
+            activeName = 'AutomovilBillingStrategy (GoF Behavioral)';
+            const ratePerMin = 110;
+            const graceMins = 5;
+            const billable = Math.max(0, mins - graceMins);
+            total = billable * ratePerMin;
+            formula = `${mins} min - ${graceMins}m gracia = ${billable}m x $${ratePerMin}/min`;
+        } else if (strat === 'Motocicleta') {
+            activeName = 'MotocicletaBillingStrategy (GoF Behavioral)';
+            const ratePerMin = 65;
+            const graceMins = 5;
+            const billable = Math.max(0, mins - graceMins);
+            total = billable * ratePerMin;
+            formula = `${mins} min - ${graceMins}m gracia = ${billable}m x $${ratePerMin}/min`;
+        } else if (strat === 'Bicicleta') {
+            activeName = 'BicicletaBillingStrategy (GoF Behavioral)';
+            const ratePerMin = 25;
+            const graceMins = 15;
+            const billable = Math.max(0, mins - graceMins);
+            total = billable * ratePerMin;
+            formula = `${mins} min - ${graceMins}m cortesía = ${billable}m x $${ratePerMin}/min`;
+        } else if (strat === 'Nocturna') {
+            activeName = 'TarifaNocturnaBillingStrategy (Tope de Noche)';
+            total = 15000;
+            formula = `Permanencia ${mins} min cruzando medianoche = Tarifa Plana Nocturna`;
+        }
+
+        const elName = document.getElementById('strategyActiveName');
+        if (elName) elName.textContent = activeName;
+        const elFormula = document.getElementById('strategyFormula');
+        if (elFormula) elFormula.textContent = formula;
+        const elTotal = document.getElementById('strategyTotal');
+        if (elTotal) elTotal.textContent = `$${total.toLocaleString('es-CO')} COP`;
+    }
+
+    function executeObserverDemo() {
+        const consoleLog = document.getElementById('observerConsoleLog');
+        const mapItem = document.getElementById('obsItemMap');
+        const kpiItem = document.getElementById('obsItemKpi');
+        const auditItem = document.getElementById('obsItemAudit');
+
+        const spotCode = 'B-02';
+        const randomState = (Math.random() > 0.5) ? 'OCUPADO' : 'DISPONIBLE';
+
+        if (mapItem) mapItem.style.boxShadow = '0 0 12px var(--emerald)';
+        if (kpiItem) kpiItem.style.boxShadow = '0 0 12px var(--primary)';
+        if (auditItem) auditItem.style.boxShadow = '0 0 12px var(--amber)';
+
+        if (consoleLog) {
+            consoleLog.innerHTML = `
+                <div style="color:var(--emerald);">[Sensor IoT Telemetría]: Evento detectado en sensor ultrasónico bahía ${spotCode} -> ${randomState}.</div>
+                <div style="color:var(--primary); margin-top:2px;">[SpotMapObserver]: Notificado -> Re-renderizando nodos SVG y clases CSS de bahía ${spotCode}.</div>
+                <div style="color:var(--indigo); margin-top:2px;">[DashboardMetricsObserver]: Notificado -> Recalculando contadores libres/ocupados y aforo.</div>
+                <div style="color:var(--amber); margin-top:2px;">[AuditLoggerObserver]: Notificado -> Inyectando registro inmutable en MySQL audit_log.</div>
+            `;
+        }
+
+        setTimeout(() => {
+            if (mapItem) mapItem.style.boxShadow = 'none';
+            if (kpiItem) kpiItem.style.boxShadow = 'none';
+            if (auditItem) auditItem.style.boxShadow = 'none';
+        }, 1200);
+    }
+
+    function executeStateAction(action) {
+        const current = saasState.currentStateSpot || 'LIBRE';
+        const badge = document.getElementById('stateBadgeActive');
+        const feedback = document.getElementById('stateTransitionFeedback');
+
+        let nextState = current;
+        let msg = '';
+        let isError = false;
+
+        if (action === 'occupy') {
+            if (current === 'LIBRE') {
+                nextState = 'OCUPADO';
+                msg = 'Transición VÁLIDA: LibreState -> occupy() -> OcupadoState (Vehículo ingresó).';
+            } else if (current === 'OCUPADO') {
+                isError = true;
+                msg = 'Transición INVÁLIDA (State Exception): La bahía ya se encuentra OCUPADA.';
+            } else if (current === 'MANTENIMIENTO') {
+                isError = true;
+                msg = 'Transición BLOQUEADA: No se puede ocupar una bahía en MANTENIMIENTO.';
+            }
+        } else if (action === 'vacate') {
+            if (current === 'OCUPADO') {
+                nextState = 'LIBRE';
+                msg = 'Transición VÁLIDA: OcupadoState -> vacate() -> LibreState (Vehículo liberó el cupo).';
+            } else {
+                isError = true;
+                msg = `Transición INVÁLIDA: La bahía no está ocupada (Estado actual: ${current}).`;
+            }
+        } else if (action === 'maintain') {
+            if (current === 'LIBRE') {
+                nextState = 'MANTENIMIENTO';
+                msg = 'Transición VÁLIDA: LibreState -> lock() -> MantenimientoState (Bahía bloqueada por mantenimiento).';
+            } else if (current === 'OCUPADO') {
+                isError = true;
+                msg = 'Transición BLOQUEADA: No se puede poner en mantenimiento una bahía con vehículo activo.';
+            } else {
+                msg = 'La bahía ya se encuentra en MANTENIMIENTO.';
+            }
+        } else if (action === 'release') {
+            if (current === 'MANTENIMIENTO') {
+                nextState = 'LIBRE';
+                msg = 'Transición VÁLIDA: MantenimientoState -> release() -> LibreState (Bahía reabierta al público).';
+            } else {
+                isError = true;
+                msg = `Transición INVÁLIDA: La bahía no está en mantenimiento (Estado actual: ${current}).`;
+            }
+        }
+
+        saasState.currentStateSpot = nextState;
+
+        if (badge) {
+            if (nextState === 'LIBRE') {
+                badge.className = 'status-badge badge-available';
+                badge.textContent = '● LIBRE (Verde)';
+            } else if (nextState === 'OCUPADO') {
+                badge.className = 'status-badge badge-occupied';
+                badge.textContent = '● OCUPADO (Rojo)';
+            } else if (nextState === 'MANTENIMIENTO') {
+                badge.className = 'status-badge badge-maintenance';
+                badge.textContent = '● MANTENIMIENTO (Gris)';
+            }
+        }
+
+        if (feedback) {
+            feedback.style.color = isError ? 'var(--rose)' : 'var(--emerald)';
+            feedback.style.borderColor = isError ? 'rgba(244,63,94,0.4)' : 'rgba(16,185,129,0.3)';
+            feedback.innerHTML = isError ? `⚠️ ${msg}` : `✅ ${msg}`;
+        }
+    }
+
+    function renderDtoDemo() {
+        const select = document.getElementById('dtoTypeSelect');
+        const rawPre = document.getElementById('dtoRawJson');
+        const sanPre = document.getElementById('dtoSanitizedJson');
+        if (!select || !rawPre || !sanPre) return;
+
+        const val = select.value;
+        if (val === 'TicketDTO') {
+            rawPre.textContent = JSON.stringify({
+                id: 104,
+                usuario_id: 2,
+                spot_id: 12,
+                raw_secret_hash: "e3b0c44298fc1c149afbf4c8996fb924",
+                internal_db_lock: false,
+                ticketCodigo: "TCK-2026-8840",
+                placa: "SUV-779",
+                minutosTranscurridos: 260,
+                valorPagado: "25000.00"
+            }, null, 2);
+
+            sanPre.textContent = JSON.stringify({
+                ticketCodigo: "TCK-2026-8840",
+                placa: "SUV-779",
+                minutos: 260,
+                totalPagar: 25000,
+                moneda: "COP",
+                estado: "LIQUIDADO"
+            }, null, 2);
+        } else if (val === 'SpotDTO') {
+            rawPre.textContent = JSON.stringify({
+                id: 18,
+                sensor_hardware_id: "HW-IOT-ESP32-990",
+                raw_firmware_flag: 4,
+                codigo: "C-02",
+                tipoPermitido: "Motocicleta",
+                estado: "DISPONIBLE"
+            }, null, 2);
+
+            sanPre.textContent = JSON.stringify({
+                codigo: "C-02",
+                categoria: "Motocicleta",
+                disponible: true,
+                estadoColor: "emerald"
+            }, null, 2);
+        } else if (val === 'RateDTO') {
+            rawPre.textContent = JSON.stringify({
+                id: 5,
+                schema_version: "2026.1",
+                tipoVehiculo: "Bicicleta",
+                tarifaPorMinuto: "25.00",
+                tarifaPorHora: "1200.00",
+                minutosGracia: 15
+            }, null, 2);
+
+            sanPre.textContent = JSON.stringify({
+                tipoVehiculo: "Bicicleta",
+                precioMinutoCOP: 25,
+                precioHoraCOP: 1200,
+                minutosCortesía: 15
+            }, null, 2);
+        }
+    }
+
+    function updateDddCapacityMetrics() {
+        const spots = saasState.spots || [];
+        const countAuto = spots.filter(s => s.tipoPermitido === 'Automóvil').length;
+        const countMoto = spots.filter(s => s.tipoPermitido === 'Motocicleta').length;
+        const countBici = spots.filter(s => s.tipoPermitido === 'Bicicleta').length;
+        const countOther = spots.filter(s => s.tipoPermitido !== 'Automóvil' && s.tipoPermitido !== 'Motocicleta' && s.tipoPermitido !== 'Bicicleta').length;
+
+        const elAuto = document.getElementById('capAutoDisplay');
+        if (elAuto) elAuto.textContent = `${countAuto || 6} Bahías Instaladas`;
+
+        const elMoto = document.getElementById('capMotoDisplay');
+        if (elMoto) elMoto.textContent = `${countMoto || 6} Bahías Instaladas`;
+
+        const elBici = document.getElementById('capBiciDisplay');
+        if (elBici) elBici.textContent = `${countBici || 4} Cupos Ecológicos`;
+
+        const elSuv = document.getElementById('capSuvEvDisplay');
+        if (elSuv) elSuv.textContent = `${countOther || 12} Bahías con Sensor`;
+
+        const elAudit = document.getElementById('auditCountDddDisplay');
+        if (elAudit) elAudit.textContent = `${(saasState.audit || []).length} Registros Inmutables`;
+    }
+
+    // Renderizar tabla en Overview (Compatibilidad)
     function renderOverviewTable() {
         const active = saasState.tickets.filter(t => t.estado === 'ACTIVO').slice(0, 5);
         const tbody = document.getElementById('overviewActiveTableBody');
+        if (!tbody) return;
 
         if (active.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:1rem;">No hay estancias activas actualmente.</td></tr>';

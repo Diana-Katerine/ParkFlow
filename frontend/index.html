@@ -159,6 +159,16 @@
                     <span>Portal Ciudadano</span>
                 </div>
             </button>
+
+            <div class="nav-group-label">Arquitectura</div>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-patterns', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">🧩</span>
+                    <span>Patrones & Dominios DDD</span>
+                </div>
+                <span class="nav-pill-badge pill-primary">DDD & GoF</span>
+            </button>
         </div>
 
         <!-- User Profile Card in Sidebar -->
@@ -254,173 +264,236 @@
             <!-- 1. VIEW: DASHBOARD GENERAL (SaaS Overview & Analytics)   -->
             <!-- ======================================================== -->
             <div id="view-overview" class="view-panel active">
-                
-                <!-- KPI Stat Cards -->
+
+                <!-- Barra de Control del Administrador: Período y Acciones Rápidas -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem; flex-wrap:wrap; gap:0.75rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Filtrar Período:</span>
+                        <div style="display:flex; gap:0.25rem; background:var(--bg-surface); padding:0.2rem; border-radius:var(--radius-md); border:1px solid var(--border);">
+                            <button type="button" class="btn btn-primary btn-sm" id="btnAdminPeriodToday" onclick="setAdminPeriodFilter('today')" style="font-size:0.72rem; padding:0.25rem 0.6rem;">📅 Hoy</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btnAdminPeriodWeek" onclick="setAdminPeriodFilter('week')" style="font-size:0.72rem; padding:0.25rem 0.6rem;">📅 Esta Semana</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btnAdminPeriodMonth" onclick="setAdminPeriodFilter('month')" style="font-size:0.72rem; padding:0.25rem 0.6rem;">📅 Este Mes</button>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btnAdminPeriodAll" onclick="setAdminPeriodFilter('all')" style="font-size:0.72rem; padding:0.25rem 0.6rem;">📅 Todo el Historial</button>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="exportFinancialReportCsv()">
+                            📥 Exportar Reporte CSV
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm" onclick="openCashClosingModal()">
+                            🧾 Arqueo / Cierre de Caja
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KPI Stat Cards Financieros y Operativos -->
                 <div class="kpi-grid">
-                    <!-- KPI 1: Ingresos Totales -->
-                    <div class="kpi-card">
+                    <!-- KPI 1: Dinero Ganado / Recaudo -->
+                    <div class="kpi-card" style="border-left:3px solid var(--emerald);">
                         <div class="kpi-top">
-                            <span class="kpi-label">Recaudo Acumulado</span>
+                            <span class="kpi-label">Dinero Recaudado</span>
                             <div class="kpi-icon-badge" style="background:var(--emerald-subtle); color:var(--emerald);">💵</div>
                         </div>
-                        <div class="kpi-value" id="kpiTotalRevenue">$0</div>
-                        <div class="kpi-bottom">
-                            <span class="trend-chip trend-up">↑ +14.8%</span>
-                            <span style="color:var(--text-muted);">vs periodo anterior</span>
+                        <div class="kpi-value" id="kpiTotalRevenue" style="color:var(--emerald);">$0</div>
+                        <div class="kpi-bottom" style="display:flex; justify-content:space-between; width:100%;">
+                            <span class="trend-chip trend-up" id="kpiRevenueTrend">↑ En Vivo</span>
+                            <span style="color:var(--text-muted); font-size:0.75rem;" id="kpiPeriodLabel">Ingresos del período</span>
                         </div>
                     </div>
 
-                    <!-- KPI 2: Ocupación en Tiempo Real -->
-                    <div class="kpi-card">
+                    <!-- KPI 2: Ticket Promedio por Vehículo -->
+                    <div class="kpi-card" style="border-left:3px solid var(--primary);">
                         <div class="kpi-top">
-                            <span class="kpi-label">Ocupación Actual</span>
-                            <div class="kpi-icon-badge" style="background:rgba(0,245,255,0.15); color:var(--primary);">🅿️</div>
+                            <span class="kpi-label">Ticket Promedio</span>
+                            <div class="kpi-icon-badge" style="background:rgba(0,245,255,0.15); color:var(--primary);">🎯</div>
+                        </div>
+                        <div class="kpi-value" id="kpiAvgTicket">$0</div>
+                        <div class="kpi-bottom">
+                            <span style="color:var(--text-muted); font-size:0.75rem;">Facturación media por estancia</span>
+                        </div>
+                    </div>
+
+                    <!-- KPI 3: Ocupación en Tiempo Real -->
+                    <div class="kpi-card" style="border-left:3px solid var(--indigo);">
+                        <div class="kpi-top">
+                            <span class="kpi-label">Ocupación de Parqueadero</span>
+                            <div class="kpi-icon-badge" style="background:var(--indigo-subtle); color:var(--indigo);">🅿️</div>
                         </div>
                         <div class="kpi-value" id="kpiOccupancyPct">0%</div>
                         <div class="kpi-bottom" style="flex-direction:column; align-items:flex-start; width:100%;">
-                            <div style="display:flex; justify-content:space-between; width:100%; font-size:0.75rem; color:var(--text-muted);">
+                            <div style="display:flex; justify-content:space-between; width:100%; font-size:0.75rem; color:var(--text-muted); margin-bottom:0.25rem;">
                                 <span id="kpiOccupiedSpotsText">0 ocupados</span>
-                                <span id="kpiFreeSpotsText">24 disponibles</span>
+                                <span id="kpiFreeSpotsText">28 disponibles</span>
                             </div>
-                            <div class="progress-track">
+                            <div class="progress-track" style="width:100%;">
                                 <div class="progress-bar-fill" id="kpiOccupancyBar" style="width:0%;"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- KPI 3: Vehículos Activos -->
-                    <div class="kpi-card">
+                    <!-- KPI 4: Vehículos y Rotación -->
+                    <div class="kpi-card" style="border-left:3px solid var(--amber);">
                         <div class="kpi-top">
                             <span class="kpi-label">Estancias Activas</span>
-                            <div class="kpi-icon-badge" style="background:var(--indigo-subtle); color:var(--indigo);">🚘</div>
+                            <div class="kpi-icon-badge" style="background:rgba(245,158,11,0.15); color:var(--amber);">🚘</div>
                         </div>
                         <div class="kpi-value" id="kpiActiveVehicles">0</div>
-                        <div class="kpi-bottom">
-                            <span class="status-badge badge-active-live">En parqueadero</span>
-                            <span id="kpiMidnightCount" style="color:var(--amber); font-weight:700;">0 nocturnos</span>
-                        </div>
-                    </div>
-
-                    <!-- KPI 4: Telemetría Sensores IoT -->
-                    <div class="kpi-card">
-                        <div class="kpi-top">
-                            <span class="kpi-label">Salud de Red IoT</span>
-                            <div class="kpi-icon-badge" style="background:rgba(245,158,11,0.15); color:var(--amber);">📡</div>
-                        </div>
-                        <div class="kpi-value" id="kpiSensorHealth">99.8%</div>
-                        <div class="kpi-bottom">
-                            <span class="trend-chip trend-up">✓ Nominal</span>
-                            <span style="color:var(--text-muted);">24 nodos activos</span>
+                        <div class="kpi-bottom" style="display:flex; justify-content:space-between; width:100%;">
+                            <span class="status-badge badge-active-live">En curso</span>
+                            <span id="kpiMidnightCount" style="color:var(--amber); font-weight:700; font-size:0.75rem;">0 nocturnos</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- SaaS Interactive Charts Row -->
-                <div class="analytics-grid">
-                    <!-- Curva de Tráfico y Flujo (SVG Bezier Graph) -->
+                <!-- Panel de Métodos de Pago y Desglose Financiero -->
+                <div class="saas-card" style="margin-bottom:1.5rem; background:var(--bg-surface);">
+                    <div class="card-header-flex" style="margin-bottom:0.75rem;">
+                        <div>
+                            <h3 class="card-heading-title">💳 Distribución de Dinero por Método de Pago</h3>
+                            <p class="card-heading-sub">Desglose de ingresos recaudados en efectivo, tarjetas y transferencias QR</p>
+                        </div>
+                        <div style="font-family:'JetBrains Mono'; font-weight:800; color:var(--emerald);" id="paymentSummaryTotal">$0 COP</div>
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem;">
+                        <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">💵 EFECTIVO</span>
+                                <span class="role-badge-tag pill-emerald" id="payCashPct">0%</span>
+                            </div>
+                            <div style="font-size:1.25rem; font-weight:900; color:var(--text-heading); font-family:'JetBrains Mono';" id="payCashTotal">$0</div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.25rem;" id="payCashCount">0 transacciones</div>
+                        </div>
+                        <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">💳 TARJETAS</span>
+                                <span class="role-badge-tag pill-primary" id="payCardPct">0%</span>
+                            </div>
+                            <div style="font-size:1.25rem; font-weight:900; color:var(--text-heading); font-family:'JetBrains Mono';" id="payCardTotal">$0</div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.25rem;" id="payCardCount">0 transacciones</div>
+                        </div>
+                        <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+                                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">📱 QR DIGITAL (NEQUI/BANCO)</span>
+                                <span class="role-badge-tag pill-amber" id="payQrPct">0%</span>
+                            </div>
+                            <div style="font-size:1.25rem; font-weight:900; color:var(--text-heading); font-family:'JetBrains Mono';" id="payQrTotal">$0</div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); margin-top:0.25rem;" id="payQrCount">0 transacciones</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficas Dinámicas de Flujo e Ingresos -->
+                <div class="analytics-grid" style="margin-bottom:1.5rem;">
+                    <!-- Gráfica 1: Curva de Recaudación Financiera y Afluencia por Horas -->
                     <div class="saas-card">
                         <div class="card-header-flex">
                             <div>
-                                <h3 class="card-heading-title">📈 Flujo Vehicular & Ingresos por Franja Horaria</h3>
-                                <p class="card-heading-sub">Monitoreo de afluencia de vehículos en las últimas 24 horas</p>
+                                <h3 class="card-heading-title">📈 Recaudación & Flujo Vehicular por Horas</h3>
+                                <p class="card-heading-sub">Dinero recaudado y vehículos por franja horaria</p>
                             </div>
-                            <div style="display:flex; gap:0.5rem;">
-                                <span class="nav-pill-badge pill-primary">Tiempo Real</span>
-                            </div>
+                            <span class="nav-pill-badge pill-emerald">En Vivo</span>
                         </div>
-                        <div class="chart-container">
+                        <div class="chart-container" id="adminRevenueChartContainer">
                             <svg viewBox="0 0 700 180" style="width:100%; height:100%; overflow:visible;">
                                 <defs>
-                                    <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
-                                        <stop offset="0%" stop-color="#00f5ff" stop-opacity="0.35"/>
-                                        <stop offset="100%" stop-color="#00f5ff" stop-opacity="0.0"/>
+                                    <linearGradient id="chartGradientRev" x1="0" y1="0" x2="0" y2="1">
+                                        <stop offset="0%" stop-color="#10b981" stop-opacity="0.35"/>
+                                        <stop offset="100%" stop-color="#10b981" stop-opacity="0.0"/>
                                     </linearGradient>
                                 </defs>
-                                <!-- Grid lines -->
                                 <line x1="0" y1="30" x2="700" y2="30" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4"/>
                                 <line x1="0" y1="80" x2="700" y2="80" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4"/>
                                 <line x1="0" y1="130" x2="700" y2="130" stroke="rgba(255,255,255,0.05)" stroke-dasharray="4"/>
-                                <!-- Area fill -->
-                                <path d="M 0,160 Q 70,140 140,90 T 280,60 T 420,110 T 560,40 T 700,80 L 700,170 L 0,170 Z" fill="url(#chartGradient)" />
-                                <!-- Spline Stroke -->
-                                <path d="M 0,160 Q 70,140 140,90 T 280,60 T 420,110 T 560,40 T 700,80" fill="none" stroke="#00f5ff" stroke-width="3" stroke-linecap="round" />
-                                <!-- Highlights -->
-                                <circle cx="280" cy="60" r="5" fill="#00f5ff" stroke="#060911" stroke-width="2" />
-                                <circle cx="560" cy="40" r="5" fill="#00f5ff" stroke="#060911" stroke-width="2" />
-                                <text x="280" y="45" fill="#00f5ff" font-size="11" font-family="'JetBrains Mono'" text-anchor="middle" font-weight="700">Pico 14:00 (18 autos)</text>
-                                <text x="560" y="25" fill="#00f5ff" font-size="11" font-family="'JetBrains Mono'" text-anchor="middle" font-weight="700">Pico 19:30 (22 autos)</text>
+                                <path id="svgDynamicArea" d="M 0,160 Q 70,140 140,90 T 280,60 T 420,110 T 560,40 T 700,80 L 700,170 L 0,170 Z" fill="url(#chartGradientRev)" />
+                                <path id="svgDynamicLine" d="M 0,160 Q 70,140 140,90 T 280,60 T 420,110 T 560,40 T 700,80" fill="none" stroke="#10b981" stroke-width="3" stroke-linecap="round" />
+                                <circle cx="280" cy="60" r="5" fill="#10b981" stroke="#060911" stroke-width="2" />
+                                <circle cx="560" cy="40" r="5" fill="#10b981" stroke="#060911" stroke-width="2" />
+                                <text x="280" y="45" fill="#10b981" font-size="11" font-family="'JetBrains Mono'" text-anchor="middle" font-weight="700">Pico Turno Tarde</text>
+                                <text x="560" y="25" fill="#10b981" font-size="11" font-family="'JetBrains Mono'" text-anchor="middle" font-weight="700">Pico Cierre Noche</text>
                             </svg>
                         </div>
                     </div>
 
-                    <!-- Donut Distribution of Fleet -->
+                    <!-- Gráfica 2: Donut Distribución de Flota y Recaudo por Categoría -->
                     <div class="saas-card">
                         <div class="card-header-flex">
                             <div>
-                                <h3 class="card-heading-title">🚗 Distribución por Flota</h3>
-                                <p class="card-heading-sub">Proporción por tipo de vehículo</p>
+                                <h3 class="card-heading-title">🚗 Recaudo y Flota por Categoría</h3>
+                                <p class="card-heading-sub">Participación porcentual y dinero ganado</p>
                             </div>
                         </div>
-                        <div style="display:flex; align-items:center; justify-content:center; height:120px;">
-                            <svg viewBox="0 0 100 100" style="width:120px; height:120px; transform:rotate(-90deg);">
+                        <div style="display:flex; align-items:center; justify-content:center; height:120px; margin-bottom:0.75rem;">
+                            <svg viewBox="0 0 100 100" style="width:120px; height:120px; transform:rotate(-90deg);" id="adminFleetDonutSvg">
                                 <circle cx="50" cy="50" r="38" fill="none" stroke="#0f172a" stroke-width="12"/>
-                                <!-- Autos: 45% -->
-                                <circle cx="50" cy="50" r="38" fill="none" stroke="#00f5ff" stroke-width="12" stroke-dasharray="107 239" stroke-dashoffset="0"/>
-                                <!-- Motos: 25% -->
-                                <circle cx="50" cy="50" r="38" fill="none" stroke="#6366f1" stroke-width="12" stroke-dasharray="60 239" stroke-dashoffset="-107"/>
-                                <!-- EV: 15% -->
-                                <circle cx="50" cy="50" r="38" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="36 239" stroke-dashoffset="-167"/>
-                                <!-- Camionetas: 15% -->
-                                <circle cx="50" cy="50" r="38" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="36 239" stroke-dashoffset="-203"/>
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#00f5ff" stroke-width="12" stroke-dasharray="90 239" stroke-dashoffset="0"/>
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#6366f1" stroke-width="12" stroke-dasharray="50 239" stroke-dashoffset="-90"/>
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#10b981" stroke-width="12" stroke-dasharray="40 239" stroke-dashoffset="-140"/>
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#f59e0b" stroke-width="12" stroke-dasharray="35 239" stroke-dashoffset="-180"/>
+                                <circle cx="50" cy="50" r="38" fill="none" stroke="#ec4899" stroke-width="12" stroke-dasharray="24 239" stroke-dashoffset="-215"/>
                             </svg>
                         </div>
                         <div class="donut-legend">
                             <div class="legend-row">
                                 <div class="legend-left"><div class="legend-color-dot" style="background:#00f5ff;"></div><span>Automóviles</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distAutoCount">45%</span>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distAutoCount">0%</span>
                             </div>
                             <div class="legend-row">
                                 <div class="legend-left"><div class="legend-color-dot" style="background:#6366f1;"></div><span>Motocicletas</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distMotoCount">25%</span>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distMotoCount">0%</span>
                             </div>
                             <div class="legend-row">
-                                <div class="legend-left"><div class="legend-color-dot" style="background:#10b981;"></div><span>Eléctricos EV</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distEvCount">15%</span>
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#10b981;"></div><span>Bicicletas</span></div>
+                                <span style="font-weight:700; color:var(--emerald);" id="distBiciCount">0%</span>
                             </div>
                             <div class="legend-row">
                                 <div class="legend-left"><div class="legend-color-dot" style="background:#f59e0b;"></div><span>Camionetas / SUV</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distSuvCount">15%</span>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distSuvCount">0%</span>
+                            </div>
+                            <div class="legend-row">
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#ec4899;"></div><span>Eléctricos EV</span></div>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distEvCount">0%</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Active Stays Quick Table -->
+                <!-- MONITOR EN VIVO DE MOVIMIENTOS DEL PARQUEADERO -->
                 <div class="table-card">
-                    <div class="table-toolbar">
+                    <div class="table-toolbar" style="flex-wrap:wrap; gap:0.75rem;">
                         <div>
-                            <h3 style="font-size:0.95rem; font-weight:700; color:var(--text-heading);">Vehículos en Estancia Activa</h3>
-                            <p style="font-size:0.75rem; color:var(--text-muted);">Sincronizado en tiempo real con MySQL</p>
+                            <h3 style="font-size:1rem; font-weight:800; color:var(--text-heading);">🔄 Monitor de Movimientos del Parqueadero en Tiempo Real</h3>
+                            <p style="font-size:0.75rem; color:var(--text-muted);">Registro en vivo de ingresos, salidas, cobros monetarios y eventos de bahía</p>
                         </div>
-                        <button type="button" class="btn btn-secondary btn-sm" onclick="switchSaasView('view-operations')">
-                            Ver Todas las Operaciones →
-                        </button>
+                        <div style="display:flex; gap:0.5rem; align-items:center;">
+                            <!-- Filtro de Movimientos -->
+                            <select id="adminMovementFilter" class="form-control-saas" style="font-size:0.75rem; padding:0.3rem 0.6rem; width:auto;" onchange="filterAdminMovements(this.value)">
+                                <option value="ALL">Todos los Movimientos</option>
+                                <option value="INGRESO">🎟️ Solo Ingresos</option>
+                                <option value="SALIDA">💳 Solo Salidas & Cobros</option>
+                                <option value="NOCTURNO">🌙 Cruces de Medianoche</option>
+                            </select>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="syncAllFromDatabase()">
+                                <span>🔄</span> Refrescar
+                            </button>
+                        </div>
                     </div>
                     <div class="table-responsive">
                         <table class="saas-table">
                             <thead>
                                 <tr>
+                                    <th>Fecha / Hora</th>
                                     <th>Ticket</th>
                                     <th>Placa</th>
-                                    <th>Tipo Vehículo</th>
+                                    <th>Categoría</th>
                                     <th>Bahía</th>
-                                    <th>Hora Entrada</th>
+                                    <th>Tipo Movimiento</th>
+                                    <th>Operador</th>
+                                    <th style="text-align:right;">Monto Liquidado</th>
                                     <th>Estado</th>
-                                    <th>Acción</th>
                                 </tr>
                             </thead>
-                            <tbody id="overviewActiveTableBody">
-                                <tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:1.5rem;">Cargando estancias desde MySQL...</td></tr>
+                            <tbody id="adminMovementsTableBody">
+                                <tr><td colspan="9" style="text-align:center; color:var(--text-muted); padding:1.5rem;">Cargando movimientos del parqueadero...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -944,6 +1017,429 @@
                 </div>
             </div>
 
+            <!-- ======================================================== -->
+            <!-- 8. VIEW: DOMINIOS DEL SISTEMA (DDD) & PATRONES DE DISEÑO -->
+            <!-- ======================================================== -->
+            <div id="view-patterns" class="view-panel">
+                <!-- Header Banner -->
+                <div class="saas-card" style="margin-bottom:1.5rem; border-left:4px solid var(--primary); background:linear-gradient(135deg, rgba(14,165,233,0.08) 0%, rgba(15,23,42,0.6) 100%);">
+                    <div class="card-header-flex">
+                        <div>
+                            <div class="role-badge-tag pill-primary" style="margin-bottom:0.4rem;">ARQUITECTURA DE SOFTWARE · DDD & GOF</div>
+                            <h2 style="font-size:1.35rem; font-weight:800; color:var(--text-heading); margin-bottom:0.35rem;">
+                                🧩 Dominios del Sistema (DDD) & Patrones de Diseño
+                            </h2>
+                            <p style="font-size:0.85rem; color:var(--text-muted); max-width:850px; line-height:1.5;">
+                                Modelado formal de <strong>ParkFlow</strong> basado en Bounded Contexts y en los cuatro patrones de diseño recomendados: <em>Strategy</em>, <em>Observer</em>, <em>State</em> y <em>Data Transfer Object (DTO)</em>.
+                            </p>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="syncAllFromDatabase()">
+                            <span>🔄</span> Sincronizar Dominios
+                        </button>
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 1: DOMINIOS DEL SISTEMA (DDD) -->
+                <div style="margin-bottom:2rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <div>
+                            <h3 style="font-size:1.1rem; font-weight:800; color:var(--text-heading);">🏛️ Dominios del Sistema (Domain-Driven Design)</h3>
+                            <p style="font-size:0.78rem; color:var(--text-muted);">Tres Bounded Contexts de alta cohesión gobernando la operativa vehicular, contable y de seguridad</p>
+                        </div>
+                        <span class="status-badge badge-active-live">3 Bounded Contexts Activos</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:1.25rem;">
+                        
+                        <!-- Dominio 1: Acceso y Estacionamiento -->
+                        <div class="saas-card" style="border-top:3px solid var(--emerald); display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span class="role-badge-tag pill-emerald">Core Domain</span>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Context: /AccessControl</span>
+                                </div>
+                                <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-bottom:0.5rem;">
+                                    🚗 Dominio de Acceso y Estacionamiento
+                                </h4>
+                                <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                    Gestiona la ocupación, controlando el ingreso y salida de vehículos a través del número de placa. Administra la capacidad máxima instalada para automóviles, motocicletas y bicicletas.
+                                </p>
+
+                                <!-- Medidores de Capacidad Máxima Instalada -->
+                                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem; margin-bottom:1rem;">
+                                    <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.5rem;">
+                                        Capacidad Máxima Instalada (28 Cupos):
+                                    </div>
+                                    <div style="display:flex; flex-direction:column; gap:0.45rem; font-size:0.75rem;">
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>🚗 Automóviles (Zona A):</span>
+                                            <strong id="capAutoDisplay">6 Bahías Instaladas</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>🏍️ Motocicletas (Zona C):</span>
+                                            <strong id="capMotoDisplay">6 Bahías Instaladas</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>🚲 Bicicletas (Zona E):</span>
+                                            <strong id="capBiciDisplay" style="color:var(--emerald);">4 Cupos Ecológicos</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>⚡ EV & Camionetas (B y D):</span>
+                                            <strong id="capSuvEvDisplay">12 Bahías con Sensor</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:1rem;">
+                                    <strong>Agregados & Entidades:</strong> <code>Vehículo</code>, <code>Espacio/Bahía</code>, <code>SensorIoT</code>, <code>CapacidadMáxima</code>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:0.5rem; border-top:1px solid var(--border); padding-top:0.75rem;">
+                                <button type="button" class="btn btn-secondary btn-sm" style="flex:1; font-size:0.75rem;" onclick="switchSaasView('view-operations')">
+                                    Ver Flujo Vehicular
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" style="font-size:0.75rem;" onclick="openSaasModal('modalCheckIn')">
+                                    + Ingreso por Placa
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dominio 2: Facturación y Tarifas -->
+                        <div class="saas-card" style="border-top:3px solid var(--primary); display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span class="role-badge-tag pill-primary">Core Domain</span>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Context: /BillingRates</span>
+                                </div>
+                                <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-bottom:0.5rem;">
+                                    💳 Dominio de Facturación y Tarifas
+                                </h4>
+                                <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                    Encargado del cálculo algorítmico de permanencia de los vehículos y la liquidación automática monetaria. Maneja los esquemas tarifarios dinámicos y la generación de los consecutivos únicos para los tickets digitales.
+                                </p>
+
+                                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem; margin-bottom:1rem;">
+                                    <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.5rem;">
+                                        Métricas de Facturación Algorítmica:
+                                    </div>
+                                    <div style="display:flex; flex-direction:column; gap:0.45rem; font-size:0.75rem;">
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Liquidación Algorítmica:</span>
+                                            <strong style="color:var(--primary);">Minutos Exactos & Mixto</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Consecutivo Ticket Único:</span>
+                                            <strong style="font-family:'JetBrains Mono';">TCK-2026-XXXX</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Tarifa Base Auto:</span>
+                                            <strong>$110 / min ($5.800/h)</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Tarifa Preferencial Bici:</span>
+                                            <strong style="color:var(--emerald);">$25 / min (15m Gracia)</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:1rem;">
+                                    <strong>Agregados & Entidades:</strong> <code>TicketDigital</code>, <code>ConsecutivoÚnico</code>, <code>MatrizTarifaria</code>, <code>AlgoritmoLiquidación</code>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:0.5rem; border-top:1px solid var(--border); padding-top:0.75rem;">
+                                <button type="button" class="btn btn-secondary btn-sm" style="flex:1; font-size:0.75rem;" onclick="switchSaasView('view-rates')">
+                                    Matriz Tarifaria
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" style="font-size:0.75rem;" onclick="openMinuteCalculatorModal()">
+                                    ⏱️ Calculadora Minutos
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Dominio 3: Identidad y Auditoría -->
+                        <div class="saas-card" style="border-top:3px solid var(--amber); display:flex; flex-direction:column; justify-content:space-between;">
+                            <div>
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span class="role-badge-tag pill-amber">Supporting Domain</span>
+                                    <span style="font-size:0.75rem; color:var(--text-muted);">Context: /IdentityAudit</span>
+                                </div>
+                                <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-bottom:0.5rem;">
+                                    🛡️ Dominio de Identidad y Auditoría
+                                </h4>
+                                <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                    Administra los perfiles de usuario y roles, específicamente Administrador y Operador. Controla la autenticación segura mediante tokens JWT y mantiene el log de auditoría de las acciones críticas.
+                                </p>
+
+                                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem; margin-bottom:1rem;">
+                                    <div style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.5rem;">
+                                        Seguridad & Trazabilidad Activa:
+                                    </div>
+                                    <div style="display:flex; flex-direction:column; gap:0.45rem; font-size:0.75rem;">
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Tokens de Autenticación:</span>
+                                            <strong style="color:var(--emerald);">JWT HMAC-SHA256</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Roles Gestionados:</span>
+                                            <strong>Administrador, Operador, Cliente</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Log de Auditoría MySQL:</span>
+                                            <strong id="auditCountDddDisplay">Registros Inmutables</strong>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between;">
+                                            <span>Acciones Críticas Auditadas:</span>
+                                            <strong>Tarifas, Salidas, Medianoche</strong>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div style="font-size:0.72rem; color:var(--text-muted); margin-bottom:1rem;">
+                                    <strong>Agregados & Entidades:</strong> <code>Usuario</code>, <code>RolRBAC</code>, <code>TokenJWT</code>, <code>BitácoraAuditoría</code>
+                                </div>
+                            </div>
+
+                            <div style="display:flex; gap:0.5rem; border-top:1px solid var(--border); padding-top:0.75rem;">
+                                <button type="button" class="btn btn-secondary btn-sm" style="flex:1; font-size:0.75rem;" onclick="switchSaasView('view-users')">
+                                    Cuentas & RBAC
+                                </button>
+                                <button type="button" class="btn btn-primary btn-sm" style="font-size:0.75rem;" onclick="switchSaasView('view-audit')">
+                                    Ver Logs Auditoría
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- SECCIÓN 2: PATRONES DE DISEÑO IMPLEMENTADOS (INTERACTIVOS) -->
+                <div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                        <div>
+                            <h3 style="font-size:1.1rem; font-weight:800; color:var(--text-heading);">⚙️ Patrones de Diseño Recomendados (GoF & Enterprise)</h3>
+                            <p style="font-size:0.78rem; color:var(--text-muted);">Cuatro patrones arquitectónicos integrados y demostrables en tiempo real</p>
+                        </div>
+                        <span class="role-badge-tag pill-primary">Demostración en Vivo</span>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(460px, 1fr)); gap:1.25rem;">
+
+                        <!-- PATRÓN 1: STRATEGY (ESTRATEGIA) -->
+                        <div class="saas-card" style="border:1px solid rgba(14,165,233,0.3);">
+                            <div class="card-header-flex">
+                                <div>
+                                    <span class="role-badge-tag pill-primary">Patrón de Comportamiento</span>
+                                    <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-top:0.25rem;">
+                                        1. Strategy (Estrategia)
+                                    </h4>
+                                </div>
+                                <span style="font-size:1.5rem;">🎯</span>
+                            </div>
+                            <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                Ideal para aislar el cálculo algorítmico de permanencia y costos. Permite intercambiar las fórmulas de cobro dependiendo de si la categoría vehicular es automóvil, motocicleta o si aplica un esquema de tarifa nocturna.
+                            </p>
+
+                            <!-- Laboratorio Interactivo Strategy -->
+                            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem;">
+                                <div style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; margin-bottom:0.75rem;">
+                                    Laboratorio Interactivo de Estrategias:
+                                </div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.75rem;">
+                                    <div>
+                                        <label class="form-label-saas" style="font-size:0.72rem;">Estrategia Concreta</label>
+                                        <select id="strategySelect" class="form-control-saas" style="font-size:0.8rem; padding:0.4rem;" onchange="executeStrategyDemo()">
+                                            <option value="Automóvil">AutomovilBillingStrategy ($110/min)</option>
+                                            <option value="Motocicleta">MotocicletaBillingStrategy ($65/min)</option>
+                                            <option value="Bicicleta">BicicletaBillingStrategy ($25/min · 15m Gracia)</option>
+                                            <option value="Nocturna">TarifaNocturnaBillingStrategy (Tope Noche)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="form-label-saas" style="font-size:0.72rem;">Minutos de Permanencia</label>
+                                        <input type="number" id="strategyMinutes" value="45" min="1" max="1440" class="form-control-saas" style="font-size:0.8rem; padding:0.4rem; font-family:'JetBrains Mono'; font-weight:700;" oninput="executeStrategyDemo()">
+                                    </div>
+                                </div>
+
+                                <!-- Resultado dinámico Strategy -->
+                                <div style="background:var(--bg-surface-elevated); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.75rem;">
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                                        <span style="font-size:0.72rem; color:var(--text-muted);">Estrategia Invocada:</span>
+                                        <strong style="font-size:0.75rem; color:var(--primary);" id="strategyActiveName">AutomovilBillingStrategy</strong>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+                                        <span style="font-size:0.72rem; color:var(--text-muted);">Fórmula Algorítmica:</span>
+                                        <span style="font-size:0.75rem; font-family:'JetBrains Mono';" id="strategyFormula">45 min x $110/min</span>
+                                    </div>
+                                    <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px dashed var(--border); padding-top:0.4rem; margin-top:0.4rem;">
+                                        <span style="font-size:0.78rem; font-weight:700;">Liquidación Monetaria:</span>
+                                        <strong style="font-size:1.15rem; color:var(--emerald); font-family:'JetBrains Mono';" id="strategyTotal">$4.950 COP</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PATRÓN 2: OBSERVER (OBSERVADOR) -->
+                        <div class="saas-card" style="border:1px solid rgba(16,185,129,0.3);">
+                            <div class="card-header-flex">
+                                <div>
+                                    <span class="role-badge-tag pill-emerald">Patrón de Comportamiento</span>
+                                    <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-top:0.25rem;">
+                                        2. Observer (Observador)
+                                    </h4>
+                                </div>
+                                <span style="font-size:1.5rem;">📡</span>
+                            </div>
+                            <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                Fundamental para el monitoreo dinámico de disponibilidad. Cuando el operador simula la acción del sensor IoT cambiando el estado de un cupo, el patrón notifica al sistema para regenerar estructuralmente el mapa interactivo y actualizar los contadores del dashboard en tiempo real.
+                            </p>
+
+                            <!-- Laboratorio Interactivo Observer -->
+                            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+                                        Sujeto IoT & Suscriptores Activos:
+                                    </span>
+                                    <button type="button" class="btn btn-primary btn-sm" style="font-size:0.72rem; padding:0.25rem 0.6rem;" onclick="executeObserverDemo()">
+                                        ⚡ Simular Sensor IoT
+                                    </button>
+                                </div>
+
+                                <div style="display:flex; flex-direction:column; gap:0.4rem; margin-bottom:0.75rem; font-size:0.75rem;">
+                                    <div style="display:flex; align-items:center; gap:0.5rem; background:var(--bg-surface-elevated); padding:0.4rem 0.6rem; border-radius:var(--radius-sm); border-left:3px solid var(--emerald);" id="obsItemMap">
+                                        <span>🗺️</span>
+                                        <div style="flex:1;">
+                                            <strong>SpotMapObserver:</strong> Regenera la matriz visual SVG/DOM del mapa.
+                                        </div>
+                                        <span class="status-badge badge-active-live" style="font-size:0.65rem;">Listo</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:0.5rem; background:var(--bg-surface-elevated); padding:0.4rem 0.6rem; border-radius:var(--radius-sm); border-left:3px solid var(--primary);" id="obsItemKpi">
+                                        <span>📊</span>
+                                        <div style="flex:1;">
+                                            <strong>DashboardMetricsObserver:</strong> Recalcula contadores libres/ocupados.
+                                        </div>
+                                        <span class="status-badge badge-active-live" style="font-size:0.65rem;">Listo</span>
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:0.5rem; background:var(--bg-surface-elevated); padding:0.4rem 0.6rem; border-radius:var(--radius-sm); border-left:3px solid var(--amber);" id="obsItemAudit">
+                                        <span>🛡️</span>
+                                        <div style="flex:1;">
+                                            <strong>AuditLoggerObserver:</strong> Registra telemetría de sensor en MySQL.
+                                        </div>
+                                        <span class="status-badge badge-active-live" style="font-size:0.65rem;">Listo</span>
+                                    </div>
+                                </div>
+
+                                <div style="font-family:'JetBrains Mono'; font-size:0.72rem; color:var(--text-muted); background:var(--bg-surface); padding:0.5rem; border-radius:var(--radius-sm); border:1px solid var(--border);" id="observerConsoleLog">
+                                    [IoT Subject]: En espera de lectura de sensor ultrasónico...
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PATRÓN 3: STATE (ESTADO) -->
+                        <div class="saas-card" style="border:1px solid rgba(245,158,11,0.3);">
+                            <div class="card-header-flex">
+                                <div>
+                                    <span class="role-badge-tag pill-amber">Patrón de Comportamiento</span>
+                                    <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-top:0.25rem;">
+                                        3. State (Estado)
+                                    </h4>
+                                </div>
+                                <span style="font-size:1.5rem;">🔄</span>
+                            </div>
+                            <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                Aplicable al ciclo de vida de los espacios de parqueo, gestionando las transiciones válidas entre los estados "Libre" (verde), "Ocupado" (rojo) y en "Mantenimiento" (gris).
+                            </p>
+
+                            <!-- Laboratorio Interactivo State -->
+                            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+                                        Máquina de Estados de Bahía (Cupo A-02):
+                                    </span>
+                                    <div id="stateBadgeActive" class="status-badge badge-available" style="font-size:0.75rem; font-weight:800;">
+                                        ● LIBRE (Verde)
+                                    </div>
+                                </div>
+
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; margin-bottom:0.75rem;">
+                                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.35rem 0.5rem;" onclick="executeStateAction('occupy')">
+                                        🚗 Ocupar (occupy())
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.35rem 0.5rem;" onclick="executeStateAction('vacate')">
+                                        🟢 Desocupar (vacate())
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.35rem 0.5rem;" onclick="executeStateAction('maintain')">
+                                        ⚙️ Mantenimiento (lock())
+                                    </button>
+                                    <button type="button" class="btn btn-secondary btn-sm" style="font-size:0.72rem; padding:0.35rem 0.5rem;" onclick="executeStateAction('release')">
+                                        🔓 Finalizar Mant. (release())
+                                    </button>
+                                </div>
+
+                                <div id="stateTransitionFeedback" style="font-size:0.75rem; color:var(--emerald); background:var(--bg-surface-elevated); padding:0.5rem; border-radius:var(--radius-sm); border:1px solid var(--border);">
+                                    Estado inicial establecido en <strong>LibreState (DISPONIBLE)</strong>. Listo para transiciones.
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- PATRÓN 4: DATA TRANSFER OBJECT (DTO) -->
+                        <div class="saas-card" style="border:1px solid rgba(168,85,247,0.3);">
+                            <div class="card-header-flex">
+                                <div>
+                                    <span class="role-badge-tag" style="background:rgba(168,85,247,0.15); color:#a855f7;">Patrón de Estructura</span>
+                                    <h4 style="font-size:1.05rem; font-weight:800; color:var(--text-heading); margin-top:0.25rem;">
+                                        4. Data Transfer Object (DTO)
+                                    </h4>
+                                </div>
+                                <span style="font-size:1.5rem;">📦</span>
+                            </div>
+                            <p style="font-size:0.8rem; color:var(--text-body); line-height:1.5; margin-bottom:1rem;">
+                                Estándar recomendado para la comunicación en formato JSON entre la API RESTful del backend y el panel web, protegiendo el modelo de base de datos interno al enviar solo los datos necesarios al cliente.
+                            </p>
+
+                            <!-- Laboratorio Interactivo DTO -->
+                            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1rem; margin-bottom:1rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+                                    <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">
+                                        Transformación JSON Sanitizada:
+                                    </span>
+                                    <select id="dtoTypeSelect" class="form-control-saas" style="width:auto; font-size:0.72rem; padding:0.25rem 0.5rem;" onchange="renderDtoDemo()">
+                                        <option value="TicketDTO">TicketDTO (Salida)</option>
+                                        <option value="SpotDTO">SpotDTO (Telemetría)</option>
+                                        <option value="RateDTO">RateDTO (Tarifas)</option>
+                                    </select>
+                                </div>
+
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; font-size:0.7rem; font-family:'JetBrains Mono';">
+                                    <div>
+                                        <div style="color:var(--rose); font-weight:700; margin-bottom:0.25rem;">Raw MySQL Row (Interno):</div>
+                                        <pre id="dtoRawJson" style="background:var(--bg-surface); padding:0.5rem; border-radius:var(--radius-sm); border:1px solid var(--border); overflow-x:auto; max-height:140px; color:var(--text-muted);">
+{
+  "id": "LOG-1002",
+  "internal_db_lock": true,
+  "raw_sql_version": 8,
+  "placa": "SUV-779"
+}</pre>
+                                    </div>
+                                    <div>
+                                        <div style="color:var(--emerald); font-weight:700; margin-bottom:0.25rem;">Sanitized DTO (API REST):</div>
+                                        <pre id="dtoSanitizedJson" style="background:var(--bg-surface-elevated); padding:0.5rem; border-radius:var(--radius-sm); border:1px solid rgba(16,185,129,0.3); overflow-x:auto; max-height:140px; color:var(--emerald);">
+{
+  "ticketCodigo": "TCK-2026-8840",
+  "placa": "SUV-779",
+  "minutos": 260
+}</pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+
         </main>
     </div>
 </div>
@@ -972,6 +1468,7 @@
                         <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
                         <option value="Motocicleta">Motocicleta (Zona C)</option>
                         <option value="Camioneta">Camioneta / SUV (Zona D)</option>
+                        <option value="Bicicleta">Bicicleta (Zona E)</option>
                     </select>
                 </div>
                 <div class="form-row">
@@ -1290,6 +1787,23 @@
                 <button type="submit" class="btn btn-primary">Guardar en MySQL</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Modal: Arqueo y Cierre de Caja Oficial (Z-Report) -->
+<div id="modalCashClosing" class="modal-backdrop">
+    <div class="modal-container" style="max-width:480px;">
+        <div class="modal-header-saas">
+            <h3 class="modal-title-saas"><span>🧾</span> Arqueo & Cierre de Caja (Z-Report)</h3>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="closeSaasModal('modalCashClosing')">✕</button>
+        </div>
+        <div class="modal-body-saas" id="cashClosingContent">
+            <!-- Inyectado dinámicamente -->
+        </div>
+        <div class="modal-footer-saas">
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.print()">🖨️ Imprimir Comprobante Z</button>
+            <button type="button" class="btn btn-primary btn-sm" onclick="closeSaasModal('modalCashClosing')">Cerrar</button>
+        </div>
     </div>
 </div>
 

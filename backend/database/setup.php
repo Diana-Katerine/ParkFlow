@@ -52,7 +52,8 @@ try {
         ['RATE-AUTO', 'Automóvil', 110.00, 5800.00, 42000.00, 5, '2026-10-05 09:00'],
         ['RATE-MOTO', 'Motocicleta', 65.00, 3400.00, 24000.00, 5, '2026-10-05 09:00'],
         ['RATE-SUV', 'Camioneta', 135.00, 7200.00, 52000.00, 5, '2026-10-05 09:00'],
-        ['RATE-EV', 'Eléctrico EV', 95.00, 5000.00, 38000.00, 10, '2026-10-05 09:00']
+        ['RATE-EV', 'Eléctrico EV', 95.00, 5000.00, 38000.00, 10, '2026-10-05 09:00'],
+        ['RATE-BICI', 'Bicicleta', 25.00, 1200.00, 8000.00, 15, '2026-10-21 10:00']
     ];
 
     $stmtRate = $pdo->prepare("INSERT INTO `tarifas` (`id`, `tipo_vehiculo`, `tarifa_por_minuto`, `tarifa_por_hora`, `tarifa_plena_dia`, `fraccion_gracia_min`, `actualizado_en`) 
@@ -63,7 +64,7 @@ try {
         $stmtRate->execute($r);
     }
 
-    // 5. Sembrar Espacios / Bahías (24 espacios en Zonas A, B, C, D)
+    // 5. Sembrar Espacios / Bahías (28 espacios en Zonas A, B, C, D, E)
     $spots = [
         // Zona A · Estándar (Automóvil)
         ['SP-A01', 'A-01', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'OCUPADO', 0, null, 99.9, 'BGT-902', 'TCK-2026-8841'],
@@ -96,6 +97,12 @@ try {
         ['SP-D04', 'D-04', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.9, null, null],
         ['SP-D05', 'D-05', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'BLOQUEADO', 0, null, 78.5, null, null],
         ['SP-D06', 'D-06', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.8, null, null],
+
+        // Zona E · Bicicletero Ecológico (Bicicleta)
+        ['SP-E01', 'E-01', 'Nivel S1', 'Zona E · Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-E02', 'E-02', 'Nivel S1', 'Zona E · Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-E03', 'E-03', 'Nivel S1', 'Zona E · Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-E04', 'E-04', 'Nivel S1', 'Zona E · Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.7, null, null],
     ];
 
     $stmtSpot = $pdo->prepare("INSERT INTO `espacios` (`id`, `codigo`, `nivel`, `zona`, `tipo_permitido`, `estado`, `es_vip`, `potencia_ev_kw`, `salud_sensor`, `placa_actual`, `ticket_actual_id`) 
