@@ -467,12 +467,14 @@
             const badge = document.getElementById('saasDbBadge');
             const badgeText = document.getElementById('saasDbStatusText');
 
-            if (statusJson.success && statusJson.data.connected) {
-                badge.className = 'heartbeat-badge hb-connected';
-                badgeText.textContent = `XAMPP MySQL: ${statusJson.data.port || 3306}`;
-            } else {
-                badge.className = 'heartbeat-badge hb-disconnected';
-                badgeText.textContent = 'MySQL Desconectado';
+            if (badge && badgeText) {
+                if (statusJson.success && statusJson.data.connected) {
+                    badge.className = 'heartbeat-badge hb-connected';
+                    badgeText.textContent = `MySQL: ${statusJson.data.port || 3306}`;
+                } else {
+                    badge.className = 'heartbeat-badge hb-disconnected';
+                    badgeText.textContent = 'MySQL Desconectado';
+                }
             }
 
             // Datos de entidades en paralelo
