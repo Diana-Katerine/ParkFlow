@@ -5379,26 +5379,30 @@
     // Renderizar Matriz 2D de Bahías
     function renderBayMatrix() {
         const zones = {
-            'Zona A · Estándar': [],
-            'Zona B · EV & VIP': [],
-            'Zona C · Motos': [],
-            'Zona D · Camionetas': []
+            'Zona A · Estándar': { spots: [], icon: '🚗', tipo: 'Automóvil' },
+            'Zona B · EV & VIP': { spots: [], icon: '⚡', tipo: 'Eléctrico EV' },
+            'Zona C · Motos': { spots: [], icon: '🏍️', tipo: 'Motocicleta' },
+            'Zona D · Camionetas': { spots: [], icon: '🚙', tipo: 'Camioneta' }
         };
 
-        saasState.spots.forEach(s => {
-            if (zones[s.zona]) zones[s.zona].push(s);
+        (saasState.spots || []).forEach(s => {
+            if (zones[s.zona]) zones[s.zona].spots.push(s);
         });
 
         const container = document.getElementById('saasZonesContainer');
+        if (!container) return;
         container.innerHTML = '';
 
-        for (const [zoneName, spots] of Object.entries(zones)) {
+        for (const [zoneName, zData] of Object.entries(zones)) {
             const zDiv = document.createElement('div');
             zDiv.className = 'zone-box';
 
-            const freeCount = spots.filter(s => s.estado === 'DISPONIBLE').length;
+            // Ordenar numéricamente por código (ej: A-01 a A-06)
+            zData.spots.sort((a, b) => (a.codigo || '').localeCompare(b.codigo || ''));
 
-            const baysHtml = spots.map(s => {
+            const freeCount = zData.spots.filter(s => s.estado === 'DISPONIBLE').length;
+
+            const baysHtml = zData.spots.map(s => {
                 const stateClass = s.estado === 'DISPONIBLE' ? 'bay-disponible' : s.estado === 'OCUPADO' ? 'bay-ocupado' : 'bay-bloqueado';
                 return `
                     <div class="bay-cell ${stateClass}" onclick="handleBayClick('${s.id}', '${s.codigo}', '${s.estado}')">
@@ -5411,8 +5415,8 @@
 
             zDiv.innerHTML = `
                 <div class="zone-header-row">
-                    <span class="zone-title">${zoneName}</span>
-                    <span class="status-badge badge-active-live">${freeCount}/${spots.length} Libres</span>
+                    <span class="zone-title">${zData.icon} ${zoneName}</span>
+                    <span class="status-badge badge-active-live">${freeCount}/${zData.spots.length} Libres</span>
                 </div>
                 <div class="bays-matrix">${baysHtml}</div>
             `;
@@ -5458,17 +5462,21 @@
     // Renderizar Tarifas
     function renderRatesTable() {
         const tbody = document.getElementById('saasRatesTableBody');
-        tbody.innerHTML = saasState.rates.map(r => `
+        if (!tbody) return;
+        const sortOrder = { 'Automóvil': 1, 'Motocicleta': 2, 'Camioneta': 3, 'Eléctrico EV': 4 };
+        const sortedRates = [...(saasState.rates || [])].sort((a,b) => (sortOrder[a.tipoVehiculo] || 99) - (sortOrder[b.tipoVehiculo] || 99));
+
+        tbody.innerHTML = sortedRates.map(r => `
             <tr>
-                <td><strong style="color:var(--text-heading);">${r.tipoVehiculo}</strong></td>
-                <td><span style="font-family:'JetBrains Mono';">$${r.tarifaPorMinuto}</span></td>
-                <td><span style="font-family:'JetBrains Mono'; font-weight:700; color:var(--primary);">$${r.tarifaPorHora.toLocaleString('es-CO')}</span></td>
-                <td><span style="font-family:'JetBrains Mono';">$${r.tarifaPlenaDia.toLocaleString('es-CO')}</span></td>
-                <td>${r.fraccionGraciaMin} min</td>
+                <td><strong style="color:var(--text-heading); font-size:0.85rem;">${r.tipoVehiculo}</strong></td>
+                <td><span style="font-family:'JetBrains Mono'; font-weight:600;">$${Number(r.tarifaPorMinuto).toLocaleString('es-CO')} COP</span></td>
+                <td><span style="font-family:'JetBrains Mono'; font-weight:700; color:var(--primary);">$${Number(r.tarifaPorHora).toLocaleString('es-CO')} COP</span></td>
+                <td><span style="font-family:'JetBrains Mono'; font-weight:700; color:var(--emerald);">$${Number(r.tarifaPlenaDia).toLocaleString('es-CO')} COP</span></td>
+                <td><span class="role-badge-tag" style="background:rgba(255,255,255,0.06); color:var(--text-body);">${r.fraccionGraciaMin} min</span></td>
                 <td style="color:var(--text-muted); font-size:0.75rem;">${r.actualizadoEn}</td>
                 <td style="text-align:right;">
                     <button type="button" class="btn btn-secondary btn-sm" onclick="editRateModal('${r.id}', '${r.tipoVehiculo}', ${r.tarifaPorHora}, ${r.tarifaPorMinuto})">
-                        Editar
+                        ✏️ Editar
                     </button>
                 </td>
             </tr>
@@ -5496,19 +5504,30 @@
     // Renderizar Usuarios
     function renderUsersTable() {
         const tbody = document.getElementById('saasUsersTableBody');
-        tbody.innerHTML = saasState.users.map(u => `
+        if (!tbody) return;
+        const roleOrder = { 'Administrador': 1, 'Operador': 2, 'Cliente': 3 };
+        const sortedUsers = [...(saasState.users || [])].sort((a,b) => {
+            const rDiff = (roleOrder[a.rol] || 99) - (roleOrder[b.rol] || 99);
+            if (rDiff !== 0) return rDiff;
+            return (a.id || '').localeCompare(b.id || '');
+        });
+
+        tbody.innerHTML = sortedUsers.map(u => `
             <tr>
-                <td><span style="font-family:'JetBrains Mono'; color:var(--text-muted);">${u.id}</span></td>
-                <td><strong style="color:var(--text-heading);">${u.nombre}</strong></td>
-                <td>${u.email}</td>
+                <td><span style="font-family:'JetBrains Mono'; color:var(--primary); font-weight:700;">${u.id}</span></td>
+                <td>
+                    <strong style="color:var(--text-heading); font-size:0.85rem;">${u.nombre}</strong>
+                    ${u.placaAsociada ? `<span class="plate-pill" style="margin-left:8px; font-size:0.7rem;">${u.placaAsociada}</span>` : ''}
+                </td>
+                <td style="color:var(--text-body); font-size:0.8rem;">${u.email}</td>
                 <td>
                     <span class="status-badge ${u.rol==='Administrador'?'pill-emerald':u.rol==='Operador'?'pill-primary':'status-badge'}">
-                        ${u.rol}
+                        ${u.rol === 'Administrador' ? '👑 Admin' : u.rol === 'Operador' ? '👷 Operador' : '👤 Cliente'}
                     </span>
                 </td>
                 <td>
                     <span class="status-badge ${u.activo ? 'badge-completed' : 'badge-blocked'}">
-                        ${u.activo ? 'Activo' : 'Inactivo'}
+                        ${u.activo ? '● Activo' : '○ Inactivo'}
                     </span>
                 </td>
                 <td style="color:var(--text-muted); font-size:0.75rem;">${u.ultimoAcceso}</td>
