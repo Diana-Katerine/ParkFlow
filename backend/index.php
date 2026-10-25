@@ -1127,123 +1127,628 @@ html, body {
 /* ========================================================================= */
 /* SaaS Login & Authentication Screen Styles                                */
 /* ========================================================================= */
+/* ========================================================================= */
+/* SaaS Login & Authentication Screen Styles (Creative & Dynamic Split)     */
+/* ========================================================================= */
 .saas-auth-overlay {
     position: fixed;
     inset: 0;
     z-index: 999999;
-    background: radial-gradient(circle at 50% 15%, rgba(0, 245, 255, 0.1), transparent 60%), #060911;
+    background: #060911;
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 1.5rem;
     overflow-y: auto;
-    backdrop-filter: blur(20px);
+    position: fixed;
 }
-.saas-auth-card {
+
+/* Ambient Glowing Orbs */
+.auth-ambient-orb {
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    opacity: 0.65;
+    filter: blur(85px);
+    z-index: 1;
+}
+.orb-cyan {
+    top: -60px;
+    left: 10%;
+    width: 440px;
+    height: 440px;
+    background: radial-gradient(circle, rgba(0, 245, 255, 0.25), transparent 70%);
+    animation: orbFloat 9s ease-in-out infinite alternate;
+}
+.orb-indigo {
+    bottom: -60px;
+    right: 10%;
+    width: 480px;
+    height: 480px;
+    background: radial-gradient(circle, rgba(99, 102, 241, 0.25), transparent 70%);
+    animation: orbFloat 12s ease-in-out infinite alternate-reverse;
+}
+@keyframes orbFloat {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(30px, 20px) scale(1.1); }
+}
+
+/* 2-Column Split Wrapper */
+.saas-auth-wrapper {
+    display: flex;
     width: 100%;
-    max-width: 460px;
-    background: #0b1120;
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-radius: 20px;
-    padding: 2.25rem 2rem;
-    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 245, 255, 0.12);
+    max-width: 980px;
+    min-height: 580px;
+    background: rgba(11, 17, 32, 0.92);
+    border: 1px solid rgba(0, 245, 255, 0.25);
+    border-radius: 24px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, 0.85), 0 0 50px rgba(0, 245, 255, 0.12);
+    overflow: hidden;
+    backdrop-filter: blur(28px);
     position: relative;
+    z-index: 2;
     animation: authFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @keyframes authFadeIn {
-    from { opacity: 0; transform: scale(0.95) translateY(10px); }
+    from { opacity: 0; transform: scale(0.96) translateY(12px); }
     to { opacity: 1; transform: scale(1) translateY(0); }
 }
-.auth-brand {
+
+/* LEFT: Creative Showcase & Live Telemetry Panel */
+.auth-showcase-panel {
+    flex: 1.05;
+    background: linear-gradient(160deg, rgba(15, 23, 42, 0.95), rgba(6, 9, 17, 0.98));
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 2.25rem;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
-    margin-bottom: 1.75rem;
+    justify-content: space-between;
+    gap: 1.25rem;
+    position: relative;
 }
-.auth-icon-wrap {
-    width: 52px;
-    height: 52px;
+.showcase-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+.showcase-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+.showcase-brand-icon {
+    width: 42px;
+    height: 42px;
     background: linear-gradient(135deg, var(--primary), var(--indigo));
-    border-radius: 14px;
+    border-radius: var(--radius-md);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: #060911;
-    box-shadow: 0 0 20px var(--primary-glow);
-    margin-bottom: 0.85rem;
-}
-.auth-title {
     font-size: 1.35rem;
+    box-shadow: 0 0 16px var(--primary-glow);
+}
+.showcase-brand-text {
+    display: flex;
+    flex-direction: column;
+}
+.sb-name {
+    font-size: 1.15rem;
     font-weight: 800;
     color: var(--text-heading);
     letter-spacing: -0.02em;
-    margin-bottom: 0.35rem;
 }
-.auth-subtitle {
-    font-size: 0.8rem;
-    color: var(--text-muted);
+.sb-badge {
+    font-size: 0.65rem;
+    color: var(--primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
 }
-.auth-form-group {
+.showcase-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.3rem 0.65rem;
+    border-radius: 9999px;
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--emerald);
+    font-size: 0.68rem;
+    font-weight: 700;
+    font-family: 'JetBrains Mono', monospace;
+}
+.live-pulse-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--emerald);
+    box-shadow: 0 0 8px var(--emerald);
+    animation: pulseDot 2s infinite;
+}
+@keyframes pulseDot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.35; transform: scale(0.8); }
+}
+
+.showcase-body {
     display: flex;
     flex-direction: column;
+    gap: 0.6rem;
+}
+.showcase-tag {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: var(--primary);
+    text-transform: uppercase;
+}
+.showcase-title {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: var(--text-heading);
+    line-height: 1.35;
+}
+.showcase-description {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+/* Telemetry stats 3-column grid */
+.showcase-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.65rem;
+    margin: 0.5rem 0;
+}
+.sc-stat-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 0.65rem 0.5rem;
+    text-align: center;
+    transition: all 0.2s;
+}
+.sc-stat-card:hover {
+    border-color: rgba(0, 245, 255, 0.3);
+    background: rgba(0, 245, 255, 0.04);
+}
+.sc-stat-icon {
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+}
+.sc-stat-val {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-heading);
+}
+.sc-stat-lbl {
+    font-size: 0.64rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    margin-top: 0.15rem;
+}
+
+/* Radar Simulator */
+.showcase-radar-container {
+    background: rgba(6, 9, 17, 0.7);
+    border: 1px solid rgba(0, 245, 255, 0.18);
+    border-radius: var(--radius-md);
+    padding: 0.85rem 1rem;
+}
+.radar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.6rem;
+}
+.radar-title-wrap {
+    display: flex;
+    align-items: center;
     gap: 0.4rem;
-    margin-bottom: 1rem;
+}
+.radar-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-heading);
+}
+.radar-count-tag {
+    font-size: 0.65rem;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--primary);
+    font-weight: 600;
+}
+.radar-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.35rem;
+}
+.radar-spot {
+    padding: 0.3rem 0.15rem;
+    border-radius: 4px;
+    font-size: 0.62rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-weight: 700;
+    text-align: center;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+    user-select: none;
+}
+.radar-spot.free {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--emerald);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+.radar-spot.occupied {
+    background: rgba(244, 63, 94, 0.15);
+    color: var(--rose);
+    border-color: rgba(244, 63, 94, 0.35);
+    box-shadow: 0 0 6px rgba(244, 63, 94, 0.2);
+}
+.showcase-footer {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+/* RIGHT: Interactive Console Panel */
+.auth-console-panel {
+    flex: 1.15;
+    padding: 2.25rem 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 0.85rem;
+    background: rgba(11, 17, 32, 0.95);
+}
+.console-top {
     text-align: left;
 }
-.auth-label {
-    font-size: 0.75rem;
+.console-title {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: var(--text-heading);
+    letter-spacing: -0.02em;
+}
+.console-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.2rem;
+}
+
+.auth-error-box {
+    padding: 0.65rem 0.85rem;
+    border-radius: var(--radius-md);
+    background: rgba(244, 63, 94, 0.12);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    color: var(--rose);
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* Interactive Role Selector Tabs */
+.role-tabs-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+}
+.role-tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.55rem 0.65rem;
+    border-radius: var(--radius-md);
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-body);
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    font-family: inherit;
+}
+.role-tab-btn:hover {
+    border-color: rgba(0, 245, 255, 0.35);
+    background: rgba(0, 245, 255, 0.05);
+}
+.role-tab-btn.active {
+    background: rgba(0, 245, 255, 0.1);
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: 0 0 14px rgba(0, 245, 255, 0.2);
+}
+.rt-icon {
+    font-size: 1.15rem;
+    flex-shrink: 0;
+}
+.rt-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.rt-title {
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.rt-sub {
+    font-size: 0.64rem;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.role-tab-btn.active .rt-sub {
+    color: var(--primary);
+    opacity: 0.85;
+}
+
+/* Quick Profile Banner */
+.quick-profile-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, rgba(0, 245, 255, 0.07), rgba(99, 102, 241, 0.09));
+    border: 1px solid rgba(0, 245, 255, 0.25);
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
+    transition: all 0.25s;
+}
+.qpb-user {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+.qpb-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.82rem;
+    color: #ffffff;
+    background: linear-gradient(135deg, #00f5ff, #6366f1);
+    border: 2px solid rgba(0, 245, 255, 0.45);
+    box-shadow: 0 0 12px rgba(0, 245, 255, 0.3);
+    flex-shrink: 0;
+    transition: all 0.3s;
+}
+.qpb-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+.qpb-name {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-heading);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.qpb-desc {
+    font-size: 0.7rem;
+    color: var(--primary);
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.btn-instant-login {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 0.95rem;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, #00f5ff, #0284c7);
+    color: #060911;
+    font-weight: 800;
+    font-size: 0.78rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    box-shadow: 0 0 14px rgba(0, 245, 255, 0.35);
+    font-family: inherit;
+    flex-shrink: 0;
+}
+.btn-instant-login:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.55);
+}
+
+/* Form separator */
+.auth-form-separator {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.64rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0.25rem 0;
+}
+.auth-form-separator::before,
+.auth-form-separator::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid var(--border);
+}
+.auth-form-separator span {
+    padding: 0 0.75rem;
+}
+
+/* Input Fields */
+.auth-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    margin-bottom: 0.65rem;
+}
+.auth-field-label {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.72rem;
     font-weight: 700;
     color: var(--text-body);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
-.auth-input {
+.field-hint-text {
+    font-size: 0.68rem;
+    color: var(--primary);
+    font-weight: 600;
+    font-family: 'JetBrains Mono', monospace;
+}
+.auth-input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+.input-leading-icon {
+    position: absolute;
+    left: 0.85rem;
+    font-size: 0.95rem;
+    pointer-events: none;
+    opacity: 0.7;
+}
+.auth-text-input {
     width: 100%;
     background: var(--bg-surface-elevated);
     border: 1px solid var(--border);
     color: var(--text-heading);
-    padding: 0.65rem 0.85rem;
+    padding: 0.6rem 2.4rem 0.6rem 2.3rem;
     border-radius: var(--radius-md);
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     outline: none;
     transition: all 0.2s;
     font-family: inherit;
 }
-.auth-input:focus {
+.auth-text-input:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.15);
+    background: var(--bg-surface-hover);
 }
-.auth-quick-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 1.5rem;
-    border-top: 1px solid var(--border);
-    padding-top: 1.25rem;
+.btn-toggle-eye {
+    position: absolute;
+    right: 0.75rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.95rem;
+    padding: 0.2rem;
+    transition: color 0.2s;
 }
-.quick-role-btn {
+.btn-toggle-eye:hover {
+    color: var(--primary);
+}
+
+/* Main submit button */
+.btn-main-submit {
+    width: 100%;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0.65rem 0.85rem;
-    background: var(--bg-surface-elevated);
-    border: 1px solid var(--border);
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.72rem;
     border-radius: var(--radius-md);
-    color: var(--text-heading);
+    background: linear-gradient(135deg, #00f5ff, #6366f1);
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.86rem;
+    border: none;
     cursor: pointer;
-    font-size: 0.8rem;
+    transition: all 0.2s;
+    box-shadow: 0 4px 18px rgba(0, 245, 255, 0.25);
+    font-family: inherit;
+    margin-top: 0.25rem;
+}
+.btn-main-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 24px rgba(0, 245, 255, 0.4);
+    filter: brightness(1.08);
+}
+.submit-arrow {
+    font-size: 1rem;
+    transition: transform 0.2s;
+}
+.btn-main-submit:hover .submit-arrow {
+    transform: translateX(4px);
+}
+
+/* Bottom quick access chips */
+.auth-bottom-chips {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--border);
+}
+.chips-title {
+    font-size: 0.68rem;
+    color: var(--text-muted);
     font-weight: 600;
+}
+.fast-chip {
+    padding: 0.25rem 0.6rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+    cursor: pointer;
     transition: all 0.15s;
-    text-align: left;
+    background: var(--bg-surface-elevated);
     font-family: inherit;
 }
-.quick-role-btn:hover {
-    border-color: var(--primary);
-    background: rgba(0, 245, 255, 0.06);
-    transform: translateX(2px);
+.chip-admin {
+    color: var(--primary);
+    border-color: rgba(0, 245, 255, 0.3);
+}
+.chip-oper {
+    color: var(--emerald);
+    border-color: rgba(16, 185, 129, 0.3);
+}
+.chip-client {
+    color: #38bdf8;
+    border-color: rgba(56, 189, 248, 0.3);
+}
+.fast-chip:hover {
+    transform: scale(1.04);
+    filter: brightness(1.2);
+}
+
+/* Responsive Breakpoints for Auth Screen */
+@media (max-width: 860px) {
+    .saas-auth-wrapper {
+        flex-direction: column;
+        max-width: 480px;
+        min-height: auto;
+    }
+    .auth-showcase-panel {
+        padding: 1.5rem;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+    .showcase-radar-container {
+        display: none;
+    }
+    .auth-console-panel {
+        padding: 1.5rem;
+    }
 }
 .btn-logout {
     display: flex;
@@ -1350,75 +1855,182 @@ html, body {
 </head>
 <body>
     <!-- ======================================================== -->
-    <!-- AUTHENTICATION GATEWAY / LOGIN OBLIGATORIO               -->
+    <!-- AUTHENTICATION GATEWAY / PORTAL ENTERPRISE MODERNO       -->
     <!-- ======================================================== -->
     <div id="saasAuthScreen" class="saas-auth-overlay">
-        <div class="saas-auth-card">
-            <div class="auth-brand">
-                <div class="auth-icon-wrap">🅿️</div>
-                <h1 class="auth-title">ParkFlow Enterprise</h1>
-                <p class="auth-subtitle">Sistema Inteligente de Gestión de Parqueaderos</p>
-                <div style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.4rem; padding:0.2rem 0.6rem; border-radius:9999px; background:rgba(0,245,255,0.1); border:1px solid rgba(0,245,255,0.25); color:var(--primary); font-size:0.7rem; font-weight:700;">
-                    🔒 Acceso Restringido · Autenticación Obligatoria
+        <!-- Ambient Glowing Orbs -->
+        <div class="auth-ambient-orb orb-cyan"></div>
+        <div class="auth-ambient-orb orb-indigo"></div>
+
+        <div class="saas-auth-wrapper">
+            <!-- Left Panel: Creative Showcase & Live Telemetry -->
+            <div class="auth-showcase-panel">
+                <div class="showcase-header">
+                    <div class="showcase-brand">
+                        <div class="showcase-brand-icon">🅿️</div>
+                        <div class="showcase-brand-text">
+                            <span class="sb-name">ParkFlow</span>
+                            <span class="sb-badge">Enterprise Cloud</span>
+                        </div>
+                    </div>
+                    <div class="showcase-status-badge">
+                        <span class="live-pulse-dot"></span>
+                        <span>NODO EN VIVO</span>
+                    </div>
+                </div>
+
+                <div class="showcase-body">
+                    <span class="showcase-tag">SISTEMA INTELIGENTE DE PARQUEADEROS</span>
+                    <h2 class="showcase-title">Control Operativo, Bahías 2D y Liquidación en Tiempo Real</h2>
+                    <p class="showcase-description">
+                        Plataforma centralizada con sincronización MySQL, facturación por fracciones y minutos COP, y control de privilegios multinivel RBAC.
+                    </p>
+
+                    <!-- Telemetry Stats -->
+                    <div class="showcase-stats-grid">
+                        <div class="sc-stat-card">
+                            <div class="sc-stat-icon">🗺️</div>
+                            <div class="sc-stat-val">24</div>
+                            <div class="sc-stat-lbl">Bahías en 4 Zonas</div>
+                        </div>
+                        <div class="sc-stat-card">
+                            <div class="sc-stat-icon">⚡</div>
+                            <div class="sc-stat-val">COP</div>
+                            <div class="sc-stat-lbl">Tarifas Oficiales</div>
+                        </div>
+                        <div class="sc-stat-card">
+                            <div class="sc-stat-icon">🛡️</div>
+                            <div class="sc-stat-val">3 Roles</div>
+                            <div class="sc-stat-lbl">Seguridad RBAC</div>
+                        </div>
+                    </div>
+
+                    <!-- Live Radar Simulator -->
+                    <div class="showcase-radar-container">
+                        <div class="radar-header">
+                            <div class="radar-title-wrap">
+                                <span class="radar-live-radar-icon">📡</span>
+                                <span class="radar-title">Radar de Telemetría Bahías</span>
+                            </div>
+                            <span class="radar-count-tag">18 Libres · 6 Ocupadas</span>
+                        </div>
+                        <div class="radar-grid">
+                            <div class="radar-spot occupied" title="Zona A-01: Ocupado (BST-902)"><span>A-01</span></div>
+                            <div class="radar-spot free" title="Zona A-02: Disponible"><span>A-02</span></div>
+                            <div class="radar-spot free" title="Zona A-03: Disponible"><span>A-03</span></div>
+                            <div class="radar-spot free" title="Zona A-04: Disponible"><span>A-04</span></div>
+                            <div class="radar-spot occupied" title="Zona B-01: Ocupado (KLM-456)"><span>B-01</span></div>
+                            <div class="radar-spot free" title="Zona B-02: Disponible"><span>B-02</span></div>
+                            <div class="radar-spot free" title="Zona B-03: Disponible"><span>B-03</span></div>
+                            <div class="radar-spot occupied" title="Zona B-04: Ocupado (EVX-108)"><span>B-04</span></div>
+                            <div class="radar-spot occupied" title="Zona C-01: Ocupado (XRT-82A)"><span>C-01</span></div>
+                            <div class="radar-spot free" title="Zona C-02: Disponible"><span>C-02</span></div>
+                            <div class="radar-spot free" title="Zona C-03: Disponible"><span>C-03</span></div>
+                            <div class="radar-spot occupied" title="Zona D-01: Ocupado (SUV-779)"><span>D-01</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="showcase-footer">
+                    <span>🔒 Cifrado Seguro SHA-256 · Motor Transaccional MySQL</span>
                 </div>
             </div>
 
-            <!-- Error message container -->
-            <div id="authErrorMsg" style="display:none; margin-bottom:1rem; padding:0.65rem 0.85rem; border-radius:var(--radius-md); background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.3); color:var(--rose); font-size:0.8rem; font-weight:600;">
-            </div>
-
-            <!-- Login Form -->
-            <form id="authLoginForm" onsubmit="event.preventDefault(); handleAuthSubmit(event);">
-                <div class="auth-form-group">
-                    <label class="auth-label">Rol con el que deseas ingresar</label>
-                    <select id="authInputRole" class="auth-input" style="cursor:pointer; background:var(--bg-surface-elevated); color:var(--text-heading);">
-                        <option value="Administrador">👑 Administrador (Acceso Total y Configuración)</option>
-                        <option value="Operador">👷 Operador (Entradas, Salidas y Bahías)</option>
-                        <option value="Cliente">👤 Cliente / Conductor (Portal Ciudadano)</option>
-                    </select>
-                </div>
-                <div class="auth-form-group">
-                    <label class="auth-label">Usuario o Correo (Cualquiera)</label>
-                    <input type="text" id="authInputEmail" class="auth-input" placeholder="Escribe cualquier nombre o correo (ej: Diana)">
-                </div>
-                <div class="auth-form-group">
-                    <label class="auth-label">Contraseña (Opcional)</label>
-                    <input type="password" id="authInputPassword" class="auth-input" placeholder="Cualquier clave (ej: 123)">
-                </div>
-                <button type="button" class="btn btn-primary" onclick="handleAuthSubmit(event)" style="width:100%; margin-top:0.5rem; padding:0.75rem; font-size:0.9rem;">
-                    🚀 Ingresar al Sistema ParkFlow →
-                </button>
-            </form>
-
-            <!-- Quick Demo Login Selection by Role -->
-            <div class="auth-quick-cards">
-                <div style="font-size:0.75rem; color:var(--primary); text-transform:uppercase; font-weight:700; letter-spacing:0.05em; margin-bottom:0.35rem;">
-                    ⚡ O entra con 1 solo clic en un perfil:
+            <!-- Right Panel: Interactive Console -->
+            <div class="auth-console-panel">
+                <div class="console-top">
+                    <h3 class="console-title">Acceso al Sistema</h3>
+                    <p class="console-sub">Selecciona tu perfil de acceso o ingresa credenciales:</p>
                 </div>
 
-                <button type="button" class="quick-role-btn" onclick="quickLogin('Administrador')">
-                    <div>
-                        <div style="font-weight:700; color:var(--primary); font-size:0.88rem;">👑 Ingresar como Administrador</div>
-                        <div style="font-size:0.72rem; color:var(--text-muted);">Acceso total: Métricas, Operaciones, Tarifas, Usuarios y Auditoría</div>
+                <!-- Error message container -->
+                <div id="authErrorMsg" class="auth-error-box" style="display:none;"></div>
+
+                <!-- Interactive Role Selector Tabs -->
+                <div class="role-tabs-container">
+                    <button type="button" class="role-tab-btn active" id="tabRoleAdmin" onclick="selectAuthRole('Administrador')">
+                        <span class="rt-icon">👑</span>
+                        <div class="rt-info">
+                            <span class="rt-title">Admin</span>
+                            <span class="rt-sub">Control Total</span>
+                        </div>
+                    </button>
+                    <button type="button" class="role-tab-btn" id="tabRoleOperador" onclick="selectAuthRole('Operador')">
+                        <span class="rt-icon">👷</span>
+                        <div class="rt-info">
+                            <span class="rt-title">Operador</span>
+                            <span class="rt-sub">Flujo & Caja</span>
+                        </div>
+                    </button>
+                    <button type="button" class="role-tab-btn" id="tabRoleCliente" onclick="selectAuthRole('Cliente')">
+                        <span class="rt-icon">👤</span>
+                        <div class="rt-info">
+                            <span class="rt-title">Cliente</span>
+                            <span class="rt-sub">Ciudadano</span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- 1-Click Quick Banner for Active Role -->
+                <div class="quick-profile-banner" id="authQuickBanner">
+                    <div class="qpb-user">
+                        <div class="qpb-avatar" id="qbAvatar">DK</div>
+                        <div class="qpb-meta">
+                            <div class="qpb-name" id="qbName">Diana Katerine Pérez</div>
+                            <div class="qpb-desc" id="qbRole">👑 Super Administradora · Matriz y Auditoría</div>
+                        </div>
                     </div>
-                    <span class="role-badge-tag pill-emerald" style="font-size:0.7rem;">Entrar →</span>
-                </button>
+                    <button type="button" class="btn-instant-login" id="qbActionBtn" onclick="quickLoginCurrent()">
+                        <span>Entrar con 1 Clic</span>
+                        <span class="instant-icon">⚡</span>
+                    </button>
+                </div>
 
-                <button type="button" class="quick-role-btn" onclick="quickLogin('Operador')">
-                    <div>
-                        <div style="font-weight:700; color:var(--emerald); font-size:0.88rem;">👷 Ingresar como Operador</div>
-                        <div style="font-size:0.72rem; color:var(--text-muted);">Acceso operativo: Entradas, Salidas, Cobros de Tickets y Bahías</div>
-                    </div>
-                    <span class="role-badge-tag pill-primary" style="font-size:0.7rem;">Entrar →</span>
-                </button>
+                <div class="auth-form-separator">
+                    <span>O INGRESA CON TUS CREDENCIALES</span>
+                </div>
 
-                <button type="button" class="quick-role-btn" onclick="quickLogin('Cliente')">
-                    <div>
-                        <div style="font-weight:700; color:#38bdf8; font-size:0.88rem;">👤 Ingresar como Cliente / Conductor</div>
-                        <div style="font-size:0.72rem; color:var(--text-muted);">Acceso ciudadano: Consulta de estancias, tiempos y tarifas</div>
+                <!-- Manual Login Form -->
+                <form id="authLoginForm" onsubmit="event.preventDefault(); handleAuthSubmit(event);">
+                    <!-- Hidden field keeps backwards-compatible authInputRole -->
+                    <input type="hidden" id="authInputRole" value="Administrador">
+
+                    <div class="auth-field">
+                        <label class="auth-field-label" for="authInputEmail">
+                            <span>Usuario / Correo</span>
+                            <span class="field-hint-text" id="authEmailHint">admin@parkpulse.co</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <span class="input-leading-icon">✉️</span>
+                            <input type="text" id="authInputEmail" class="auth-text-input" placeholder="Nombre o correo (ej: Diana)" value="admin@parkpulse.co">
+                        </div>
                     </div>
-                    <span class="role-badge-tag" style="background:rgba(56,189,248,0.15); color:#38bdf8; font-size:0.7rem;">Entrar →</span>
-                </button>
+
+                    <div class="auth-field">
+                        <label class="auth-field-label" for="authInputPassword">
+                            <span>Contraseña</span>
+                            <span class="field-hint-text">Clave de acceso demo</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <span class="input-leading-icon">🔒</span>
+                            <input type="password" id="authInputPassword" class="auth-text-input" placeholder="Contraseña..." value="admin">
+                            <button type="button" class="btn-toggle-eye" onclick="toggleAuthPasswordVisibility()" title="Mostrar u ocultar contraseña">👁️</button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-main-submit" onclick="handleAuthSubmit(event)">
+                        <span>Acceder a la Plataforma</span>
+                        <span class="submit-arrow">→</span>
+                    </button>
+                </form>
+
+                <!-- Direct Quick Launch Chips -->
+                <div class="auth-bottom-chips">
+                    <span class="chips-title">Acceso rápido directo:</span>
+                    <button type="button" class="fast-chip chip-admin" onclick="quickLogin('Administrador')">👑 Diana (Admin)</button>
+                    <button type="button" class="fast-chip chip-oper" onclick="quickLogin('Operador')">👷 Carlos (Operador)</button>
+                    <button type="button" class="fast-chip chip-client" onclick="quickLogin('Cliente')">👤 Mateo (Cliente)</button>
+                </div>
             </div>
         </div>
     </div>
@@ -3259,7 +3871,7 @@ html, body {
             account = {
                 email: 'admin@parkpulse.co',
                 password: 'admin',
-                nombre: 'Alejandro Vargas (Admin)',
+                nombre: 'Diana Katerine Pérez',
                 rol: 'Administrador',
                 placa: null
             };
@@ -3267,7 +3879,7 @@ html, body {
             account = {
                 email: 'operador@parkpulse.co',
                 password: 'oper',
-                nombre: 'Camila Mendoza (Operador)',
+                nombre: 'Carlos Mendoza',
                 rol: 'Operador',
                 placa: null
             };
@@ -3275,7 +3887,7 @@ html, body {
             account = {
                 email: 'cliente@parkpulse.co',
                 password: 'cliente',
-                nombre: 'Diana K. Pérez (Cliente)',
+                nombre: 'Mateo Silva',
                 rol: 'Cliente',
                 placa: 'KLM-456'
             };
@@ -3288,6 +3900,74 @@ html, body {
             };
         }
         loginUserSuccess(account);
+    }
+
+    function selectAuthRole(role) {
+        const roleInput = document.getElementById('authInputRole');
+        if (roleInput) roleInput.value = role;
+
+        // Update active tab buttons
+        const tabAdmin = document.getElementById('tabRoleAdmin');
+        const tabOper = document.getElementById('tabRoleOperador');
+        const tabClient = document.getElementById('tabRoleCliente');
+        if (tabAdmin) tabAdmin.classList.toggle('active', role === 'Administrador');
+        if (tabOper) tabOper.classList.toggle('active', role === 'Operador');
+        if (tabClient) tabClient.classList.toggle('active', role === 'Cliente');
+
+        // Update Quick Banner & Form Fields
+        const qbAvatar = document.getElementById('qbAvatar');
+        const qbName = document.getElementById('qbName');
+        const qbRole = document.getElementById('qbRole');
+        const emailInput = document.getElementById('authInputEmail');
+        const passInput = document.getElementById('authInputPassword');
+        const hint = document.getElementById('authEmailHint');
+
+        if (role === 'Administrador') {
+            if (qbAvatar) {
+                qbAvatar.textContent = 'DK';
+                qbAvatar.style.background = 'linear-gradient(135deg, #00f5ff, #6366f1)';
+                qbAvatar.style.borderColor = 'rgba(0, 245, 255, 0.5)';
+            }
+            if (qbName) qbName.textContent = 'Diana Katerine Pérez';
+            if (qbRole) qbRole.textContent = '👑 Super Administradora · Matriz y Auditoría';
+            if (emailInput) emailInput.value = 'admin@parkpulse.co';
+            if (passInput) passInput.value = 'admin';
+            if (hint) hint.textContent = 'admin@parkpulse.co';
+        } else if (role === 'Operador') {
+            if (qbAvatar) {
+                qbAvatar.textContent = 'CM';
+                qbAvatar.style.background = 'linear-gradient(135deg, #10b981, #0284c7)';
+                qbAvatar.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+            }
+            if (qbName) qbName.textContent = 'Carlos Mendoza';
+            if (qbRole) qbRole.textContent = '👷 Operador Activo · Entradas, Salidas y Caja';
+            if (emailInput) emailInput.value = 'operador@parkpulse.co';
+            if (passInput) passInput.value = 'oper';
+            if (hint) hint.textContent = 'operador@parkpulse.co';
+        } else if (role === 'Cliente') {
+            if (qbAvatar) {
+                qbAvatar.textContent = 'MS';
+                qbAvatar.style.background = 'linear-gradient(135deg, #38bdf8, #818cf8)';
+                qbAvatar.style.borderColor = 'rgba(56, 189, 248, 0.5)';
+            }
+            if (qbName) qbName.textContent = 'Mateo Silva';
+            if (qbRole) qbRole.textContent = '👤 Conductor Ciudadano · Vehículo KLM-456';
+            if (emailInput) emailInput.value = 'cliente@parkpulse.co';
+            if (passInput) passInput.value = 'cliente';
+            if (hint) hint.textContent = 'cliente@parkpulse.co';
+        }
+    }
+
+    function quickLoginCurrent() {
+        const roleInput = document.getElementById('authInputRole');
+        const role = roleInput ? roleInput.value : 'Administrador';
+        quickLogin(role);
+    }
+
+    function toggleAuthPasswordVisibility() {
+        const passInput = document.getElementById('authInputPassword');
+        if (!passInput) return;
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';
     }
 
     function loginUserSuccess(account) {
@@ -3334,6 +4014,9 @@ html, body {
 
     // Exponer funciones globales al objeto window para llamadas inline
     window.quickLogin = quickLogin;
+    window.selectAuthRole = selectAuthRole;
+    window.quickLoginCurrent = quickLoginCurrent;
+    window.toggleAuthPasswordVisibility = toggleAuthPasswordVisibility;
     window.handleAuthSubmit = handleAuthSubmit;
     window.handleLogout = handleLogout;
     window.loginUserSuccess = loginUserSuccess;

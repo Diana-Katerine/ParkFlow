@@ -11,75 +11,182 @@
 </head>
 <body>
     <!-- ======================================================== -->
-    <!-- AUTHENTICATION GATEWAY / LOGIN OBLIGATORIO               -->
+    <!-- AUTHENTICATION GATEWAY / PORTAL ENTERPRISE MODERNO       -->
     <!-- ======================================================== -->
     <div id="saasAuthScreen" class="saas-auth-overlay">
-        <div class="saas-auth-card">
-            <div class="auth-brand">
-                <div class="auth-icon-wrap">🅿️</div>
-                <h1 class="auth-title">ParkFlow Enterprise</h1>
-                <p class="auth-subtitle">Sistema Inteligente de Gestión de Parqueaderos</p>
-                <div style="margin-top:0.5rem; display:inline-flex; align-items:center; gap:0.4rem; padding:0.2rem 0.6rem; border-radius:9999px; background:rgba(0,245,255,0.1); border:1px solid rgba(0,245,255,0.25); color:var(--primary); font-size:0.7rem; font-weight:700;">
-                    🔒 Acceso Restringido · Autenticación Obligatoria
+        <!-- Ambient Glowing Orbs -->
+        <div class="auth-ambient-orb orb-cyan"></div>
+        <div class="auth-ambient-orb orb-indigo"></div>
+
+        <div class="saas-auth-wrapper">
+            <!-- Left Panel: Creative Showcase & Live Telemetry -->
+            <div class="auth-showcase-panel">
+                <div class="showcase-header">
+                    <div class="showcase-brand">
+                        <div class="showcase-brand-icon">🅿️</div>
+                        <div class="showcase-brand-text">
+                            <span class="sb-name">ParkFlow</span>
+                            <span class="sb-badge">Enterprise Cloud</span>
+                        </div>
+                    </div>
+                    <div class="showcase-status-badge">
+                        <span class="live-pulse-dot"></span>
+                        <span>NODO EN VIVO</span>
+                    </div>
+                </div>
+
+                <div class="showcase-body">
+                    <span class="showcase-tag">SISTEMA INTELIGENTE DE PARQUEADEROS</span>
+                    <h2 class="showcase-title">Control Operativo, Bahías 2D y Liquidación en Tiempo Real</h2>
+                    <p class="showcase-description">
+                        Plataforma centralizada con sincronización MySQL, facturación por fracciones y minutos COP, y control de privilegios multinivel RBAC.
+                    </p>
+
+                    <!-- Telemetry Stats -->
+                    <div class="showcase-stats-grid">
+                        <div class="sc-stat-card">
+                            <div class="sc-stat-icon">🗺️</div>
+                            <div class="sc-stat-val">24</div>
+                            <div class="sc-stat-lbl">Bahías en 4 Zonas</div>
+                        </div>
+                        <div class="sc-stat-card">
+                            <div class="sc-stat-icon">⚡</div>
+                            <div class="sc-stat-val">COP</div>
+                            <div class="sc-stat-lbl">Tarifas Oficiales</div>
+                        </div>
+                        <div class="sc-stat-card">
+                            <div class="sc-stat-icon">🛡️</div>
+                            <div class="sc-stat-val">3 Roles</div>
+                            <div class="sc-stat-lbl">Seguridad RBAC</div>
+                        </div>
+                    </div>
+
+                    <!-- Live Radar Simulator -->
+                    <div class="showcase-radar-container">
+                        <div class="radar-header">
+                            <div class="radar-title-wrap">
+                                <span class="radar-live-radar-icon">📡</span>
+                                <span class="radar-title">Radar de Telemetría Bahías</span>
+                            </div>
+                            <span class="radar-count-tag">18 Libres · 6 Ocupadas</span>
+                        </div>
+                        <div class="radar-grid">
+                            <div class="radar-spot occupied" title="Zona A-01: Ocupado (BST-902)"><span>A-01</span></div>
+                            <div class="radar-spot free" title="Zona A-02: Disponible"><span>A-02</span></div>
+                            <div class="radar-spot free" title="Zona A-03: Disponible"><span>A-03</span></div>
+                            <div class="radar-spot free" title="Zona A-04: Disponible"><span>A-04</span></div>
+                            <div class="radar-spot occupied" title="Zona B-01: Ocupado (KLM-456)"><span>B-01</span></div>
+                            <div class="radar-spot free" title="Zona B-02: Disponible"><span>B-02</span></div>
+                            <div class="radar-spot free" title="Zona B-03: Disponible"><span>B-03</span></div>
+                            <div class="radar-spot occupied" title="Zona B-04: Ocupado (EVX-108)"><span>B-04</span></div>
+                            <div class="radar-spot occupied" title="Zona C-01: Ocupado (XRT-82A)"><span>C-01</span></div>
+                            <div class="radar-spot free" title="Zona C-02: Disponible"><span>C-02</span></div>
+                            <div class="radar-spot free" title="Zona C-03: Disponible"><span>C-03</span></div>
+                            <div class="radar-spot occupied" title="Zona D-01: Ocupado (SUV-779)"><span>D-01</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="showcase-footer">
+                    <span>🔒 Cifrado Seguro SHA-256 · Motor Transaccional MySQL</span>
                 </div>
             </div>
 
-            <!-- Error message container -->
-            <div id="authErrorMsg" style="display:none; margin-bottom:1rem; padding:0.65rem 0.85rem; border-radius:var(--radius-md); background:rgba(244,63,94,0.12); border:1px solid rgba(244,63,94,0.3); color:var(--rose); font-size:0.8rem; font-weight:600;">
-            </div>
-
-            <!-- Login Form -->
-            <form id="authLoginForm" onsubmit="event.preventDefault(); handleAuthSubmit(event);">
-                <div class="auth-form-group">
-                    <label class="auth-label">Rol con el que deseas ingresar</label>
-                    <select id="authInputRole" class="auth-input" style="cursor:pointer; background:var(--bg-surface-elevated); color:var(--text-heading);">
-                        <option value="Administrador">👑 Administrador (Acceso Total y Configuración)</option>
-                        <option value="Operador">👷 Operador (Entradas, Salidas y Bahías)</option>
-                        <option value="Cliente">👤 Cliente / Conductor (Portal Ciudadano)</option>
-                    </select>
-                </div>
-                <div class="auth-form-group">
-                    <label class="auth-label">Usuario o Correo (Cualquiera)</label>
-                    <input type="text" id="authInputEmail" class="auth-input" placeholder="Escribe cualquier nombre o correo (ej: Diana)">
-                </div>
-                <div class="auth-form-group">
-                    <label class="auth-label">Contraseña (Opcional)</label>
-                    <input type="password" id="authInputPassword" class="auth-input" placeholder="Cualquier clave (ej: 123)">
-                </div>
-                <button type="button" class="btn btn-primary" onclick="handleAuthSubmit(event)" style="width:100%; margin-top:0.5rem; padding:0.75rem; font-size:0.9rem;">
-                    🚀 Ingresar al Sistema ParkFlow →
-                </button>
-            </form>
-
-            <!-- Quick Demo Login Selection by Role -->
-            <div class="auth-quick-cards">
-                <div style="font-size:0.75rem; color:var(--primary); text-transform:uppercase; font-weight:700; letter-spacing:0.05em; margin-bottom:0.35rem;">
-                    ⚡ O entra con 1 solo clic en un perfil:
+            <!-- Right Panel: Interactive Console -->
+            <div class="auth-console-panel">
+                <div class="console-top">
+                    <h3 class="console-title">Acceso al Sistema</h3>
+                    <p class="console-sub">Selecciona tu perfil de acceso o ingresa credenciales:</p>
                 </div>
 
-                <button type="button" class="quick-role-btn" onclick="quickLogin('Administrador')">
-                    <div>
-                        <div style="font-weight:700; color:var(--primary); font-size:0.88rem;">👑 Ingresar como Administrador</div>
-                        <div style="font-size:0.72rem; color:var(--text-muted);">Acceso total: Métricas, Operaciones, Tarifas, Usuarios y Auditoría</div>
+                <!-- Error message container -->
+                <div id="authErrorMsg" class="auth-error-box" style="display:none;"></div>
+
+                <!-- Interactive Role Selector Tabs -->
+                <div class="role-tabs-container">
+                    <button type="button" class="role-tab-btn active" id="tabRoleAdmin" onclick="selectAuthRole('Administrador')">
+                        <span class="rt-icon">👑</span>
+                        <div class="rt-info">
+                            <span class="rt-title">Admin</span>
+                            <span class="rt-sub">Control Total</span>
+                        </div>
+                    </button>
+                    <button type="button" class="role-tab-btn" id="tabRoleOperador" onclick="selectAuthRole('Operador')">
+                        <span class="rt-icon">👷</span>
+                        <div class="rt-info">
+                            <span class="rt-title">Operador</span>
+                            <span class="rt-sub">Flujo & Caja</span>
+                        </div>
+                    </button>
+                    <button type="button" class="role-tab-btn" id="tabRoleCliente" onclick="selectAuthRole('Cliente')">
+                        <span class="rt-icon">👤</span>
+                        <div class="rt-info">
+                            <span class="rt-title">Cliente</span>
+                            <span class="rt-sub">Ciudadano</span>
+                        </div>
+                    </button>
+                </div>
+
+                <!-- 1-Click Quick Banner for Active Role -->
+                <div class="quick-profile-banner" id="authQuickBanner">
+                    <div class="qpb-user">
+                        <div class="qpb-avatar" id="qbAvatar">DK</div>
+                        <div class="qpb-meta">
+                            <div class="qpb-name" id="qbName">Diana Katerine Pérez</div>
+                            <div class="qpb-desc" id="qbRole">👑 Super Administradora · Matriz y Auditoría</div>
+                        </div>
                     </div>
-                    <span class="role-badge-tag pill-emerald" style="font-size:0.7rem;">Entrar →</span>
-                </button>
+                    <button type="button" class="btn-instant-login" id="qbActionBtn" onclick="quickLoginCurrent()">
+                        <span>Entrar con 1 Clic</span>
+                        <span class="instant-icon">⚡</span>
+                    </button>
+                </div>
 
-                <button type="button" class="quick-role-btn" onclick="quickLogin('Operador')">
-                    <div>
-                        <div style="font-weight:700; color:var(--emerald); font-size:0.88rem;">👷 Ingresar como Operador</div>
-                        <div style="font-size:0.72rem; color:var(--text-muted);">Acceso operativo: Entradas, Salidas, Cobros de Tickets y Bahías</div>
-                    </div>
-                    <span class="role-badge-tag pill-primary" style="font-size:0.7rem;">Entrar →</span>
-                </button>
+                <div class="auth-form-separator">
+                    <span>O INGRESA CON TUS CREDENCIALES</span>
+                </div>
 
-                <button type="button" class="quick-role-btn" onclick="quickLogin('Cliente')">
-                    <div>
-                        <div style="font-weight:700; color:#38bdf8; font-size:0.88rem;">👤 Ingresar como Cliente / Conductor</div>
-                        <div style="font-size:0.72rem; color:var(--text-muted);">Acceso ciudadano: Consulta de estancias, tiempos y tarifas</div>
+                <!-- Manual Login Form -->
+                <form id="authLoginForm" onsubmit="event.preventDefault(); handleAuthSubmit(event);">
+                    <!-- Hidden field keeps backwards-compatible authInputRole -->
+                    <input type="hidden" id="authInputRole" value="Administrador">
+
+                    <div class="auth-field">
+                        <label class="auth-field-label" for="authInputEmail">
+                            <span>Usuario / Correo</span>
+                            <span class="field-hint-text" id="authEmailHint">admin@parkpulse.co</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <span class="input-leading-icon">✉️</span>
+                            <input type="text" id="authInputEmail" class="auth-text-input" placeholder="Nombre o correo (ej: Diana)" value="admin@parkpulse.co">
+                        </div>
                     </div>
-                    <span class="role-badge-tag" style="background:rgba(56,189,248,0.15); color:#38bdf8; font-size:0.7rem;">Entrar →</span>
-                </button>
+
+                    <div class="auth-field">
+                        <label class="auth-field-label" for="authInputPassword">
+                            <span>Contraseña</span>
+                            <span class="field-hint-text">Clave de acceso demo</span>
+                        </label>
+                        <div class="auth-input-wrapper">
+                            <span class="input-leading-icon">🔒</span>
+                            <input type="password" id="authInputPassword" class="auth-text-input" placeholder="Contraseña..." value="admin">
+                            <button type="button" class="btn-toggle-eye" onclick="toggleAuthPasswordVisibility()" title="Mostrar u ocultar contraseña">👁️</button>
+                        </div>
+                    </div>
+
+                    <button type="button" class="btn-main-submit" onclick="handleAuthSubmit(event)">
+                        <span>Acceder a la Plataforma</span>
+                        <span class="submit-arrow">→</span>
+                    </button>
+                </form>
+
+                <!-- Direct Quick Launch Chips -->
+                <div class="auth-bottom-chips">
+                    <span class="chips-title">Acceso rápido directo:</span>
+                    <button type="button" class="fast-chip chip-admin" onclick="quickLogin('Administrador')">👑 Diana (Admin)</button>
+                    <button type="button" class="fast-chip chip-oper" onclick="quickLogin('Operador')">👷 Carlos (Operador)</button>
+                    <button type="button" class="fast-chip chip-client" onclick="quickLogin('Cliente')">👤 Mateo (Cliente)</button>
+                </div>
             </div>
         </div>
     </div>

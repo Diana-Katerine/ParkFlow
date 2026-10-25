@@ -102,7 +102,7 @@
             account = {
                 email: 'admin@parkpulse.co',
                 password: 'admin',
-                nombre: 'Alejandro Vargas (Admin)',
+                nombre: 'Diana Katerine Pérez',
                 rol: 'Administrador',
                 placa: null
             };
@@ -110,7 +110,7 @@
             account = {
                 email: 'operador@parkpulse.co',
                 password: 'oper',
-                nombre: 'Camila Mendoza (Operador)',
+                nombre: 'Carlos Mendoza',
                 rol: 'Operador',
                 placa: null
             };
@@ -118,7 +118,7 @@
             account = {
                 email: 'cliente@parkpulse.co',
                 password: 'cliente',
-                nombre: 'Diana K. Pérez (Cliente)',
+                nombre: 'Mateo Silva',
                 rol: 'Cliente',
                 placa: 'KLM-456'
             };
@@ -131,6 +131,74 @@
             };
         }
         loginUserSuccess(account);
+    }
+
+    function selectAuthRole(role) {
+        const roleInput = document.getElementById('authInputRole');
+        if (roleInput) roleInput.value = role;
+
+        // Update active tab buttons
+        const tabAdmin = document.getElementById('tabRoleAdmin');
+        const tabOper = document.getElementById('tabRoleOperador');
+        const tabClient = document.getElementById('tabRoleCliente');
+        if (tabAdmin) tabAdmin.classList.toggle('active', role === 'Administrador');
+        if (tabOper) tabOper.classList.toggle('active', role === 'Operador');
+        if (tabClient) tabClient.classList.toggle('active', role === 'Cliente');
+
+        // Update Quick Banner & Form Fields
+        const qbAvatar = document.getElementById('qbAvatar');
+        const qbName = document.getElementById('qbName');
+        const qbRole = document.getElementById('qbRole');
+        const emailInput = document.getElementById('authInputEmail');
+        const passInput = document.getElementById('authInputPassword');
+        const hint = document.getElementById('authEmailHint');
+
+        if (role === 'Administrador') {
+            if (qbAvatar) {
+                qbAvatar.textContent = 'DK';
+                qbAvatar.style.background = 'linear-gradient(135deg, #00f5ff, #6366f1)';
+                qbAvatar.style.borderColor = 'rgba(0, 245, 255, 0.5)';
+            }
+            if (qbName) qbName.textContent = 'Diana Katerine Pérez';
+            if (qbRole) qbRole.textContent = '👑 Super Administradora · Matriz y Auditoría';
+            if (emailInput) emailInput.value = 'admin@parkpulse.co';
+            if (passInput) passInput.value = 'admin';
+            if (hint) hint.textContent = 'admin@parkpulse.co';
+        } else if (role === 'Operador') {
+            if (qbAvatar) {
+                qbAvatar.textContent = 'CM';
+                qbAvatar.style.background = 'linear-gradient(135deg, #10b981, #0284c7)';
+                qbAvatar.style.borderColor = 'rgba(16, 185, 129, 0.5)';
+            }
+            if (qbName) qbName.textContent = 'Carlos Mendoza';
+            if (qbRole) qbRole.textContent = '👷 Operador Activo · Entradas, Salidas y Caja';
+            if (emailInput) emailInput.value = 'operador@parkpulse.co';
+            if (passInput) passInput.value = 'oper';
+            if (hint) hint.textContent = 'operador@parkpulse.co';
+        } else if (role === 'Cliente') {
+            if (qbAvatar) {
+                qbAvatar.textContent = 'MS';
+                qbAvatar.style.background = 'linear-gradient(135deg, #38bdf8, #818cf8)';
+                qbAvatar.style.borderColor = 'rgba(56, 189, 248, 0.5)';
+            }
+            if (qbName) qbName.textContent = 'Mateo Silva';
+            if (qbRole) qbRole.textContent = '👤 Conductor Ciudadano · Vehículo KLM-456';
+            if (emailInput) emailInput.value = 'cliente@parkpulse.co';
+            if (passInput) passInput.value = 'cliente';
+            if (hint) hint.textContent = 'cliente@parkpulse.co';
+        }
+    }
+
+    function quickLoginCurrent() {
+        const roleInput = document.getElementById('authInputRole');
+        const role = roleInput ? roleInput.value : 'Administrador';
+        quickLogin(role);
+    }
+
+    function toggleAuthPasswordVisibility() {
+        const passInput = document.getElementById('authInputPassword');
+        if (!passInput) return;
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';
     }
 
     function loginUserSuccess(account) {
@@ -177,6 +245,9 @@
 
     // Exponer funciones globales al objeto window para llamadas inline
     window.quickLogin = quickLogin;
+    window.selectAuthRole = selectAuthRole;
+    window.quickLoginCurrent = quickLoginCurrent;
+    window.toggleAuthPasswordVisibility = toggleAuthPasswordVisibility;
     window.handleAuthSubmit = handleAuthSubmit;
     window.handleLogout = handleLogout;
     window.loginUserSuccess = loginUserSuccess;
