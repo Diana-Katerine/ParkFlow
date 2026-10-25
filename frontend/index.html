@@ -252,7 +252,8 @@
 
         <!-- Navigation Menu -->
         <div class="sidebar-nav">
-            <div class="nav-group-label">Vistas del Sistema</div>
+            <!-- 1. VISTAS OPERATIVAS (Admin & Operador) -->
+            <div class="nav-group-label">Control Operativo</div>
 
             <button type="button" class="nav-item-btn active" onclick="switchSaasView('view-overview', this)">
                 <div class="nav-item-left">
@@ -277,6 +278,7 @@
                 </div>
             </button>
 
+            <!-- 2. ADMINISTRACIÓN (Admin y Tarifas para Operador) -->
             <div class="nav-group-label">Administración</div>
 
             <button type="button" class="nav-item-btn" onclick="switchSaasView('view-rates', this)">
@@ -300,21 +302,64 @@
                 </div>
             </button>
 
-            <div class="nav-group-label">Servicios</div>
-
-            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-client-portal', this)">
-                <div class="nav-item-left">
-                    <span class="nav-item-icon">📱</span>
-                    <span>Portal Ciudadano</span>
-                </div>
-            </button>
-
             <button type="button" class="nav-item-btn" onclick="switchSaasView('view-patterns', this)">
                 <div class="nav-item-left">
                     <span class="nav-item-icon">🧩</span>
                     <span>Patrones & Dominios DDD</span>
                 </div>
                 <span class="nav-pill-badge pill-primary">DDD & GoF</span>
+            </button>
+
+            <!-- 3. SERVICIOS DEDICADOS AL CLIENTE / CONDUCTOR -->
+            <div class="nav-group-label">Mi Vehículo & Operaciones</div>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-client-entry', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">🚗</span>
+                    <span>Registro de Vehículo</span>
+                </div>
+                <span class="nav-pill-badge pill-emerald">Entrada</span>
+            </button>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-client-reserve', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">📅</span>
+                    <span>Mis Reservas</span>
+                </div>
+                <span class="nav-pill-badge pill-primary" id="sidebarReservationsBadge">0</span>
+            </button>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-client-payment', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">💳</span>
+                    <span>Pago de Estadía</span>
+                </div>
+                <span class="nav-pill-badge pill-emerald">Nequi/PSE</span>
+            </button>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-client-exit', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">🚪</span>
+                    <span>Salida de Vehículo</span>
+                </div>
+                <span class="nav-pill-badge pill-rose">Paz & Salvo</span>
+            </button>
+
+            <div class="nav-group-label">Información & Bahías</div>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-client-bays', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">🗺️</span>
+                    <span>Bahías Disponibles</span>
+                </div>
+                <span class="nav-pill-badge pill-primary">130 Cupos</span>
+            </button>
+
+            <button type="button" class="nav-item-btn" onclick="switchSaasView('view-client-rates', this)">
+                <div class="nav-item-left">
+                    <span class="nav-item-icon">🏷️</span>
+                    <span>Tarifas al Público</span>
+                </div>
             </button>
         </div>
 
@@ -819,101 +864,195 @@
             </div>
 
             <!-- ======================================================== -->
-            <!-- 7. VIEW: PORTAL DEL CLIENTE                              -->
+            <!-- 7. MÓDULOS DE AUTOSERVICIO DEL CLIENTE / CONDUCTOR       -->
             <!-- ======================================================== -->
-                        <!-- ======================================================== -->
-            <!-- 7. VIEW: PORTAL CIUDADANO / CLIENTE                      -->
-            <!-- ======================================================== -->
-            <div id="view-client-portal" class="view-panel">
-                <div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:1.75rem;">
 
-                    <!-- Pestañas de Modo: Entrada Inmediata vs Reserva Anticipada -->
-                    <div style="display:flex; gap:0.75rem;">
-                        <button type="button" class="client-mode-tab active" id="tabModeEntry" onclick="switchClientActionTab('entry')">
-                            🚗 Registrar Entrada Inmediata
+            <!-- 7.1 VIEW: REGISTRO DE VEHÍCULO (CHECK-IN CLIENTE) -->
+            <div id="view-client-entry" class="view-panel">
+                <div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:1.5rem;">
+                    
+                    <!-- Sub-Navegación Modular del Cliente -->
+                    <div class="client-subnav-hub">
+                        <button type="button" class="client-hub-btn active" onclick="switchSaasView('view-client-entry')">
+                            <span class="hub-icon">🚗</span>
+                            <div class="hub-text">
+                                <strong>1. Registro de Vehículo</strong>
+                                <small>Ingreso a bahía</small>
+                            </div>
                         </button>
-                        <button type="button" class="client-mode-tab" id="tabModeReserve" onclick="switchClientActionTab('reserve')">
-                            📅 Realizar Reserva Anticipada (Horas, Días, Noches)
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-reserve')">
+                            <span class="hub-icon">📅</span>
+                            <div class="hub-text">
+                                <strong>2. Reservas</strong>
+                                <small>Horas, Noches, Días</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-payment')">
+                            <span class="hub-icon">💳</span>
+                            <div class="hub-text">
+                                <strong>3. Pago de Estadía</strong>
+                                <small>Liquidación & Nequi</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-exit')">
+                            <span class="hub-icon">🚪</span>
+                            <div class="hub-text">
+                                <strong>4. Salida de Vehículo</strong>
+                                <small>Paz y Salvo & Salida</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-bays')">
+                            <span class="hub-icon">🗺️</span>
+                            <div class="hub-text">
+                                <strong>5. Bahías en Vivo</strong>
+                                <small>130 Cupos Libres</small>
+                            </div>
                         </button>
                     </div>
 
-                    <!-- Panel A: Entrada Inmediata de Vehículo -->
-                    <div id="clientActionPanelEntry" class="saas-card" style="border:1px solid rgba(0, 245, 255, 0.3); background:linear-gradient(180deg, rgba(11, 17, 32, 0.95), rgba(17, 26, 46, 0.9));">
-                        <div class="card-header-flex" style="margin-bottom:1rem;">
-                            <div style="display:flex; align-items:center; gap:0.75rem;">
-                                <div style="width:40px; height:40px; border-radius:var(--radius-md); background:linear-gradient(135deg, var(--primary), var(--indigo)); color:#060911; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">
+                    <!-- Panel de Registro Inmediato -->
+                    <div class="saas-card" style="border:1px solid rgba(0, 245, 255, 0.35); background:linear-gradient(180deg, rgba(11, 17, 32, 0.98), rgba(17, 26, 46, 0.9));">
+                        <div class="card-header-flex" style="margin-bottom:1.25rem;">
+                            <div style="display:flex; align-items:center; gap:0.85rem;">
+                                <div style="width:44px; height:44px; border-radius:var(--radius-md); background:linear-gradient(135deg, var(--primary), var(--indigo)); color:#060911; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:800;">
                                     🚗
                                 </div>
                                 <div>
-                                    <h3 class="card-heading-title" style="color:var(--text-heading); font-size:1.1rem; font-weight:800;">Registrar Entrada de mi Vehículo</h3>
-                                    <p class="card-heading-sub">Elige tu bahía en el mapa interactivo de abajo o selecciónala en el menú desplegable</p>
+                                    <h3 class="card-heading-title" style="color:var(--text-heading); font-size:1.15rem; font-weight:800;">Registro de Vehículo / Entrada Inmediata</h3>
+                                    <p class="card-heading-sub">Registra la placa de tu vehículo y selecciona tu bahía asignada o disponible en el sistema</p>
                                 </div>
                             </div>
+                            <span class="role-badge-tag pill-emerald">Autoservicio Activo</span>
                         </div>
 
-                        <form onsubmit="handleClientSelfEntrySubmit(event)" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)) 160px; gap:0.85rem; align-items:flex-end;">
-                            <div class="form-row" style="margin-bottom:0;">
-                                <label class="form-label-saas" style="font-weight:700;">Placa del Vehículo</label>
-                                <input type="text" id="clientSelfPlate" class="form-control-saas" placeholder="Ej: KLM-456" required style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700; font-size:1rem;">
+                        <form onsubmit="handleClientSelfEntrySubmit(event)" style="display:flex; flex-direction:column; gap:1.25rem;">
+                            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:1rem;">
+                                <div class="form-row" style="margin-bottom:0;">
+                                    <label class="form-label-saas" style="font-weight:700;">Placa del Vehículo <span style="color:var(--rose);">*</span></label>
+                                    <input type="text" id="clientSelfPlate" class="form-control-saas" placeholder="Ej: KLM-456" required style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700; font-size:1.05rem;">
+                                </div>
+                                <div class="form-row" style="margin-bottom:0;">
+                                    <label class="form-label-saas" style="font-weight:700;">Tipo de Vehículo / Zona <span style="color:var(--rose);">*</span></label>
+                                    <select id="clientSelfType" class="form-control-saas" onchange="onClientVehicleTypeChange(this.value)">
+                                        <option value="Automóviles pequeños">🚗 Automóviles pequeños (Zona S1 · $110/min)</option>
+                                        <option value="Automóviles grandes">🚙 Automóviles grandes (Zona S2 · $135/min)</option>
+                                        <option value="Motocicletas">🏍️ Motocicletas (Zona S1 · $65/min)</option>
+                                        <option value="Bicicletas">🚲 Bicicletas (Zona S1 · $25/min)</option>
+                                    </select>
+                                </div>
+                                <div class="form-row" style="margin-bottom:0;">
+                                    <label class="form-label-saas" style="font-weight:700;">Bahía Disponible Seleccionada <span style="color:var(--rose);">*</span></label>
+                                    <select id="clientSelfBay" class="form-control-saas" required>
+                                        <option value="">Cargando bahías disponibles...</option>
+                                    </select>
+                                </div>
+                                <div class="form-row" style="margin-bottom:0;">
+                                    <label class="form-label-saas" style="font-weight:700;">Conductor / Propietario</label>
+                                    <input type="text" id="clientSelfOwner" class="form-control-saas" placeholder="Nombre completo" readonly style="background:rgba(255,255,255,0.04); color:var(--text-heading);">
+                                </div>
                             </div>
-                            <div class="form-row" style="margin-bottom:0;">
-                                <label class="form-label-saas" style="font-weight:700;">Tipo de Vehículo</label>
-                                <select id="clientSelfType" class="form-control-saas" onchange="onClientVehicleTypeChange(this.value)">
-                                    <option value="Automóviles pequeños">🚗 Automóviles pequeños (Zona Automóviles pequeños)</option>
-                                    <option value="Automóviles grandes">🚙 Automóviles grandes (Zona Automóviles grandes)</option>
-                                    <option value="Motocicletas">🏍️ Motocicletas (Zona Motocicletas)</option>
-                                    <option value="Bicicletas">🚲 Bicicletas (Zona Bicicletas)</option>
-                                </select>
+
+                            <div style="background:rgba(0, 245, 255, 0.05); border:1px solid rgba(0, 245, 255, 0.2); border-radius:var(--radius-md); padding:0.85rem 1.15rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+                                <div style="display:flex; align-items:center; gap:0.6rem; font-size:0.82rem; color:var(--text-body);">
+                                    <span>🛡️</span>
+                                    <span>Póliza de seguro incluida contra todo riesgo · Primeros <strong>5 minutos de cortesía</strong> gratis.</span>
+                                </div>
+                                <button type="submit" id="btnSubmitClientSelf" class="btn btn-primary" style="height:44px; padding:0 1.5rem; font-weight:800; font-size:0.9rem;">
+                                    <span>🚀</span> Registrar Entrada Inmediata
+                                </button>
                             </div>
-                            <div class="form-row" style="margin-bottom:0;">
-                                <label class="form-label-saas" style="font-weight:700;">Bahía Seleccionada</label>
-                                <select id="clientSelfBay" class="form-control-saas" required>
-                                    <option value="">Cargando bahías disponibles...</option>
-                                </select>
-                            </div>
-                            <button type="submit" id="btnSubmitClientSelf" class="btn btn-primary" style="height:42px; font-weight:800; width:100%;">
-                                <span>🚀</span> Registrar Entrada
-                            </button>
                         </form>
                     </div>
 
-                    <!-- Panel B: Reserva Anticipada (Horas, Días, Noches) -->
-                    <div id="clientActionPanelReserve" class="saas-card" style="display:none; border:1px solid rgba(245, 158, 11, 0.4); background:linear-gradient(180deg, rgba(11, 17, 32, 0.95), rgba(28, 20, 10, 0.9));">
-                        <div class="card-header-flex" style="margin-bottom:1rem;">
-                            <div style="display:flex; align-items:center; gap:0.75rem;">
-                                <div style="width:40px; height:40px; border-radius:var(--radius-md); background:linear-gradient(135deg, var(--amber), #ea580c); color:#060911; display:flex; align-items:center; justify-content:center; font-size:1.3rem; font-weight:800;">
+                    <!-- Tarjeta de Ticket Activo Emitido -->
+                    <div id="clientActiveTicketContainer" class="saas-card" style="display:none; border:1px solid var(--emerald);">
+                        <!-- Inyectado al registrar entrada -->
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 7.2 VIEW: RESERVAS ANTICIPADAS -->
+            <div id="view-client-reserve" class="view-panel">
+                <div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:1.5rem;">
+                    
+                    <!-- Sub-Navegación Modular del Cliente -->
+                    <div class="client-subnav-hub">
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-entry')">
+                            <span class="hub-icon">🚗</span>
+                            <div class="hub-text">
+                                <strong>1. Registro de Vehículo</strong>
+                                <small>Ingreso a bahía</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn active" onclick="switchSaasView('view-client-reserve')">
+                            <span class="hub-icon">📅</span>
+                            <div class="hub-text">
+                                <strong>2. Reservas</strong>
+                                <small>Horas, Noches, Días</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-payment')">
+                            <span class="hub-icon">💳</span>
+                            <div class="hub-text">
+                                <strong>3. Pago de Estadía</strong>
+                                <small>Liquidación & Nequi</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-exit')">
+                            <span class="hub-icon">🚪</span>
+                            <div class="hub-text">
+                                <strong>4. Salida de Vehículo</strong>
+                                <small>Paz y Salvo & Salida</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-bays')">
+                            <span class="hub-icon">🗺️</span>
+                            <div class="hub-text">
+                                <strong>5. Bahías en Vivo</strong>
+                                <small>130 Cupos Libres</small>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Panel de Formulario de Reserva -->
+                    <div class="saas-card" style="border:1px solid rgba(245, 158, 11, 0.4); background:linear-gradient(180deg, rgba(11, 17, 32, 0.98), rgba(28, 20, 10, 0.9));">
+                        <div class="card-header-flex" style="margin-bottom:1.25rem;">
+                            <div style="display:flex; align-items:center; gap:0.85rem;">
+                                <div style="width:44px; height:44px; border-radius:var(--radius-md); background:linear-gradient(135deg, var(--amber), #ea580c); color:#060911; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:800;">
                                     📅
                                 </div>
                                 <div>
-                                    <h3 class="card-heading-title" style="color:var(--text-heading); font-size:1.1rem; font-weight:800;">Reserva Anticipada de Bahía</h3>
+                                    <h3 class="card-heading-title" style="color:var(--text-heading); font-size:1.15rem; font-weight:800;">Reserva Anticipada de Bahía</h3>
                                     <p class="card-heading-sub">Asegura tu lugar con antelación por horas, noche completa o múltiples días</p>
                                 </div>
                             </div>
+                            <span class="role-badge-tag pill-primary">Cupo Garantizado</span>
                         </div>
 
                         <form onsubmit="handleClientReservationSubmit(event)">
                             <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; margin-bottom:1rem;">
                                 <div class="form-row" style="margin-bottom:0;">
-                                    <label class="form-label-saas" style="font-weight:700;">Placa del Vehículo</label>
+                                    <label class="form-label-saas" style="font-weight:700;">Placa del Vehículo <span style="color:var(--rose);">*</span></label>
                                     <input type="text" id="reservePlate" class="form-control-saas" placeholder="Ej: KLM-456" required style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700; font-size:1rem;">
                                 </div>
                                 <div class="form-row" style="margin-bottom:0;">
-                                    <label class="form-label-saas" style="font-weight:700;">Tipo de Vehículo</label>
+                                    <label class="form-label-saas" style="font-weight:700;">Tipo de Vehículo <span style="color:var(--rose);">*</span></label>
                                     <select id="reserveType" class="form-control-saas" onchange="onClientVehicleTypeChange(this.value)">
-                                        <option value="Automóviles pequeños">🚗 Automóviles pequeños (Zona Automóviles pequeños)</option>
-                                        <option value="Automóviles grandes">🚙 Automóviles grandes (Zona Automóviles grandes)</option>
-                                        <option value="Motocicletas">🏍️ Motocicletas (Zona Motocicletas)</option>
-                                        <option value="Bicicletas">🚲 Bicicletas (Zona Bicicletas)</option>
+                                        <option value="Automóviles pequeños">🚗 Automóviles pequeños</option>
+                                        <option value="Automóviles grandes">🚙 Automóviles grandes</option>
+                                        <option value="Motocicletas">🏍️ Motocicletas</option>
+                                        <option value="Bicicletas">🚲 Bicicletas</option>
                                     </select>
                                 </div>
                                 <div class="form-row" style="margin-bottom:0;">
-                                    <label class="form-label-saas" style="font-weight:700;">Bahía a Reservar</label>
+                                    <label class="form-label-saas" style="font-weight:700;">Bahía a Reservar <span style="color:var(--rose);">*</span></label>
                                     <select id="reserveBay" class="form-control-saas" required onchange="calculateReservationCost()">
                                         <option value="">Selecciona una bahía...</option>
                                     </select>
                                 </div>
                                 <div class="form-row" style="margin-bottom:0;">
-                                    <label class="form-label-saas" style="font-weight:700;">Modalidad de Reserva</label>
+                                    <label class="form-label-saas" style="font-weight:700;">Modalidad de Reserva <span style="color:var(--rose);">*</span></label>
                                     <select id="reserveModality" class="form-control-saas" onchange="onReservationModalityChange()" style="font-weight:700; color:var(--amber);">
                                         <option value="HORAS">⏱️ Por Horas (Tarifa horaria)</option>
                                         <option value="NOCHE">🌙 Noche Completa (7:00 PM - 7:00 AM)</option>
@@ -937,7 +1076,7 @@
                                     </select>
                                 </div>
                                 <div class="form-row" style="margin-bottom:0;">
-                                    <label class="form-label-saas">Fecha & Hora de Inicio</label>
+                                    <label class="form-label-saas">Fecha & Hora de Llegada</label>
                                     <input type="datetime-local" id="reserveStartTime" class="form-control-saas" required onchange="calculateReservationCost()">
                                 </div>
                                 <div style="display:flex; flex-direction:column; justify-content:center;">
@@ -952,7 +1091,255 @@
                         </form>
                     </div>
 
-                    <!-- MAPA DE DISPONIBILIDAD CATEGORIZADO POR TIPO DE VEHÍCULO -->
+                    <!-- Lista de Reservas Activas -->
+                    <div class="saas-card" id="clientReservationsSection">
+                        <div class="card-header-flex" style="margin-bottom:1rem;">
+                            <div>
+                                <h3 class="card-heading-title" style="font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:0.45rem;">
+                                    <span>📋</span> Mis Reservas Confirmadas
+                                </h3>
+                                <p class="card-heading-sub">Bahías reservadas con anticipación para tu vehículo</p>
+                            </div>
+                            <span class="role-badge-tag pill-emerald" id="clientReservationsCountBadge">0 Activas</span>
+                        </div>
+                        <div id="clientReservationsList" style="display:flex; flex-direction:column; gap:0.75rem;">
+                            <!-- Inyectado dinámicamente -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 7.3 VIEW: PAGO POR ESTADÍA DEL VEHÍCULO -->
+            <div id="view-client-payment" class="view-panel">
+                <div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:1.5rem;">
+                    
+                    <!-- Sub-Navegación Modular del Cliente -->
+                    <div class="client-subnav-hub">
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-entry')">
+                            <span class="hub-icon">🚗</span>
+                            <div class="hub-text">
+                                <strong>1. Registro de Vehículo</strong>
+                                <small>Ingreso a bahía</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-reserve')">
+                            <span class="hub-icon">📅</span>
+                            <div class="hub-text">
+                                <strong>2. Reservas</strong>
+                                <small>Horas, Noches, Días</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn active" onclick="switchSaasView('view-client-payment')">
+                            <span class="hub-icon">💳</span>
+                            <div class="hub-text">
+                                <strong>3. Pago de Estadía</strong>
+                                <small>Liquidación & Nequi</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-exit')">
+                            <span class="hub-icon">🚪</span>
+                            <div class="hub-text">
+                                <strong>4. Salida de Vehículo</strong>
+                                <small>Paz y Salvo & Salida</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-bays')">
+                            <span class="hub-icon">🗺️</span>
+                            <div class="hub-text">
+                                <strong>5. Bahías en Vivo</strong>
+                                <small>130 Cupos Libres</small>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Tarjeta de Búsqueda y Liquidación -->
+                    <div class="saas-card" style="border:1px solid rgba(16, 185, 129, 0.4); background:linear-gradient(180deg, rgba(11, 17, 32, 0.98), rgba(12, 28, 22, 0.85));">
+                        <div class="card-header-flex" style="margin-bottom:1.25rem;">
+                            <div style="display:flex; align-items:center; gap:0.85rem;">
+                                <div style="width:44px; height:44px; border-radius:var(--radius-md); background:linear-gradient(135deg, var(--emerald), #059669); color:#060911; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:800;">
+                                    💳
+                                </div>
+                                <div>
+                                    <h3 class="card-heading-title" style="color:var(--text-heading); font-size:1.15rem; font-weight:800;">Liquidación & Pago de Estadía</h3>
+                                    <p class="card-heading-sub">Consulta el saldo acumulado en tiempo real y paga mediante Nequi, Tarjeta o Taquilla</p>
+                                </div>
+                            </div>
+                            <span class="role-badge-tag pill-emerald">Liquidación Oficial</span>
+                        </div>
+
+                        <div style="display:flex; gap:0.75rem; margin-bottom:1.25rem;">
+                            <input type="text" id="clientPaySearchPlate" class="form-control-saas" placeholder="Ingresa tu placa (Ej: KLM-456, BGT-902)" style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700; font-size:1.05rem;">
+                            <button type="button" class="btn btn-primary" onclick="handleClientPaymentSearch()" style="height:44px; padding:0 1.5rem; font-weight:800;">
+                                <span>🔍</span> Liquidar Saldo
+                            </button>
+                        </div>
+
+                        <!-- Contenedor del Desglose de Liquidación -->
+                        <div id="clientPayResultBox" style="display:none; background:var(--bg-surface-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:1.25rem;">
+                            <!-- Inyectado dinámicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Selector de Métodos de Pago Digital -->
+                    <div id="clientPaymentMethodsSection" class="saas-card" style="display:none;">
+                        <h4 style="font-size:1rem; font-weight:800; color:var(--text-heading); margin-bottom:0.25rem;">Selecciona tu Método de Pago</h4>
+                        <p style="font-size:0.75rem; color:var(--text-muted); margin-bottom:1rem;">Transacciones cifradas de extremo a extremo</p>
+
+                        <div class="payment-methods-grid">
+                            <div class="payment-method-card active" id="payMethodNequi" onclick="selectClientPaymentMethod('NEQUI')">
+                                <div class="payment-method-icon">📱</div>
+                                <div class="payment-method-title">Nequi / Daviplata</div>
+                                <div class="payment-method-desc">Pago instantáneo con QR o número de recaudo</div>
+                            </div>
+                            <div class="payment-method-card" id="payMethodCard" onclick="selectClientPaymentMethod('CARD')">
+                                <div class="payment-method-icon">💳</div>
+                                <div class="payment-method-title">Tarjeta Débito / Crédito</div>
+                                <div class="payment-method-desc">Visa, Mastercard o franquicias nacionales</div>
+                            </div>
+                            <div class="payment-method-card" id="payMethodCash" onclick="selectClientPaymentMethod('CASH')">
+                                <div class="payment-method-icon">💵</div>
+                                <div class="payment-method-title">Taquilla / Efectivo</div>
+                                <div class="payment-method-desc">Punto físico de pago en parqueadero</div>
+                            </div>
+                        </div>
+
+                        <!-- Detalles dinámicos según el método seleccionado -->
+                        <div id="clientPaymentFormContainer" style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-md); padding:1.25rem; margin-bottom:1.25rem;">
+                            <!-- Inyectado dinámicamente -->
+                        </div>
+
+                        <button type="button" id="btnConfirmClientPay" class="btn btn-primary" onclick="executeClientPayment()" style="width:100%; height:48px; font-weight:900; font-size:1rem; background:linear-gradient(135deg, var(--emerald), #059669); color:#060911;">
+                            <span>💳</span> Procesar Pago & Generar Paz y Salvo Oficial
+                        </button>
+                    </div>
+
+                    <!-- Contenedor de Paz y Salvo Oficial -->
+                    <div id="clientPazYSalvoBox" style="display:none;">
+                        <!-- Inyectado al confirmar pago -->
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 7.4 VIEW: SALIDA DE VEHÍCULO & LIBERACIÓN DE BAHÍA -->
+            <div id="view-client-exit" class="view-panel">
+                <div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:1.5rem;">
+                    
+                    <!-- Sub-Navegación Modular del Cliente -->
+                    <div class="client-subnav-hub">
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-entry')">
+                            <span class="hub-icon">🚗</span>
+                            <div class="hub-text">
+                                <strong>1. Registro de Vehículo</strong>
+                                <small>Ingreso a bahía</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-reserve')">
+                            <span class="hub-icon">📅</span>
+                            <div class="hub-text">
+                                <strong>2. Reservas</strong>
+                                <small>Horas, Noches, Días</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-payment')">
+                            <span class="hub-icon">💳</span>
+                            <div class="hub-text">
+                                <strong>3. Pago de Estadía</strong>
+                                <small>Liquidación & Nequi</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn active" onclick="switchSaasView('view-client-exit')">
+                            <span class="hub-icon">🚪</span>
+                            <div class="hub-text">
+                                <strong>4. Salida de Vehículo</strong>
+                                <small>Paz y Salvo & Salida</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-bays')">
+                            <span class="hub-icon">🗺️</span>
+                            <div class="hub-text">
+                                <strong>5. Bahías en Vivo</strong>
+                                <small>130 Cupos Libres</small>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- Panel de Salida y Liberación de Bahía -->
+                    <div class="saas-card" style="border:1px solid rgba(244, 63, 94, 0.4); background:linear-gradient(180deg, rgba(11, 17, 32, 0.98), rgba(28, 12, 18, 0.85));">
+                        <div class="card-header-flex" style="margin-bottom:1.25rem;">
+                            <div style="display:flex; align-items:center; gap:0.85rem;">
+                                <div style="width:44px; height:44px; border-radius:var(--radius-md); background:linear-gradient(135deg, var(--rose), #e11d48); color:#060911; display:flex; align-items:center; justify-content:center; font-size:1.4rem; font-weight:800;">
+                                    🚪
+                                </div>
+                                <div>
+                                    <h3 class="card-heading-title" style="color:var(--text-heading); font-size:1.15rem; font-weight:800;">Salida de Vehículo & Liberación de Bahía</h3>
+                                    <p class="card-heading-sub">Valida tu Paz y Salvo digital para autorizar la salida y liberar tu bahía en el parqueadero</p>
+                                </div>
+                            </div>
+                            <span class="role-badge-tag pill-rose">Control de Salida</span>
+                        </div>
+
+                        <div style="display:flex; gap:0.75rem; margin-bottom:1.25rem;">
+                            <input type="text" id="clientExitSearchPlate" class="form-control-saas" placeholder="Ingresa tu placa (Ej: KLM-456)" style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700; font-size:1.05rem;">
+                            <button type="button" class="btn btn-primary" onclick="handleClientExitSearch()" style="height:44px; padding:0 1.5rem; font-weight:800; background:linear-gradient(135deg, var(--rose), #e11d48); border-color:var(--rose); color:#fff;">
+                                <span>🔍</span> Validar Salida
+                            </button>
+                        </div>
+
+                        <!-- Contenedor del Estado de Salida -->
+                        <div id="clientExitStatusContainer" style="display:none;">
+                            <!-- Inyectado dinámicamente -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- 7.5 VIEW: BAHÍAS DISPONIBLES & TELEMETRÍA (CLIENTE) -->
+            <div id="view-client-bays" class="view-panel">
+                <div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:1.5rem;">
+                    
+                    <!-- Sub-Navegación Modular del Cliente -->
+                    <div class="client-subnav-hub">
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-entry')">
+                            <span class="hub-icon">🚗</span>
+                            <div class="hub-text">
+                                <strong>1. Registro de Vehículo</strong>
+                                <small>Ingreso a bahía</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-reserve')">
+                            <span class="hub-icon">📅</span>
+                            <div class="hub-text">
+                                <strong>2. Reservas</strong>
+                                <small>Horas, Noches, Días</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-payment')">
+                            <span class="hub-icon">💳</span>
+                            <div class="hub-text">
+                                <strong>3. Pago de Estadía</strong>
+                                <small>Liquidación & Nequi</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-exit')">
+                            <span class="hub-icon">🚪</span>
+                            <div class="hub-text">
+                                <strong>4. Salida de Vehículo</strong>
+                                <small>Paz y Salvo & Salida</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn active" onclick="switchSaasView('view-client-bays')">
+                            <span class="hub-icon">🗺️</span>
+                            <div class="hub-text">
+                                <strong>5. Bahías en Vivo</strong>
+                                <small>130 Cupos Libres</small>
+                            </div>
+                        </button>
+                    </div>
+
+                    <!-- MAPA DE DISPONIBILIDAD CATEGORIZADO -->
                     <div class="saas-card" style="border:1px solid var(--border-strong);">
                         <div class="card-header-flex" style="flex-wrap:wrap; gap:1rem; margin-bottom:1.25rem;">
                             <div>
@@ -999,40 +1386,50 @@
                         </div>
                     </div>
 
-                    <!-- MIS RESERVAS ACTIVAS -->
-                    <div class="saas-card" id="clientReservationsSection">
-                        <div class="card-header-flex" style="margin-bottom:1rem;">
-                            <div>
-                                <h3 class="card-heading-title" style="font-size:1.05rem; font-weight:800; display:flex; align-items:center; gap:0.45rem;">
-                                    <span>📋</span> Mis Reservas Confirmadas
-                                </h3>
-                                <p class="card-heading-sub">Bahías reservadas con anticipación para tu vehículo</p>
-                            </div>
-                            <span class="role-badge-tag pill-emerald" id="clientReservationsCountBadge">0 Activas</span>
-                        </div>
-                        <div id="clientReservationsList" style="display:flex; flex-direction:column; gap:0.75rem;">
-                            <!-- Inyectado dinámicamente -->
-                        </div>
-                    </div>
+                </div>
+            </div>
 
-                    <!-- Tarjeta de Consulta por Placa -->
-                    <div class="saas-card">
-                        <div class="card-header-flex">
-                            <div>
-                                <h3 class="card-heading-title">🔍 Consulta de Estancia en Curso</h3>
-                                <p class="card-heading-sub">Consulta el estado, tiempo transcurrido y tarifa acumulada de tu vehículo en tiempo real</p>
+            <!-- 7.6 VIEW: TARIFAS & CALCULADORA AL PÚBLICO -->
+            <div id="view-client-rates" class="view-panel">
+                <div style="max-width:980px; margin:0 auto; display:flex; flex-direction:column; gap:1.5rem;">
+                    
+                    <!-- Sub-Navegación Modular del Cliente -->
+                    <div class="client-subnav-hub">
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-entry')">
+                            <span class="hub-icon">🚗</span>
+                            <div class="hub-text">
+                                <strong>1. Registro de Vehículo</strong>
+                                <small>Ingreso a bahía</small>
                             </div>
-                        </div>
-                        <div style="display:flex; gap:0.75rem; margin-bottom:1rem;">
-                            <input type="text" id="saasClientPlateSearch" class="form-control-saas" placeholder="Ingresa tu placa (Ej: KLM-456, BGT-902, SUV-779)" style="text-transform:uppercase; font-family:'JetBrains Mono'; font-weight:700; font-size:1rem;">
-                            <button type="button" class="btn btn-primary" onclick="handleSaasClientSearch()">
-                                Consultar
-                            </button>
-                        </div>
-
-                        <div id="saasClientResultCard" style="display:none; background:var(--bg-surface-elevated); border:1px solid var(--border); border-radius:var(--radius-md); padding:1.25rem;">
-                            <!-- Inyectado dinámicamente -->
-                        </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-reserve')">
+                            <span class="hub-icon">📅</span>
+                            <div class="hub-text">
+                                <strong>2. Reservas</strong>
+                                <small>Horas, Noches, Días</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-payment')">
+                            <span class="hub-icon">💳</span>
+                            <div class="hub-text">
+                                <strong>3. Pago de Estadía</strong>
+                                <small>Liquidación & Nequi</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-exit')">
+                            <span class="hub-icon">🚪</span>
+                            <div class="hub-text">
+                                <strong>4. Salida de Vehículo</strong>
+                                <small>Paz y Salvo & Salida</small>
+                            </div>
+                        </button>
+                        <button type="button" class="client-hub-btn" onclick="switchSaasView('view-client-bays')">
+                            <span class="hub-icon">🗺️</span>
+                            <div class="hub-text">
+                                <strong>5. Bahías en Vivo</strong>
+                                <small>130 Cupos Libres</small>
+                            </div>
+                        </button>
                     </div>
 
                     <!-- Calculadora Interactiva de Tarifa por Minutos de Estadía -->

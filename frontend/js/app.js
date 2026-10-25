@@ -514,8 +514,13 @@
                 'view-rates',
                 'view-users',
                 'view-audit',
-                'view-client-portal',
-                'view-patterns'
+                'view-patterns',
+                'view-client-entry',
+                'view-client-reserve',
+                'view-client-payment',
+                'view-client-exit',
+                'view-client-bays',
+                'view-client-rates'
             ],
             canCheckIn: true,
             canCheckOut: true,
@@ -530,7 +535,7 @@
             email: 'carlos.operador@parkflow.co',
             avatar: 'CM',
             avatarBg: 'linear-gradient(135deg, #10b981, #06b6d4)',
-            avatarBorder: 'rgba(16, 185, 129, 0.45)',
+            avatarBorder: 'rgba(168, 85, 247, 0.45)',
             badge: 'Operador de Patio',
             badgeClass: 'pill-primary',
             sessionStatus: 'Turno Activo (Cabina de Entrada)',
@@ -560,11 +565,14 @@
             badgeClass: 'pill-primary',
             sessionStatus: 'En Línea (Portal Autoservicio)',
             statusDotColor: '#10b981',
-            defaultView: 'view-client-portal',
+            defaultView: 'view-client-entry',
             allowedViews: [
-                'view-client-portal',
-                'view-matrix',
-                'view-rates'
+                'view-client-entry',
+                'view-client-reserve',
+                'view-client-payment',
+                'view-client-exit',
+                'view-client-bays',
+                'view-client-rates'
             ],
             canCheckIn: true,
             canCheckOut: false,
@@ -578,12 +586,17 @@
     const MODULE_NAMES = {
         'view-overview': { name: 'Dashboard General', minRole: 'Operador' },
         'view-operations': { name: 'Flujo & Estancias', minRole: 'Operador' },
-        'view-matrix': { name: 'Telemetría de Bahías', minRole: 'Cliente' },
-        'view-rates': { name: 'Matriz Tarifaria', minRole: 'Cliente' },
+        'view-matrix': { name: 'Telemetría de Bahías', minRole: 'Operador' },
+        'view-rates': { name: 'Matriz Tarifaria', minRole: 'Operador' },
         'view-users': { name: 'Cuentas & RBAC', minRole: 'Administrador' },
         'view-audit': { name: 'Seguridad & Logs', minRole: 'Administrador' },
-        'view-client-portal': { name: 'Portal Ciudadano', minRole: 'Cliente' },
-        'view-patterns': { name: 'Patrones & Dominios DDD', minRole: 'Cliente' }
+        'view-patterns': { name: 'Patrones & Dominios DDD', minRole: 'Administrador' },
+        'view-client-entry': { name: 'Registro de Vehículo', minRole: 'Cliente' },
+        'view-client-reserve': { name: 'Mis Reservas', minRole: 'Cliente' },
+        'view-client-payment': { name: 'Pago de Estadía', minRole: 'Cliente' },
+        'view-client-exit': { name: 'Salida de Vehículo', minRole: 'Cliente' },
+        'view-client-bays': { name: 'Bahías Disponibles', minRole: 'Cliente' },
+        'view-client-rates': { name: 'Tarifas al Público', minRole: 'Cliente' }
     };
 
     function showRbacToast(msg, isBlocked = true) {
@@ -767,6 +780,33 @@
             });
         }
 
+        // Sincronizar botones de los hubs horizontales de clientes
+        document.querySelectorAll('.client-hub-btn').forEach(hubBtn => {
+            const hubOnclick = hubBtn.getAttribute('onclick') || '';
+            if (hubOnclick.includes(viewId)) {
+                hubBtn.classList.add('active');
+            } else {
+                hubBtn.classList.remove('active');
+            }
+        });
+
+        // Actualizar datos específicos al entrar a vistas del cliente
+        if (viewId === 'view-client-entry') {
+            filterAvailableBaysForClientSelf();
+            const ownerEl = document.getElementById('clientSelfOwner');
+            if (ownerEl && currentAuthSession && currentAuthSession.nombre) {
+                ownerEl.value = currentAuthSession.nombre;
+            }
+        } else if (viewId === 'view-client-reserve') {
+            filterAvailableBaysForReservation();
+            renderClientReservations();
+        } else if (viewId === 'view-client-bays') {
+            renderClientCategorizedMap();
+        } else if (viewId === 'view-client-rates') {
+            updatePortalMinuteCalculation();
+            renderClientHistoryTable();
+        }
+
         // Update breadcrumb
         const breadcrumbNames = {
             'view-overview': 'Dashboard General',
@@ -775,10 +815,16 @@
             'view-rates': 'Matriz Tarifaria',
             'view-users': 'Cuentas & RBAC',
             'view-audit': 'Seguridad & Logs',
-            'view-client-portal': 'Portal Ciudadano',
-            'view-patterns': 'Patrones & Dominios DDD'
+            'view-patterns': 'Patrones & Dominios DDD',
+            'view-client-entry': 'Registro de Vehículo',
+            'view-client-reserve': 'Mis Reservas',
+            'view-client-payment': 'Pago de Estadía',
+            'view-client-exit': 'Salida de Vehículo',
+            'view-client-bays': 'Bahías Disponibles',
+            'view-client-rates': 'Tarifas al Público'
         };
-        document.getElementById('currentViewBreadcrumb').textContent = breadcrumbNames[viewId] || 'Dashboard';
+        const bc = document.getElementById('currentViewBreadcrumb');
+        if (bc) bc.textContent = breadcrumbNames[viewId] || 'Dashboard';
     }
 
     function toggleMobileSidebar() {
@@ -1694,7 +1740,7 @@
         const btn = document.getElementById('btnSubmitClientSelf');
 
         const plate = plateInput ? plateInput.value.trim().toUpperCase() : '';
-        const type = typeSelect ? typeSelect.value : 'Automóvil';
+        const type = typeSelect ? typeSelect.value : 'Automóviles pequeños';
         const bay = baySelect ? baySelect.value : '';
         const owner = currentAuthSession?.nombre || 'Cliente Autoservicio';
 
@@ -1710,7 +1756,7 @@
 
         if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '<span>⏳</span> Registrando...';
+            btn.innerHTML = '<span>⏳</span> Registrando Entrada...';
         }
 
         try {
@@ -1732,36 +1778,83 @@
                 return;
             }
 
-            // Limpiar campo de placa
-            if (plateInput) plateInput.value = '';
-
-            // Mostrar ticket generado
-            showCheckInReceipt(data.data);
-
-            // Sincronizar datos
-            await syncAllFromDatabase();
-
-            // Consultar inmediatamente para mostrar la estancia en curso en el portal
-            const clientSearchInput = document.getElementById('saasClientPlateSearch');
-            if (clientSearchInput) {
-                clientSearchInput.value = plate;
-                handleSaasClientSearch();
+            // Mostrar ticket digital activo en la pantalla de Registro
+            const activeContainer = document.getElementById('clientActiveTicketContainer');
+            if (activeContainer) {
+                activeContainer.style.display = 'block';
+                activeContainer.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                        <div>
+                            <span class="role-badge-tag pill-emerald" style="margin-bottom:0.35rem;">✓ Entrada Registrada con Éxito</span>
+                            <div style="font-size:1.15rem; font-weight:800; color:var(--text-heading);">Ticket Digital: <span style="color:var(--primary); font-family:'JetBrains Mono';">${data.data.ticketCodigo}</span></div>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick='showCheckInReceipt(${JSON.stringify(data.data)})'>🖨️ Ver Recibo</button>
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:1rem; margin-bottom:1.25rem;">
+                        <div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Placa</div>
+                            <div class="plate-pill" style="font-size:1.1rem; margin-top:0.25rem;">${data.data.placa}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Bahía Asignada</div>
+                            <div style="font-size:1.2rem; font-weight:800; color:var(--emerald);">${data.data.spotCodigo}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Hora Entrada</div>
+                            <div style="font-size:0.95rem; font-weight:700; color:var(--text-heading);">${new Date(data.data.fechaIngreso).toLocaleTimeString('es-CO')}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Estado</div>
+                            <div class="status-badge badge-active-live">Estadía Activa</div>
+                        </div>
+                    </div>
+                    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                        <button type="button" class="btn btn-primary btn-sm" onclick="quickProceedToPay('${data.data.placa}')">
+                            💳 Ir a Pagar Estadía de este Vehículo
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="switchSaasView('view-client-bays')">
+                            🗺️ Ver Bahía en el Mapa
+                        </button>
+                    </div>
+                `;
             }
 
-            showRbacToast(`✅ ¡Tu vehículo <strong>${plate}</strong> fue registrado con éxito en la bahía <strong>${bay}</strong>!`, false);
+            // Precargar la placa en los demás módulos para máxima comodidad del usuario
+            const payInput = document.getElementById('clientPaySearchPlate');
+            if (payInput) payInput.value = plate;
+            const exitInput = document.getElementById('clientExitSearchPlate');
+            if (exitInput) exitInput.value = plate;
+
+            // Mostrar modal de ticket
+            showCheckInReceipt(data.data);
+
+            // Sincronizar datos de la base de datos
+            await syncAllFromDatabase();
+
+            showRbacToast(`✅ ¡Vehículo <strong>${plate}</strong> registrado exitosamente en bahía <strong>${bay}</strong>!`, false);
 
         } catch (err) {
             alert('Error al registrar vehículo: ' + err.message);
         } finally {
             if (btn) {
                 btn.disabled = false;
-                btn.innerHTML = '<span>🚀</span> Registrar Entrada';
+                btn.innerHTML = '<span>🚀</span> Registrar Entrada Inmediata';
             }
+        }
+    }
+
+    function quickProceedToPay(plate) {
+        switchSaasView('view-client-payment');
+        const payInput = document.getElementById('clientPaySearchPlate');
+        if (payInput) {
+            payInput.value = plate;
+            handleClientPaymentSearch();
         }
     }
 
     window.filterAvailableBaysForClientSelf = filterAvailableBaysForClientSelf;
     window.handleClientSelfEntrySubmit = handleClientSelfEntrySubmit;
+    window.quickProceedToPay = quickProceedToPay;
 
     // Registrar Entrada (Check-In)
     async function handleSaasEntrySubmit(e) {
@@ -2756,9 +2849,9 @@
         if (saasState.currentRole === 'Cliente') {
             const spot = (saasState.spots || []).find(s => s.codigo === code);
             if (state === 'DISPONIBLE') {
-                selectBayForClient(code, spot ? spot.tipoPermitido : 'Automóvil', state);
-                switchSaasView('view-client-portal');
-                showRbacToast(`📍 Bahía <strong>${code}</strong> seleccionada. Elige 'Registrar Entrada' o 'Reservar'.`, false);
+                selectBayForClient(code, spot ? spot.tipoPermitido : 'Automóviles pequeños', state);
+                switchSaasView('view-client-entry');
+                showRbacToast(`📍 Bahía <strong>${code}</strong> seleccionada para tu registro de vehículo.`, false);
             } else if (state === 'OCUPADO') {
                 alert(`La bahía ${code} está actualmente ocupada por otro vehículo.`);
             } else {
@@ -2960,71 +3053,482 @@
         `).join('');
     }
 
-    // Portal del Cliente - Búsqueda
-    function handleSaasClientSearch() {
-        const plate = document.getElementById('saasClientPlateSearch').value.trim().toUpperCase();
-        const card = document.getElementById('saasClientResultCard');
+    // =========================================================================
+    // MÓDULOS DE AUTOSERVICIO DEL CLIENTE: PAGO, SALIDA & PAZ Y SALVO
+    // =========================================================================
+    let activeClientPaymentData = null;
+    let selectedClientPaymentMethod = 'NEQUI';
+
+    // 1. Módulo de Pago: Búsqueda y Liquidación
+    function handleClientPaymentSearch() {
+        const input = document.getElementById('clientPaySearchPlate');
+        const plate = input ? input.value.trim().toUpperCase() : '';
+        const resultBox = document.getElementById('clientPayResultBox');
+        const methodsSection = document.getElementById('clientPaymentMethodsSection');
+        const pazBox = document.getElementById('clientPazYSalvoBox');
+
+        if (pazBox) pazBox.style.display = 'none';
 
         if (!plate) {
-            alert('Ingresa una placa.');
+            alert('Por favor ingresa la placa de tu vehículo.');
             return;
         }
 
-        const active = saasState.tickets.find(t => t.estado === 'ACTIVO' && t.placa === plate);
-        if (!active) {
-            card.style.display = 'block';
-            card.innerHTML = `
-                <div style="color:var(--rose); font-weight:700; margin-bottom:0.25rem;">Vehículo no encontrado</div>
-                <p style="font-size:0.8rem; color:var(--text-muted);">La placa <strong>${plate}</strong> no tiene ingreso activo vigente en el parqueadero.</p>
+        const activeTicket = (saasState.tickets || []).find(t => t.estado === 'ACTIVO' && t.placa === plate);
+
+        if (!activeTicket) {
+            if (resultBox) {
+                resultBox.style.display = 'block';
+                resultBox.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:0.75rem; color:var(--rose);">
+                        <span style="font-size:1.5rem;">⚠️</span>
+                        <div>
+                            <strong style="font-size:0.95rem;">Vehículo sin Estancia Activa</strong>
+                            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:0.2rem;">
+                                La placa <strong>${plate}</strong> no tiene un ingreso activo en este momento o ya fue liquidada.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            }
+            if (methodsSection) methodsSection.style.display = 'none';
+            return;
+        }
+
+        // Calcular minutos de estadía y tarifa
+        const entryTime = new Date(activeTicket.fechaIngreso).getTime();
+        const mins = Math.max(1, Math.round((Date.now() - entryTime) / 60000));
+        const calc = calculateStayFee(activeTicket.tipoVehiculo, mins, 'MINUTE');
+
+        activeClientPaymentData = {
+            ticket: activeTicket,
+            minutes: mins,
+            calc: calc
+        };
+
+        if (resultBox) {
+            resultBox.style.display = 'block';
+            resultBox.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                    <div>
+                        <span class="plate-pill" style="font-size:1.25rem;">${activeTicket.placa}</span>
+                        <span style="margin-left:0.5rem; color:var(--primary); font-size:0.85rem; font-weight:700;">${activeTicket.tipoVehiculo}</span>
+                    </div>
+                    <span class="status-badge badge-active-live">Estancia en Curso</span>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:0.85rem; margin-bottom:1.15rem;">
+                    <div>
+                        <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Bahía Asignada</div>
+                        <div style="font-size:1.25rem; font-weight:800; color:var(--emerald); font-family:'JetBrains Mono';">${activeTicket.spotCodigo}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Hora Ingreso</div>
+                        <div style="font-size:0.95rem; font-weight:700; color:var(--text-heading);">${new Date(activeTicket.fechaIngreso).toLocaleTimeString('es-CO')}</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Tiempo Transcurrido</div>
+                        <div style="font-size:1.2rem; font-weight:800; color:var(--primary); font-family:'JetBrains Mono';">${mins} mins</div>
+                    </div>
+                    <div>
+                        <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Tarifa por Minuto</div>
+                        <div style="font-size:1.1rem; font-weight:800; color:var(--text-heading); font-family:'JetBrains Mono';">$${calc.ratePerMinute.toLocaleString('es-CO')}/min</div>
+                    </div>
+                </div>
+                <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.9rem 1.15rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem;">
+                    <div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">Desglose de Liquidación:</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono';">${calc.formula} (5m gracia aplicados)</div>
+                    </div>
+                    <div style="font-size:1.55rem; font-weight:900; color:var(--emerald); font-family:'JetBrains Mono';">
+                        $${calc.total.toLocaleString('es-CO')} COP
+                    </div>
+                </div>
+                <div style="margin-top:0.75rem; text-align:right;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="handleClientPaymentSearch()" style="font-size:0.75rem;">
+                        🔄 Recalcular Minutos en Vivo
+                    </button>
+                </div>
             `;
+        }
+
+        if (methodsSection) {
+            methodsSection.style.display = 'block';
+            selectClientPaymentMethod('NEQUI');
+        }
+    }
+
+    // 2. Selección de Método de Pago
+    function selectClientPaymentMethod(method) {
+        selectedClientPaymentMethod = method;
+
+        const btnNequi = document.getElementById('payMethodNequi');
+        const btnCard = document.getElementById('payMethodCard');
+        const btnCash = document.getElementById('payMethodCash');
+        const formContainer = document.getElementById('clientPaymentFormContainer');
+        const confirmBtn = document.getElementById('btnConfirmClientPay');
+
+        if (btnNequi) btnNequi.className = (method === 'NEQUI') ? 'payment-method-card active' : 'payment-method-card';
+        if (btnCard) btnCard.className = (method === 'CARD') ? 'payment-method-card active' : 'payment-method-card';
+        if (btnCash) btnCash.className = (method === 'CASH') ? 'payment-method-card active' : 'payment-method-card';
+
+        const totalFormatted = activeClientPaymentData ? `$${activeClientPaymentData.calc.total.toLocaleString('es-CO')} COP` : '$0 COP';
+
+        if (formContainer) {
+            if (method === 'NEQUI') {
+                formContainer.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:1.25rem; flex-wrap:wrap;">
+                        <div style="background:#ffffff; padding:0.6rem; border-radius:var(--radius-md); text-align:center; box-shadow:0 4px 15px rgba(0,0,0,0.4);">
+                            <div style="width:110px; height:110px; background:repeating-linear-gradient(45deg, #000 0px, #000 7px, #fff 7px, #fff 14px); border-radius:4px; margin:0 auto;"></div>
+                            <div style="font-size:0.65rem; color:#0f172a; font-weight:800; margin-top:0.35rem;">QR OFICIAL NEQUI</div>
+                        </div>
+                        <div style="flex:1; min-width:200px;">
+                            <div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Línea de Recaudo Empresarial</div>
+                            <div style="font-size:1.2rem; font-weight:800; color:var(--primary); font-family:'JetBrains Mono'; margin:0.2rem 0;">315 890 4421</div>
+                            <p style="font-size:0.78rem; color:var(--text-body); line-height:1.4;">
+                                Escanea el código QR desde tu App Nequi / Daviplata o transfiere el monto exacto de <strong>${totalFormatted}</strong>. La acreditación se reflejará al confirmar.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else if (method === 'CARD') {
+                formContainer.innerHTML = `
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:0.75rem;">
+                        <div class="form-row" style="margin-bottom:0; grid-column: 1 / -1;">
+                            <label class="form-label-saas">Número de Tarjeta</label>
+                            <input type="text" class="form-control-saas" value="4532 •••• •••• 8891" readonly style="font-family:'JetBrains Mono';">
+                        </div>
+                        <div class="form-row" style="margin-bottom:0;">
+                            <label class="form-label-saas">Vencimiento</label>
+                            <input type="text" class="form-control-saas" value="08/29" readonly style="text-align:center;">
+                        </div>
+                        <div class="form-row" style="margin-bottom:0;">
+                            <label class="form-label-saas">CVV</label>
+                            <input type="text" class="form-control-saas" value="•••" readonly style="text-align:center;">
+                        </div>
+                    </div>
+                `;
+            } else {
+                formContainer.innerHTML = `
+                    <div style="display:flex; align-items:center; gap:0.75rem; color:var(--amber);">
+                        <span style="font-size:1.4rem;">💵</span>
+                        <div style="font-size:0.82rem; color:var(--text-body);">
+                            Acércate a la taquilla física del parqueadero para realizar el pago en efectivo de <strong>${totalFormatted}</strong> y solicita tu comprobante impreso.
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        if (confirmBtn) {
+            confirmBtn.innerHTML = `<span>💳</span> Confirmar Pago con ${method === 'NEQUI' ? 'Nequi / Daviplata' : method === 'CARD' ? 'Tarjeta Débito/Crédito' : 'Taquilla'} (${totalFormatted})`;
+        }
+    }
+
+    // 3. Ejecutar Pago y Emitir Paz y Salvo
+    async function executeClientPayment() {
+        if (!activeClientPaymentData) {
+            alert('Por favor busca y liquida una placa primero.');
             return;
         }
 
-        const mins = Math.max(1, Math.round((Date.now() - new Date(active.fechaIngreso).getTime()) / 60000));
-        const calc = calculateStayFee(active.tipoVehiculo, mins, 'MINUTE');
+        const data = activeClientPaymentData;
+        const btn = document.getElementById('btnConfirmClientPay');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳</span> Procesando Pago Seguro...';
+        }
 
-        card.style.display = 'block';
-        card.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
-                <div>
-                    <span class="plate-pill" style="font-size:1.25rem;">${active.placa}</span>
-                    <span style="margin-left:0.5rem; color:var(--primary); font-size:0.85rem; font-weight:700;">${active.tipoVehiculo}</span>
+        try {
+            const res = await fetch(`${API_BASE}/tickets.php`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    logId: data.ticket.id,
+                    valorPagado: data.calc.total,
+                    minutosTranscurridos: data.minutes,
+                    metodoPago: selectedClientPaymentMethod,
+                    operadorSalida: 'Cliente Autoservicio (' + (currentAuthSession?.nombre || 'Usuario') + ')'
+                })
+            });
+
+            const json = await res.json();
+            if (!json.success) {
+                alert(json.message || 'Error al procesar pago.');
+                return;
+            }
+
+            // Registrar Paz y Salvo Oficial
+            const pzId = 'PZ-' + Date.now().toString().slice(-6);
+            const pazYSalvo = {
+                id: pzId,
+                ticketCodigo: data.ticket.ticketCodigo,
+                placa: data.ticket.placa,
+                tipoVehiculo: data.ticket.tipoVehiculo,
+                spotCodigo: data.ticket.spotCodigo,
+                valorPagado: data.calc.total,
+                minutos: data.minutes,
+                metodoPago: selectedClientPaymentMethod,
+                fechaPago: new Date().toISOString(),
+                graciaSalidaMinutos: 15
+            };
+
+            localStorage.setItem('parkflow_pz_' + data.ticket.placa, JSON.stringify(pazYSalvo));
+
+            // Ocultar sección de métodos y mostrar tarjeta de Paz y Salvo
+            const methodsSection = document.getElementById('clientPaymentMethodsSection');
+            if (methodsSection) methodsSection.style.display = 'none';
+
+            const pazBox = document.getElementById('clientPazYSalvoBox');
+            if (pazBox) {
+                pazBox.style.display = 'block';
+                pazBox.innerHTML = `
+                    <div class="paz-salvo-card">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid rgba(16,185,129,0.3); padding-bottom:0.75rem;">
+                            <div style="display:flex; align-items:center; gap:0.6rem;">
+                                <span style="font-size:1.6rem;">🎉</span>
+                                <div>
+                                    <h3 style="color:var(--emerald); font-size:1.15rem; font-weight:800; margin:0;">¡Paz y Salvo Digital Emitido!</h3>
+                                    <p style="font-size:0.75rem; color:var(--text-muted); margin:0;">Comprobante oficial de pago de estadía</p>
+                                </div>
+                            </div>
+                            <span class="role-badge-tag pill-emerald">N° ${pzId}</span>
+                        </div>
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:1rem; margin-bottom:1.25rem;">
+                            <div>
+                                <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Placa</div>
+                                <div class="plate-pill" style="font-size:1.1rem; margin-top:0.25rem;">${pazYSalvo.placa}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Bahía</div>
+                                <div style="font-size:1.15rem; font-weight:800; color:var(--text-heading); font-family:'JetBrains Mono';">${pazYSalvo.spotCodigo}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Monto Liquidado</div>
+                                <div style="font-size:1.15rem; font-weight:800; color:var(--emerald); font-family:'JetBrains Mono';">$${pazYSalvo.valorPagado.toLocaleString('es-CO')}</div>
+                            </div>
+                            <div>
+                                <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Gracia para Salida</div>
+                                <div style="font-size:1.1rem; font-weight:800; color:var(--amber);">15 Minutos</div>
+                            </div>
+                        </div>
+                        <div style="background:rgba(0,0,0,0.3); border-radius:var(--radius-sm); padding:0.85rem 1rem; margin-bottom:1.25rem; font-size:0.8rem; color:var(--text-body);">
+                            ✓ Tu pago ha sido registrado en el sistema. Tienes <strong>15 minutos</strong> para retirar tu vehículo. Dirígete al módulo de <strong>Salida de Vehículo</strong> para liberar tu bahía.
+                        </div>
+                        <button type="button" class="btn btn-primary" onclick="proceedToExitAfterPayment('${pazYSalvo.placa}')" style="width:100%; height:46px; font-weight:800; background:linear-gradient(135deg, var(--emerald), #059669); color:#060911;">
+                            <span>🚪</span> Proceder a Salida de Vehículo & Liberar Bahía →
+                        </button>
+                    </div>
+                `;
+            }
+
+            await syncAllFromDatabase();
+            showRbacToast(`🎉 ¡Pago confirmado! Paz y Salvo <strong>${pzId}</strong> emitido.`, false);
+
+        } catch (err) {
+            alert('Error procesando pago: ' + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '<span>💳</span> Procesar Pago & Generar Paz y Salvo Oficial';
+            }
+        }
+    }
+
+    function proceedToExitAfterPayment(plate) {
+        switchSaasView('view-client-exit');
+        const exitInput = document.getElementById('clientExitSearchPlate');
+        if (exitInput) {
+            exitInput.value = plate;
+            handleClientExitSearch();
+        }
+    }
+
+    // 4. Módulo de Salida: Validación de Paz y Salvo
+    function handleClientExitSearch() {
+        const input = document.getElementById('clientExitSearchPlate');
+        const plate = input ? input.value.trim().toUpperCase() : '';
+        const container = document.getElementById('clientExitStatusContainer');
+
+        if (!plate) {
+            alert('Por favor ingresa la placa de tu vehículo.');
+            return;
+        }
+
+        if (!container) return;
+        container.style.display = 'block';
+
+        // 1. Revisar si tiene Paz y Salvo local vigente
+        let pz = null;
+        try {
+            const raw = localStorage.getItem('parkflow_pz_' + plate);
+            if (raw) pz = JSON.parse(raw);
+        } catch (e) {}
+
+        // 2. Revisar si hay un ticket activo o recientemente finalizado
+        const activeTicket = (saasState.tickets || []).find(t => t.estado === 'ACTIVO' && t.placa === plate);
+        const lastTicket = (saasState.tickets || []).find(t => t.placa === plate);
+
+        if (pz) {
+            // Caso A: Paz y Salvo Autorizado
+            container.innerHTML = `
+                <div class="exit-hero-card" style="border-left:4px solid var(--emerald);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            <span style="font-size:1.6rem; color:var(--emerald);">✓</span>
+                            <div>
+                                <h3 style="color:var(--text-heading); font-size:1.15rem; font-weight:800; margin:0;">Vehículo Autorizado para Salida</h3>
+                                <p style="font-size:0.75rem; color:var(--emerald); margin:0;">Paz y Salvo Vigente (${pz.id})</p>
+                            </div>
+                        </div>
+                        <span class="status-badge badge-available">Salida Aprobada</span>
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:1rem; margin-bottom:1.25rem;">
+                        <div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Placa</div>
+                            <div class="plate-pill" style="font-size:1.15rem; margin-top:0.25rem;">${pz.placa}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Bahía a Liberar</div>
+                            <div style="font-size:1.25rem; font-weight:800; color:var(--emerald); font-family:'JetBrains Mono';">${pz.spotCodigo}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Valor Liquidado</div>
+                            <div style="font-size:1.1rem; font-weight:800; color:var(--text-heading); font-family:'JetBrains Mono';">$${pz.valorPagado.toLocaleString('es-CO')}</div>
+                        </div>
+                        <div>
+                            <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Método de Pago</div>
+                            <div style="font-size:0.95rem; font-weight:700; color:var(--primary);">${pz.metodoPago}</div>
+                        </div>
+                    </div>
+                    <p style="font-size:0.8rem; color:var(--text-body); margin-bottom:1.25rem;">
+                        Al hacer clic en confirmar salida, el sistema abrirá la barrera y la bahía <strong>${pz.spotCodigo}</strong> pasará inmediatamente a estado <strong>DISPONIBLE</strong>.
+                    </p>
+                    <button type="button" class="btn btn-primary" onclick="executeClientExit('${pz.placa}', '${pz.spotCodigo}')" style="width:100%; height:46px; font-weight:800; font-size:0.95rem; background:linear-gradient(135deg, var(--emerald), #059669); color:#060911;">
+                        <span>🚪</span> Confirmar Salida y Liberar Bahía [${pz.spotCodigo}]
+                    </button>
                 </div>
-                <span class="status-badge badge-active-live">Estancia en Curso</span>
-            </div>
-            <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:0.75rem; margin-bottom:1rem;">
-                <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Bahía Asignada</div>
-                    <div style="font-size:1.25rem; font-weight:800; color:var(--emerald);">${active.spotCodigo}</div>
+            `;
+        } else if (activeTicket) {
+            // Caso B: Pendiente de Pago
+            const mins = Math.max(1, Math.round((Date.now() - new Date(activeTicket.fechaIngreso).getTime()) / 60000));
+            const calc = calculateStayFee(activeTicket.tipoVehiculo, mins, 'MINUTE');
+
+            container.innerHTML = `
+                <div class="exit-hero-card" style="border-left:4px solid var(--rose);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                        <div style="display:flex; align-items:center; gap:0.6rem;">
+                            <span style="font-size:1.6rem; color:var(--rose);">⛔</span>
+                            <div>
+                                <h3 style="color:var(--rose); font-size:1.15rem; font-weight:800; margin:0;">Estadía Pendiente de Pago</h3>
+                                <p style="font-size:0.75rem; color:var(--text-muted); margin:0;">Se requiere Paz y Salvo antes de autorizar la salida</p>
+                            </div>
+                        </div>
+                        <span class="role-badge-tag pill-rose">Saldo Pendiente</span>
+                    </div>
+                    <p style="font-size:0.82rem; color:var(--text-body); margin-bottom:1rem;">
+                        Tu vehículo con placa <strong>${plate}</strong> lleva <strong>${mins} minutos</strong> de permanencia acumulada en la bahía <strong>${activeTicket.spotCodigo}</strong> (Total: <strong>$${calc.total.toLocaleString('es-CO')} COP</strong>).
+                    </p>
+                    <button type="button" class="btn btn-primary" onclick="quickProceedToPay('${plate}')" style="width:100%; height:44px; font-weight:800;">
+                        <span>💳</span> Ir al Módulo de Pago de Estadía →
+                    </button>
                 </div>
-                <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Hora Ingreso</div>
-                    <div style="font-size:1rem; font-weight:700; color:var(--text-heading);">${new Date(active.fechaIngreso).toLocaleTimeString('es-CO')}</div>
+            `;
+        } else {
+            // Caso C: No encontrado
+            container.innerHTML = `
+                <div class="exit-hero-card" style="border-left:4px solid var(--amber);">
+                    <div style="display:flex; align-items:center; gap:0.6rem;">
+                        <span style="font-size:1.5rem; color:var(--amber);">⚠️</span>
+                        <div>
+                            <strong style="font-size:0.95rem; color:var(--text-heading);">Sin Registro Activo para Salida</strong>
+                            <p style="font-size:0.78rem; color:var(--text-muted); margin-top:0.2rem;">
+                                No se encontró ningún ingreso activo para la placa <strong>${plate}</strong>. Si ya registraste tu salida anteriormente, la bahía ya fue liberada.
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Tiempo Transcurrido</div>
-                    <div style="font-size:1.25rem; font-weight:800; color:var(--primary);">${mins} mins</div>
-                </div>
-                <div>
-                    <div style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase;">Tarifa por Minuto</div>
-                    <div style="font-size:1.1rem; font-weight:800; color:var(--text-heading);">$${calc.ratePerMinute.toLocaleString('es-CO')}/min</div>
-                </div>
-            </div>
-            <div style="background:var(--bg-base); border:1px solid var(--border); border-radius:var(--radius-sm); padding:0.85rem 1rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
-                <div>
-                    <div style="font-size:0.75rem; color:var(--text-muted); font-weight:700;">Total Acumulado a Cobrar por Minutos:</div>
-                    <div style="font-size:0.75rem; color:var(--text-muted); font-family:'JetBrains Mono';">${calc.formula}</div>
-                </div>
-                <div style="font-size:1.5rem; font-weight:900; color:var(--emerald); font-family:'JetBrains Mono';">
-                    $${calc.total.toLocaleString('es-CO')} COP
-                </div>
-            </div>
-            <div style="margin-top:0.75rem; text-align:right;">
-                <button type="button" class="btn btn-secondary btn-sm" onclick="handleSaasClientSearch()" style="font-size:0.75rem;">
-                    🔄 Recalcular Minutos en Vivo
-                </button>
-            </div>
-        `;
+            `;
+        }
+    }
+
+    // 5. Ejecutar Salida y Liberar Bahía
+    async function executeClientExit(plate, bayCode) {
+        try {
+            // Si la bahía aún está marcada como OCUPADA, liberarla en MySQL
+            const spot = (saasState.spots || []).find(s => s.codigo === bayCode);
+            if (spot && spot.id) {
+                await fetch(`${API_BASE}/spots.php`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        id: spot.id,
+                        estado: 'DISPONIBLE',
+                        placaActual: null
+                    })
+                });
+            }
+
+            // Limpiar Paz y Salvo consumido
+            localStorage.removeItem('parkflow_pz_' + plate);
+
+            // Mostrar pantalla de despedida exitosa
+            const container = document.getElementById('clientExitStatusContainer');
+            if (container) {
+                container.innerHTML = `
+                    <div class="paz-salvo-card" style="border-color:var(--emerald); text-align:center; padding:2rem 1.5rem;">
+                        <div style="font-size:3rem; margin-bottom:0.5rem;">👋🚗</div>
+                        <h3 style="font-size:1.35rem; font-weight:800; color:var(--emerald); margin-bottom:0.4rem;">
+                            ¡Salida Confirmada! Buen Viaje
+                        </h3>
+                        <p style="font-size:0.85rem; color:var(--text-body); max-width:500px; margin:0 auto 1.25rem; line-height:1.5;">
+                            La barrera vehicular ha sido autorizada. La bahía <strong>${bayCode}</strong> ha sido liberada exitosamente a <strong>DISPONIBLE</strong> en ParkFlow.
+                        </p>
+                        <div style="display:flex; justify-content:center; gap:0.75rem;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="switchSaasView('view-client-bays')">
+                                🗺️ Ver Disponibilidad de Bahías
+                            </button>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="switchSaasView('view-client-entry')">
+                                🚗 Nuevo Registro de Vehículo
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Sincronizar datos de la base de datos
+            await syncAllFromDatabase();
+            showRbacToast(`🚗 ¡Salida registrada! Bahía <strong>${bayCode}</strong> liberada.`, false);
+
+        } catch (e) {
+            alert('Error liberando bahía: ' + e.message);
+        }
+    }
+
+    // 6. Historial de Estancias del Cliente
+    function renderClientHistoryTable() {
+        const tbody = document.getElementById('clientHistoryTableBody');
+        if (!tbody) return;
+        const completed = (saasState.tickets || []).filter(t => t.estado === 'FINALIZADO').slice(0, 10);
+        if (completed.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:1rem;">No hay estancias registradas aún.</td></tr>';
+            return;
+        }
+        tbody.innerHTML = completed.map(t => `
+            <tr>
+                <td><strong style="color:var(--primary); font-family:'JetBrains Mono';">${t.ticketCodigo}</strong></td>
+                <td><span class="plate-pill">${t.placa}</span></td>
+                <td>${t.spotCodigo}</td>
+                <td>${t.minutosTranscurridos || 0} min</td>
+                <td><strong style="color:var(--emerald);">$${(t.valorPagado || 0).toLocaleString('es-CO')}</strong></td>
+                <td>${t.metodoPago || '—'}</td>
+                <td style="color:var(--text-muted); font-size:0.75rem;">${new Date(t.fechaSalida || t.fechaIngreso).toLocaleString('es-CO')}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Compatibilidad con buscador previo
+    function handleSaasClientSearch() {
+        handleClientPaymentSearch();
     }
 
     // Buscador Global en Topbar
@@ -3074,6 +3578,13 @@
     window.onPortalMinutesRangeChange = onPortalMinutesRangeChange;
     window.setPortalMinutes = setPortalMinutes;
     window.handleSaasClientSearch = handleSaasClientSearch;
+    window.handleClientPaymentSearch = handleClientPaymentSearch;
+    window.selectClientPaymentMethod = selectClientPaymentMethod;
+    window.executeClientPayment = executeClientPayment;
+    window.proceedToExitAfterPayment = proceedToExitAfterPayment;
+    window.handleClientExitSearch = handleClientExitSearch;
+    window.executeClientExit = executeClientExit;
+    window.renderClientHistoryTable = renderClientHistoryTable;
     window.handleGlobalSearch = handleGlobalSearch;
     window.resetDatabaseFromSaas = resetDatabaseFromSaas;
 
