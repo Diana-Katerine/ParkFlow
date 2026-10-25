@@ -17,9 +17,9 @@
             placa: null
         },
         {
-            email: 'cliente@parkpulse.co',
-            password: 'cliente',
-            nombre: 'Diana K. Pérez',
+            email: '',
+            password: '',
+            nombre: 'Conductor Ciudadano',
             rol: 'Cliente',
             placa: 'KLM-456'
         }
@@ -97,9 +97,13 @@
             if (emailHint) emailHint.textContent = 'Carlos Mendoza (Operador)';
             if (passHint) passHint.textContent = 'Obligatoria · Clave de Turno';
         } else if (role === 'Cliente') {
-            if (emailInput) emailInput.value = 'cliente@parkpulse.co';
-            if (emailHint) emailHint.textContent = 'Mateo Silva (Conductor)';
-            if (passHint) passHint.textContent = 'Acceso Libre al Portal';
+            if (emailInput) {
+                emailInput.value = '';
+                emailInput.placeholder = 'Ingresa tu correo, usuario o placa (ej: KLM-456)...';
+                emailInput.focus();
+            }
+            if (emailHint) emailHint.textContent = 'Libre · Ingresa tus credenciales';
+            if (passHint) passHint.textContent = 'Ingresa tu contraseña de cliente';
         }
         if (passInput) passInput.value = '';
     }
@@ -356,7 +360,11 @@
             }
             if (!email) email = 'operador@parkpulse.co';
         } else if (role === 'Cliente') {
-            if (!email) email = 'cliente@parkpulse.co';
+            if (!email) {
+                showAuthError('⚠️ Por favor ingresa tus credenciales (correo electrónico, usuario o placa).');
+                if (emailInput) emailInput.focus();
+                return;
+            }
         }
 
         await performServerAuth(role, email, password);

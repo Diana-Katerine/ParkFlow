@@ -131,27 +131,43 @@ if ($method === 'POST') {
 
         // 3. ACCESO: CLIENTE / CONDUCTOR (PORTAL CIUDADANO)
         if ($role === 'Cliente') {
-            $clientEmail = !empty($email) ? $email : 'cliente@parkpulse.co';
-            $clientName = 'Conductor / Cliente Ciudadano';
+            if (empty($email)) {
+                sendResponse(false, null, 'Por favor ingresa tu correo electrónico, usuario o placa registrada.', 400);
+            }
+
+            $clientEmail = $email;
+            $clientName = 'Conductor / Cliente';
             $plate = 'KLM-456';
 
-            // Buscar si existe en la base de datos
-            $stmt = $pdo->prepare("SELECT * FROM `usuarios` WHERE `email` = ? AND `rol` = 'Cliente' LIMIT 1");
-            $stmt->execute([$clientEmail]);
+            // Buscar si existe en la base de datos por email o placa
+            $stmt = $pdo->prepare("SELECT * FROM `usuarios` WHERE (`email` = ? OR `placa_asociada` = ?) AND `rol` = 'Cliente' LIMIT 1");
+            $stmt->execute([$clientEmail, strtoupper($clientEmail)]);
             $clientUser = $stmt->fetch();
 
             if ($clientUser) {
                 $clientName = $clientUser['nombre'];
+                $clientEmail = $clientUser['email'];
                 $plate = $clientUser['placa_asociada'] ?? 'KLM-456';
+            } else {
+                // Si ingresó una placa como usuario (ej: ABC-123)
+                if (preg_match('/^[A-Z0-9-]{5,8}$/i', $clientEmail)) {
+                    $plate = strtoupper($clientEmail);
+                    $clientName = "Conductor (" . $plate . ")";
+                } else if (filter_var($clientEmail, FILTER_VALIDATE_EMAIL)) {
+                    $parts = explode('@', $clientEmail);
+                    $clientName = ucfirst($parts[0]);
+                } else {
+                    $clientName = ucfirst($clientEmail);
+                }
             }
 
             $now = date('Y-m-d H:i:s');
             $token = 'pf_cli_' . bin2hex(random_bytes(16));
 
-            logAuthAudit($pdo, $clientEmail, 'Cliente', 'LOGIN_PORTAL', 'Acceso al Portal Ciudadano (Sin privilegios administrativos)', 'OK');
+            logAuthAudit($pdo, $clientEmail, 'Cliente', 'LOGIN_PORTAL', 'Acceso al Portal Ciudadano con credenciales de cliente (' . $clientEmail . ')', 'OK');
 
             $userData = [
-                'id'           => $clientUser['id'] ?? 'CLI-PORTAL',
+                'id'           => $clientUser['id'] ?? ('CLI-' . substr(bin2hex(random_bytes(3)), 0, 6)),
                 'nombre'       => $clientName,
                 'email'        => $clientEmail,
                 'rol'          => 'Cliente',
