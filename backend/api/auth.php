@@ -132,16 +132,16 @@ if ($method === 'POST') {
         // 3. ACCESO: CLIENTE / CONDUCTOR (PORTAL CIUDADANO)
         if ($role === 'Cliente') {
             if (empty($email)) {
-                sendResponse(false, null, 'Por favor ingresa tu correo electrónico, usuario o placa registrada.', 400);
+                sendResponse(false, null, 'Por favor ingresa tu correo electrónico o usuario registrado.', 400);
             }
 
             $clientEmail = $email;
             $clientName = 'Conductor / Cliente';
-            $plate = 'KLM-456';
+            $plate = '';
 
-            // Buscar si existe en la base de datos por email o placa
-            $stmt = $pdo->prepare("SELECT * FROM `usuarios` WHERE (`email` = ? OR `placa_asociada` = ?) AND `rol` = 'Cliente' LIMIT 1");
-            $stmt->execute([$clientEmail, strtoupper($clientEmail)]);
+            // Buscar si existe en la base de datos por email o nombre de usuario
+            $stmt = $pdo->prepare("SELECT * FROM `usuarios` WHERE (`email` = ? OR `nombre` = ?) AND `rol` = 'Cliente' LIMIT 1");
+            $stmt->execute([$clientEmail, $clientEmail]);
             $clientUser = $stmt->fetch();
 
             if ($clientUser) {

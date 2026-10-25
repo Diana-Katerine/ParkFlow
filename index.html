@@ -3884,7 +3884,7 @@ html, body {
         } else if (role === 'Cliente') {
             if (emailInput) {
                 emailInput.value = '';
-                emailInput.placeholder = 'Ingresa tu correo, usuario o placa (ej: KLM-456)...';
+                emailInput.placeholder = 'Ingresa tu correo o usuario registrado...';
                 emailInput.focus();
             }
             if (emailHint) emailHint.textContent = 'Libre · Ingresa tus credenciales';
@@ -4146,7 +4146,7 @@ html, body {
             if (!email) email = 'operador@parkpulse.co';
         } else if (role === 'Cliente') {
             if (!email) {
-                showAuthError('⚠️ Por favor ingresa tus credenciales (correo electrónico, usuario o placa).');
+                showAuthError('⚠️ Por favor ingresa tus credenciales (correo electrónico o usuario).');
                 if (emailInput) emailInput.focus();
                 return;
             }
