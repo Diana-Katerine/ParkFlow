@@ -335,13 +335,9 @@
                 </div>
             </div>
 
-            <div class="role-switcher-box">
-                <label for="saasRoleSelector" class="role-switcher-label">Perfil RBAC Activo:</label>
-                <select class="user-role-select" id="saasRoleSelector" onchange="handleRoleChange(this.value)">
-                    <option value="Administrador">👑 Diana Katerine (Admin)</option>
-                    <option value="Operador">👷 Carlos Mendoza (Operador)</option>
-                    <option value="Cliente">👤 Mateo Silva (Cliente)</option>
-                </select>
+            <div class="user-session-lock-tag" id="sidebarSessionLockTag">
+                <span class="lock-tag-icon">🔒</span>
+                <span class="lock-tag-text" id="sidebarLockText">Sesión Protegida · Administrador</span>
             </div>
 
             <button type="button" class="btn-logout" onclick="handleLogout()" title="Cerrar sesión activa de forma segura">

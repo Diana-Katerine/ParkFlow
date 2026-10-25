@@ -437,9 +437,9 @@
         const config = RBAC_RULES[account.rol] || RBAC_RULES['Administrador'];
         switchSaasView(config.defaultView);
 
-        // Actualizar selector de rol del sidebar
-        const selector = document.getElementById('saasRoleSelector');
-        if (selector) selector.value = account.rol;
+        // Actualizar indicador estático de sesión protegida
+        const lockText = document.getElementById('sidebarLockText');
+        if (lockText) lockText.textContent = `Sesión Protegida · ${account.rol}`;
 
         showRbacToast(`¡Bienvenido/a <strong>${account.nombre}</strong>! Has ingresado con rol <strong>${account.rol}</strong>.`, false);
     }
@@ -626,18 +626,24 @@
         const userName = document.getElementById('sidebarUserName');
         const roleTag = document.getElementById('sidebarRoleTag');
         const statusText = document.getElementById('sidebarStatusText');
-        const roleSelector = document.getElementById('saasRoleSelector');
+        const lockText = document.getElementById('sidebarLockText');
+
+        const activeName = (currentAuthSession && currentAuthSession.nombre) || config.name;
+        const activeRole = (currentAuthSession && currentAuthSession.rol) || role;
 
         if (avatar) {
-            avatar.textContent = config.avatar;
+            const initials = activeName.split(' ').map(n => n[0]).filter(Boolean).join('').substring(0, 2).toUpperCase() || config.avatar;
+            avatar.textContent = initials;
             avatar.style.background = config.avatarBg;
             avatar.style.borderColor = config.avatarBorder;
         }
-        if (userName) userName.textContent = config.name;
-        if (roleTag) roleTag.textContent = config.roleTitle;
+        if (userName) userName.textContent = activeName;
+        if (roleTag) {
+            roleTag.textContent = activeRole === 'Administrador' ? '👑 Super Administradora' : (activeRole === 'Operador' ? '👷 Operador de Patio' : '👤 Cliente / Conductor');
+        }
         if (statusText) statusText.textContent = config.sessionStatus;
-        if (roleSelector && roleSelector.value !== role) {
-            roleSelector.value = role;
+        if (lockText) {
+            lockText.textContent = `Sesión Protegida · ${activeRole}`;
         }
 
         // 2. Navigation items
@@ -781,14 +787,9 @@
         document.getElementById(id).classList.remove('open');
     }
 
-    // Cambio de Rol RBAC
+    // Cambio de Rol RBAC - Inhabilitado por seguridad (Exige autenticación obligatoria)
     function handleRoleChange(role) {
-        saasState.currentRole = role;
-        applyRbacToUI();
-
-        const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
-        switchSaasView(config.defaultView);
-        showRbacToast(`Sesión cambiada a: <strong>${role}</strong> (${config.badge}). Permisos ajustados.`, false);
+        showRbacToast('🔒 El cambio de perfil dentro del sistema está deshabilitado por seguridad. Para acceder con otro rol debes cerrar sesión e ingresar tus credenciales.', true);
     }
 
     // 1. Sincronización completa con MySQL vía API PHP

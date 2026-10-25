@@ -292,44 +292,30 @@ html, body {
             margin-top: 0.1rem;
         }
 
-        .role-switcher-box {
+        .user-session-lock-tag {
             display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .role-switcher-label {
-            font-size: 0.65rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.06em;
-            color: var(--text-muted);
-            padding-left: 0.2rem;
-        }
-
-        .user-role-select {
-            background: var(--bg-surface-elevated);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            color: var(--text-heading);
-            font-size: 0.75rem;
-            font-weight: 600;
-            cursor: pointer;
-            outline: none;
-            font-family: inherit;
+            align-items: center;
+            gap: 0.45rem;
             padding: 0.35rem 0.6rem;
-            width: 100%;
-            transition: all 0.2s;
+            background: rgba(15, 23, 42, 0.75);
+            border: 1px solid rgba(0, 245, 255, 0.15);
+            border-radius: var(--radius-sm);
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
         }
-
-        .user-role-select:hover, .user-role-select:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 2px rgba(0, 245, 255, 0.15);
+        .lock-tag-icon {
+            font-size: 0.75rem;
+            color: var(--primary);
+            flex-shrink: 0;
         }
-
-        .user-role-select option {
-            background: #0f172a;
-            color: #f1f5f9;
+        .lock-tag-text {
+            font-weight: 600;
+            color: var(--text-heading);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            font-size: 0.68rem;
         }
 
         /* Main View Area */
@@ -2171,13 +2157,9 @@ html, body {
                 </div>
             </div>
 
-            <div class="role-switcher-box">
-                <label for="saasRoleSelector" class="role-switcher-label">Perfil RBAC Activo:</label>
-                <select class="user-role-select" id="saasRoleSelector" onchange="handleRoleChange(this.value)">
-                    <option value="Administrador">👑 Diana Katerine (Admin)</option>
-                    <option value="Operador">👷 Carlos Mendoza (Operador)</option>
-                    <option value="Cliente">👤 Mateo Silva (Cliente)</option>
-                </select>
+            <div class="user-session-lock-tag" id="sidebarSessionLockTag">
+                <span class="lock-tag-icon">🔒</span>
+                <span class="lock-tag-text" id="sidebarLockText">Sesión Protegida · Administrador</span>
             </div>
 
             <button type="button" class="btn-logout" onclick="handleLogout()" title="Cerrar sesión activa de forma segura">
@@ -4240,9 +4222,9 @@ html, body {
         const config = RBAC_RULES[account.rol] || RBAC_RULES['Administrador'];
         switchSaasView(config.defaultView);
 
-        // Actualizar selector de rol del sidebar
-        const selector = document.getElementById('saasRoleSelector');
-        if (selector) selector.value = account.rol;
+        // Actualizar indicador estático de sesión protegida
+        const lockText = document.getElementById('sidebarLockText');
+        if (lockText) lockText.textContent = `Sesión Protegida · ${account.rol}`;
 
         showRbacToast(`¡Bienvenido/a <strong>${account.nombre}</strong>! Has ingresado con rol <strong>${account.rol}</strong>.`, false);
     }
@@ -4429,18 +4411,24 @@ html, body {
         const userName = document.getElementById('sidebarUserName');
         const roleTag = document.getElementById('sidebarRoleTag');
         const statusText = document.getElementById('sidebarStatusText');
-        const roleSelector = document.getElementById('saasRoleSelector');
+        const lockText = document.getElementById('sidebarLockText');
+
+        const activeName = (currentAuthSession && currentAuthSession.nombre) || config.name;
+        const activeRole = (currentAuthSession && currentAuthSession.rol) || role;
 
         if (avatar) {
-            avatar.textContent = config.avatar;
+            const initials = activeName.split(' ').map(n => n[0]).filter(Boolean).join('').substring(0, 2).toUpperCase() || config.avatar;
+            avatar.textContent = initials;
             avatar.style.background = config.avatarBg;
             avatar.style.borderColor = config.avatarBorder;
         }
-        if (userName) userName.textContent = config.name;
-        if (roleTag) roleTag.textContent = config.roleTitle;
+        if (userName) userName.textContent = activeName;
+        if (roleTag) {
+            roleTag.textContent = activeRole === 'Administrador' ? '👑 Super Administradora' : (activeRole === 'Operador' ? '👷 Operador de Patio' : '👤 Cliente / Conductor');
+        }
         if (statusText) statusText.textContent = config.sessionStatus;
-        if (roleSelector && roleSelector.value !== role) {
-            roleSelector.value = role;
+        if (lockText) {
+            lockText.textContent = `Sesión Protegida · ${activeRole}`;
         }
 
         // 2. Navigation items
@@ -4584,14 +4572,9 @@ html, body {
         document.getElementById(id).classList.remove('open');
     }
 
-    // Cambio de Rol RBAC
+    // Cambio de Rol RBAC - Inhabilitado por seguridad (Exige autenticación obligatoria)
     function handleRoleChange(role) {
-        saasState.currentRole = role;
-        applyRbacToUI();
-
-        const config = RBAC_RULES[role] || RBAC_RULES['Administrador'];
-        switchSaasView(config.defaultView);
-        showRbacToast(`Sesión cambiada a: <strong>${role}</strong> (${config.badge}). Permisos ajustados.`, false);
+        showRbacToast('🔒 El cambio de perfil dentro del sistema está deshabilitado por seguridad. Para acceder con otro rol debes cerrar sesión e ingresar tus credenciales.', true);
     }
 
     // 1. Sincronización completa con MySQL vía API PHP
