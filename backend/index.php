@@ -1430,163 +1430,45 @@ html, body {
     font-weight: 600;
 }
 
-/* Interactive Role Selector Tabs */
-.role-tabs-container {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 0.5rem;
-}
-.role-tab-btn {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.55rem 0.65rem;
-    border-radius: var(--radius-md);
-    background: var(--bg-surface-elevated);
-    border: 1px solid var(--border);
-    color: var(--text-body);
-    cursor: pointer;
-    transition: all 0.2s;
-    text-align: left;
-    font-family: inherit;
-}
-.role-tab-btn:hover {
-    border-color: rgba(0, 245, 255, 0.35);
-    background: rgba(0, 245, 255, 0.05);
-}
-.role-tab-btn.active {
-    background: rgba(0, 245, 255, 0.1);
-    border-color: var(--primary);
-    color: var(--primary);
-    box-shadow: 0 0 14px rgba(0, 245, 255, 0.2);
-}
-.rt-icon {
-    font-size: 1.15rem;
-    flex-shrink: 0;
-}
-.rt-info {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-.rt-title {
-    font-size: 0.78rem;
-    font-weight: 700;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.rt-sub {
-    font-size: 0.64rem;
-    color: var(--text-muted);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.role-tab-btn.active .rt-sub {
-    color: var(--primary);
-    opacity: 0.85;
-}
-
-/* Quick Profile Banner */
-.quick-profile-banner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    padding: 0.75rem 1rem;
-    border-radius: var(--radius-lg);
-    background: linear-gradient(135deg, rgba(0, 245, 255, 0.07), rgba(99, 102, 241, 0.09));
-    border: 1px solid rgba(0, 245, 255, 0.25);
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.3);
-    transition: all 0.25s;
-}
-.qpb-user {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    min-width: 0;
-}
-.qpb-avatar {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 800;
-    font-size: 0.82rem;
-    color: #ffffff;
-    background: linear-gradient(135deg, #00f5ff, #6366f1);
-    border: 2px solid rgba(0, 245, 255, 0.45);
-    box-shadow: 0 0 12px rgba(0, 245, 255, 0.3);
-    flex-shrink: 0;
-    transition: all 0.3s;
-}
-.qpb-meta {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-}
-.qpb-name {
-    font-size: 0.85rem;
-    font-weight: 700;
-    color: var(--text-heading);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.qpb-desc {
-    font-size: 0.7rem;
-    color: var(--primary);
-    font-weight: 600;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-.btn-instant-login {
+/* Mandatory Authentication Insignia Badge */
+.auth-mandatory-badge {
     display: inline-flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.55rem 0.95rem;
-    border-radius: var(--radius-md);
-    background: linear-gradient(135deg, #00f5ff, #0284c7);
-    color: #060911;
-    font-weight: 800;
-    font-size: 0.78rem;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-    box-shadow: 0 0 14px rgba(0, 245, 255, 0.35);
-    font-family: inherit;
-    flex-shrink: 0;
-}
-.btn-instant-login:hover {
-    transform: translateY(-1px) scale(1.02);
-    box-shadow: 0 0 20px rgba(0, 245, 255, 0.55);
+    padding: 0.25rem 0.65rem;
+    border-radius: 9999px;
+    background: rgba(0, 245, 255, 0.1);
+    border: 1px solid rgba(0, 245, 255, 0.3);
+    color: var(--primary);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.45rem;
 }
 
-/* Form separator */
-.auth-form-separator {
-    display: flex;
-    align-items: center;
-    text-align: center;
-    color: var(--text-muted);
-    font-size: 0.64rem;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin: 0.25rem 0;
+/* Role Select Field */
+.auth-select-field {
+    width: 100%;
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    color: var(--text-heading);
+    padding: 0.6rem 0.85rem 0.6rem 2.3rem;
+    border-radius: var(--radius-md);
+    font-size: 0.82rem;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
 }
-.auth-form-separator::before,
-.auth-form-separator::after {
-    content: '';
-    flex: 1;
-    border-bottom: 1px solid var(--border);
+.auth-select-field:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(0, 245, 255, 0.15);
+    background: var(--bg-surface-hover);
 }
-.auth-form-separator span {
-    padding: 0 0.75rem;
+.auth-select-field option {
+    background: #0f172a;
+    color: #f8fafc;
 }
 
 /* Input Fields */
@@ -1656,7 +1538,7 @@ html, body {
 }
 
 /* Main submit button */
-.btn-main-submit {
+.btn-auth-submit {
     width: 100%;
     display: flex;
     align-items: center;
@@ -1664,8 +1546,8 @@ html, body {
     gap: 0.5rem;
     padding: 0.72rem;
     border-radius: var(--radius-md);
-    background: linear-gradient(135deg, #00f5ff, #6366f1);
-    color: #ffffff;
+    background: linear-gradient(135deg, #00f5ff, #0284c7);
+    color: #060911;
     font-weight: 800;
     font-size: 0.86rem;
     border: none;
@@ -1675,60 +1557,219 @@ html, body {
     font-family: inherit;
     margin-top: 0.25rem;
 }
-.btn-main-submit:hover {
+.btn-auth-submit:hover {
     transform: translateY(-1px);
     box-shadow: 0 6px 24px rgba(0, 245, 255, 0.4);
     filter: brightness(1.08);
 }
-.submit-arrow {
-    font-size: 1rem;
-    transition: transform 0.2s;
-}
-.btn-main-submit:hover .submit-arrow {
-    transform: translateX(4px);
-}
 
-/* Bottom quick access chips */
-.auth-bottom-chips {
+/* Redesigned Restricted Quick Access Section */
+.auth-quick-cards-wrapper {
     display: flex;
-    align-items: center;
-    gap: 0.45rem;
-    flex-wrap: wrap;
-    margin-top: 0.25rem;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.6rem;
     padding-top: 0.65rem;
     border-top: 1px solid var(--border);
 }
-.chips-title {
+.auth-quick-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.15rem;
+}
+.quick-title {
+    font-size: 0.68rem;
+    color: var(--primary);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+.quick-security-badge {
+    font-size: 0.62rem;
+    color: var(--rose);
+    background: rgba(244, 63, 94, 0.12);
+    border: 1px solid rgba(244, 63, 94, 0.3);
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.quick-restricted-card {
+    background: var(--bg-surface-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+    overflow: hidden;
+}
+.admin-card {
+    border-left: 3px solid #00f5ff;
+}
+.admin-card:hover, .admin-card.gate-open {
+    border-color: rgba(0, 245, 255, 0.45);
+    background: rgba(0, 245, 255, 0.04);
+    box-shadow: 0 0 14px rgba(0, 245, 255, 0.15);
+}
+.oper-card {
+    border-left: 3px solid #10b981;
+}
+.oper-card:hover, .oper-card.gate-open {
+    border-color: rgba(16, 185, 129, 0.45);
+    background: rgba(16, 185, 129, 0.04);
+    box-shadow: 0 0 14px rgba(16, 185, 129, 0.15);
+}
+.client-card {
+    border-left: 3px solid #38bdf8;
+    cursor: pointer;
+}
+.client-card:hover {
+    border-color: rgba(56, 189, 248, 0.45);
+    background: rgba(56, 189, 248, 0.04);
+}
+
+.qrc-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 0.85rem;
+    cursor: pointer;
+    gap: 0.5rem;
+}
+.qrc-icon-title {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+}
+.qrc-badge-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+.admin-icon {
+    background: rgba(0, 245, 255, 0.12);
+    color: var(--primary);
+    border: 1px solid rgba(0, 245, 255, 0.25);
+}
+.oper-icon {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--emerald);
+    border: 1px solid rgba(16, 185, 129, 0.25);
+}
+.client-icon {
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+}
+.qrc-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-heading);
+}
+.qrc-desc {
     font-size: 0.68rem;
     color: var(--text-muted);
+    line-height: 1.3;
+}
+.qrc-action-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+.pill-locked {
+    font-size: 0.62rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 9999px;
+    background: rgba(0, 245, 255, 0.12);
+    color: var(--primary);
+    font-weight: 700;
+    border: 1px solid rgba(0, 245, 255, 0.25);
+}
+.pill-locked.oper {
+    background: rgba(16, 185, 129, 0.12);
+    color: var(--emerald);
+    border-color: rgba(16, 185, 129, 0.25);
+}
+.pill-open {
+    font-size: 0.62rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 9999px;
+    background: rgba(56, 189, 248, 0.12);
+    color: #38bdf8;
+    font-weight: 700;
+    border: 1px solid rgba(56, 189, 248, 0.25);
+}
+.qrc-chevron {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+}
+.gate-open .qrc-chevron {
+    transform: rotate(180deg);
+}
+
+/* Password Gate */
+.quick-pwd-gate {
+    padding: 0.6rem 0.85rem 0.75rem;
+    background: rgba(6, 9, 17, 0.65);
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    animation: fadeIn 0.2s ease;
+}
+.gate-hint {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
     font-weight: 600;
 }
-.fast-chip {
-    padding: 0.25rem 0.6rem;
-    border-radius: 9999px;
-    font-size: 0.7rem;
-    font-weight: 700;
-    border: 1px solid transparent;
-    cursor: pointer;
-    transition: all 0.15s;
-    background: var(--bg-surface-elevated);
+.gate-input-row {
+    display: flex;
+    gap: 0.45rem;
+}
+.gate-pwd-input {
+    flex: 1;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    color: var(--text-heading);
+    padding: 0.45rem 0.65rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.78rem;
+    outline: none;
     font-family: inherit;
 }
-.chip-admin {
-    color: var(--primary);
-    border-color: rgba(0, 245, 255, 0.3);
+.gate-pwd-input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(0, 245, 255, 0.15);
 }
-.chip-oper {
-    color: var(--emerald);
-    border-color: rgba(16, 185, 129, 0.3);
+.btn-gate-submit {
+    padding: 0.45rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+    font-family: inherit;
 }
-.chip-client {
-    color: #38bdf8;
-    border-color: rgba(56, 189, 248, 0.3);
+.admin-btn {
+    background: linear-gradient(135deg, #00f5ff, #0284c7);
+    color: #060911;
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.25);
 }
-.fast-chip:hover {
-    transform: scale(1.04);
-    filter: brightness(1.2);
+.oper-btn {
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: #ffffff;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
+}
+.btn-gate-submit:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
 }
 
 /* Responsive Breakpoints for Auth Screen */
@@ -1939,97 +1980,134 @@ html, body {
             <!-- Right Panel: Interactive Console -->
             <div class="auth-console-panel">
                 <div class="console-top">
+                    <div class="auth-mandatory-badge">
+                        <span>🔒</span> Restricted Access · Mandatory Authentication
+                    </div>
                     <h3 class="console-title">Acceso al Sistema</h3>
-                    <p class="console-sub">Selecciona tu perfil de acceso o ingresa credenciales:</p>
+                    <p class="console-sub">Sistema Inteligente de Gestión de Parqueaderos</p>
                 </div>
 
                 <!-- Error message container -->
                 <div id="authErrorMsg" class="auth-error-box" style="display:none;"></div>
 
-                <!-- Interactive Role Selector Tabs -->
-                <div class="role-tabs-container">
-                    <button type="button" class="role-tab-btn active" id="tabRoleAdmin" onclick="selectAuthRole('Administrador')">
-                        <span class="rt-icon">👑</span>
-                        <div class="rt-info">
-                            <span class="rt-title">Admin</span>
-                            <span class="rt-sub">Control Total</span>
-                        </div>
-                    </button>
-                    <button type="button" class="role-tab-btn" id="tabRoleOperador" onclick="selectAuthRole('Operador')">
-                        <span class="rt-icon">👷</span>
-                        <div class="rt-info">
-                            <span class="rt-title">Operador</span>
-                            <span class="rt-sub">Flujo & Caja</span>
-                        </div>
-                    </button>
-                    <button type="button" class="role-tab-btn" id="tabRoleCliente" onclick="selectAuthRole('Cliente')">
-                        <span class="rt-icon">👤</span>
-                        <div class="rt-info">
-                            <span class="rt-title">Cliente</span>
-                            <span class="rt-sub">Ciudadano</span>
-                        </div>
-                    </button>
-                </div>
-
-                <!-- 1-Click Quick Banner for Active Role -->
-                <div class="quick-profile-banner" id="authQuickBanner">
-                    <div class="qpb-user">
-                        <div class="qpb-avatar" id="qbAvatar">DK</div>
-                        <div class="qpb-meta">
-                            <div class="qpb-name" id="qbName">Diana Katerine Pérez</div>
-                            <div class="qpb-desc" id="qbRole">👑 Super Administradora · Matriz y Auditoría</div>
+                <!-- Main Login Form -->
+                <form id="authLoginForm" onsubmit="event.preventDefault(); handleAuthSubmit(event);">
+                    <div class="auth-field">
+                        <label class="auth-field-label" for="authInputRole">ROL CON EL QUE DESEAS INGRESAR</label>
+                        <div class="auth-input-wrapper">
+                            <span class="input-leading-icon">👑</span>
+                            <select id="authInputRole" class="auth-select-field" onchange="syncRoleSelection(this.value)">
+                                <option value="Administrador">👑 Administrador (Acceso Total y Configuración)</option>
+                                <option value="Operador">👷 Operador (Entradas, Salidas y Bahías)</option>
+                                <option value="Cliente">👤 Cliente / Conductor (Portal Ciudadano)</option>
+                            </select>
                         </div>
                     </div>
-                    <button type="button" class="btn-instant-login" id="qbActionBtn" onclick="quickLoginCurrent()">
-                        <span>Entrar con 1 Clic</span>
-                        <span class="instant-icon">⚡</span>
-                    </button>
-                </div>
-
-                <div class="auth-form-separator">
-                    <span>O INGRESA CON TUS CREDENCIALES</span>
-                </div>
-
-                <!-- Manual Login Form -->
-                <form id="authLoginForm" onsubmit="event.preventDefault(); handleAuthSubmit(event);">
-                    <!-- Hidden field keeps backwards-compatible authInputRole -->
-                    <input type="hidden" id="authInputRole" value="Administrador">
 
                     <div class="auth-field">
                         <label class="auth-field-label" for="authInputEmail">
-                            <span>Usuario / Correo</span>
-                            <span class="field-hint-text" id="authEmailHint">admin@parkpulse.co</span>
+                            <span>Usuario o Correo</span>
+                            <span class="field-hint-text" id="authEmailHint">Diana Katerine Pérez</span>
                         </label>
                         <div class="auth-input-wrapper">
                             <span class="input-leading-icon">✉️</span>
-                            <input type="text" id="authInputEmail" class="auth-text-input" placeholder="Nombre o correo (ej: Diana)" value="admin@parkpulse.co">
+                            <input type="text" id="authInputEmail" class="auth-text-input" placeholder="Correo o usuario..." value="admin@parkpulse.co">
                         </div>
                     </div>
 
                     <div class="auth-field">
                         <label class="auth-field-label" for="authInputPassword">
-                            <span>Contraseña</span>
-                            <span class="field-hint-text">Clave de acceso demo</span>
+                            <span>Contraseña de Seguridad</span>
+                            <span class="field-hint-text" id="authPassHint">Obligatoria para Admin y Operador</span>
                         </label>
                         <div class="auth-input-wrapper">
                             <span class="input-leading-icon">🔒</span>
-                            <input type="password" id="authInputPassword" class="auth-text-input" placeholder="Contraseña..." value="admin">
+                            <input type="password" id="authInputPassword" class="auth-text-input" placeholder="Ingresa contraseña requerida..." autocomplete="current-password">
                             <button type="button" class="btn-toggle-eye" onclick="toggleAuthPasswordVisibility()" title="Mostrar u ocultar contraseña">👁️</button>
                         </div>
                     </div>
 
-                    <button type="button" class="btn-main-submit" onclick="handleAuthSubmit(event)">
-                        <span>Acceder a la Plataforma</span>
-                        <span class="submit-arrow">→</span>
+                    <button type="button" class="btn btn-primary btn-auth-submit" onclick="handleAuthSubmit(event)">
+                        🚀 Ingresar al Sistema ParkFlow →
                     </button>
                 </form>
 
-                <!-- Direct Quick Launch Chips -->
-                <div class="auth-bottom-chips">
-                    <span class="chips-title">Acceso rápido directo:</span>
-                    <button type="button" class="fast-chip chip-admin" onclick="quickLogin('Administrador')">👑 Diana (Admin)</button>
-                    <button type="button" class="fast-chip chip-oper" onclick="quickLogin('Operador')">👷 Carlos (Operador)</button>
-                    <button type="button" class="fast-chip chip-client" onclick="quickLogin('Cliente')">👤 Mateo (Cliente)</button>
+                <!-- Redesigned Restricted Quick Access Section -->
+                <div class="auth-quick-cards-wrapper">
+                    <div class="auth-quick-header">
+                        <span class="quick-title">⚡ O ENTRA CON 1 SOLO CLIC EN UN PERFIL:</span>
+                        <span class="quick-security-badge">🔒 VALIDACIÓN OBLIGATORIA</span>
+                    </div>
+
+                    <!-- Card 1: Administrador (Restringido) -->
+                    <div class="quick-restricted-card admin-card" id="quickCardAdmin">
+                        <div class="qrc-top" onclick="toggleQuickGate('Administrador')">
+                            <div class="qrc-icon-title">
+                                <div class="qrc-badge-icon admin-icon">👑</div>
+                                <div>
+                                    <div class="qrc-title">Ingresar como Administrador</div>
+                                    <div class="qrc-desc">Acceso total: Métricas, Operaciones, Tarifas, Usuarios y Auditoría</div>
+                                </div>
+                            </div>
+                            <div class="qrc-action-indicator">
+                                <span class="pill-locked">🔒 Restringido</span>
+                                <span class="qrc-chevron">▼</span>
+                            </div>
+                        </div>
+                        <!-- Password gate unfolded upon click -->
+                        <div class="quick-pwd-gate" id="gateAdmin" style="display:none;">
+                            <div class="gate-hint">🔒 Validación de Administrador · Contraseña Requerida:</div>
+                            <div class="gate-input-row">
+                                <input type="password" id="quickPassAdmin" class="gate-pwd-input" placeholder="Escribe la clave de Administrador..." onkeydown="if(event.key==='Enter') executeQuickAuth('Administrador')">
+                                <button type="button" class="btn-gate-submit admin-btn" onclick="executeQuickAuth('Administrador')">
+                                    Desbloquear →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Operador (Restringido) -->
+                    <div class="quick-restricted-card oper-card" id="quickCardOperador">
+                        <div class="qrc-top" onclick="toggleQuickGate('Operador')">
+                            <div class="qrc-icon-title">
+                                <div class="qrc-badge-icon oper-icon">👷</div>
+                                <div>
+                                    <div class="qrc-title">Ingresar como Operador</div>
+                                    <div class="qrc-desc">Acceso operativo: Entradas, Salidas, Cobros de Tickets y Bahías</div>
+                                </div>
+                            </div>
+                            <div class="qrc-action-indicator">
+                                <span class="pill-locked oper">🔒 Restringido</span>
+                                <span class="qrc-chevron">▼</span>
+                            </div>
+                        </div>
+                        <!-- Password gate unfolded upon click -->
+                        <div class="quick-pwd-gate" id="gateOperador" style="display:none;">
+                            <div class="gate-hint">🔒 Validación de Operador en Turno · Contraseña Requerida:</div>
+                            <div class="gate-input-row">
+                                <input type="password" id="quickPassOperador" class="gate-pwd-input" placeholder="Escribe la clave de Operador..." onkeydown="if(event.key==='Enter') executeQuickAuth('Operador')">
+                                <button type="button" class="btn-gate-submit oper-btn" onclick="executeQuickAuth('Operador')">
+                                    Validar Turno →
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Cliente (Libre) -->
+                    <div class="quick-restricted-card client-card" onclick="executeQuickAuth('Cliente')">
+                        <div class="qrc-top">
+                            <div class="qrc-icon-title">
+                                <div class="qrc-badge-icon client-icon">👤</div>
+                                <div>
+                                    <div class="qrc-title">Ingresar como Cliente / Conductor</div>
+                                    <div class="qrc-desc">Acceso ciudadano: Consulta de estancias, tiempos y tarifas</div>
+                                </div>
+                            </div>
+                            <div class="qrc-action-indicator">
+                                <span class="pill-open">Entrar →</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -3832,136 +3910,177 @@ html, body {
         if (overlay) overlay.style.display = 'none';
     }
 
-    function handleAuthSubmit(event) {
-        if (event) event.preventDefault();
-        const emailInput = document.getElementById('authInputEmail');
-        const passInput = document.getElementById('authInputPassword');
-        const roleSelect = document.getElementById('authInputRole');
-
-        const email = emailInput ? emailInput.value.trim() : 'usuario@parkflow.com';
-        const pass = passInput ? passInput.value.trim() : '123';
-        const chosenRole = roleSelect ? roleSelect.value : 'Administrador';
-
-        // 1. Si coincide con una cuenta demo predefinida:
-        const match = REGISTERED_ACCOUNTS.find(a => a.email.toLowerCase() === email.toLowerCase());
-        if (match) {
-            loginUserSuccess(match);
-            return;
-        }
-
-        // 2. Si es CUALQUIER otro correo o contraseña (no necesitan ser reales):
-        // Obtenemos un nombre amigable a partir del correo
-        const namePart = email.includes('@') ? email.split('@')[0] : email;
-        const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-
-        const customUser = {
-            email: email || 'usuario@parkflow.com',
-            password: pass || '123456',
-            nombre: formattedName,
-            rol: chosenRole,
-            placa: (chosenRole === 'Cliente') ? 'KLM-456' : null
-        };
-
-        loginUserSuccess(customUser);
+    function showAuthScreen() {
+        const overlay = document.getElementById('saasAuthScreen');
+        if (overlay) overlay.style.display = 'flex';
     }
 
-    function quickLogin(roleOrEmail) {
-        let account = null;
-        if (roleOrEmail === 'Administrador' || roleOrEmail.includes('admin')) {
-            account = {
-                email: 'admin@parkpulse.co',
-                password: 'admin',
-                nombre: 'Diana Katerine Pérez',
-                rol: 'Administrador',
-                placa: null
-            };
-        } else if (roleOrEmail === 'Operador' || roleOrEmail.includes('operador')) {
-            account = {
-                email: 'operador@parkpulse.co',
-                password: 'oper',
-                nombre: 'Carlos Mendoza',
-                rol: 'Operador',
-                placa: null
-            };
-        } else if (roleOrEmail === 'Cliente' || roleOrEmail.includes('cliente')) {
-            account = {
-                email: 'cliente@parkpulse.co',
-                password: 'cliente',
-                nombre: 'Mateo Silva',
-                rol: 'Cliente',
-                placa: 'KLM-456'
-            };
-        } else {
-            account = {
-                email: roleOrEmail || 'usuario@parkflow.com',
-                password: '123',
-                nombre: 'Usuario ParkFlow',
-                rol: 'Administrador'
-            };
-        }
-        loginUserSuccess(account);
+    function showAuthError(message) {
+        const errBox = document.getElementById('authErrorMsg');
+        if (!errBox) return;
+        errBox.textContent = message;
+        errBox.style.display = 'block';
+        errBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    function selectAuthRole(role) {
-        const roleInput = document.getElementById('authInputRole');
-        if (roleInput) roleInput.value = role;
+    function hideAuthError() {
+        const errBox = document.getElementById('authErrorMsg');
+        if (errBox) errBox.style.display = 'none';
+    }
 
-        // Update active tab buttons
-        const tabAdmin = document.getElementById('tabRoleAdmin');
-        const tabOper = document.getElementById('tabRoleOperador');
-        const tabClient = document.getElementById('tabRoleCliente');
-        if (tabAdmin) tabAdmin.classList.toggle('active', role === 'Administrador');
-        if (tabOper) tabOper.classList.toggle('active', role === 'Operador');
-        if (tabClient) tabClient.classList.toggle('active', role === 'Cliente');
-
-        // Update Quick Banner & Form Fields
-        const qbAvatar = document.getElementById('qbAvatar');
-        const qbName = document.getElementById('qbName');
-        const qbRole = document.getElementById('qbRole');
+    function syncRoleSelection(role) {
+        hideAuthError();
         const emailInput = document.getElementById('authInputEmail');
+        const emailHint = document.getElementById('authEmailHint');
+        const passHint = document.getElementById('authPassHint');
         const passInput = document.getElementById('authInputPassword');
-        const hint = document.getElementById('authEmailHint');
 
         if (role === 'Administrador') {
-            if (qbAvatar) {
-                qbAvatar.textContent = 'DK';
-                qbAvatar.style.background = 'linear-gradient(135deg, #00f5ff, #6366f1)';
-                qbAvatar.style.borderColor = 'rgba(0, 245, 255, 0.5)';
-            }
-            if (qbName) qbName.textContent = 'Diana Katerine Pérez';
-            if (qbRole) qbRole.textContent = '👑 Super Administradora · Matriz y Auditoría';
             if (emailInput) emailInput.value = 'admin@parkpulse.co';
-            if (passInput) passInput.value = 'admin';
-            if (hint) hint.textContent = 'admin@parkpulse.co';
+            if (emailHint) emailHint.textContent = 'Diana Katerine Pérez (Única Admin)';
+            if (passHint) passHint.textContent = 'Obligatoria · Contraseña Maestra';
         } else if (role === 'Operador') {
-            if (qbAvatar) {
-                qbAvatar.textContent = 'CM';
-                qbAvatar.style.background = 'linear-gradient(135deg, #10b981, #0284c7)';
-                qbAvatar.style.borderColor = 'rgba(16, 185, 129, 0.5)';
-            }
-            if (qbName) qbName.textContent = 'Carlos Mendoza';
-            if (qbRole) qbRole.textContent = '👷 Operador Activo · Entradas, Salidas y Caja';
             if (emailInput) emailInput.value = 'operador@parkpulse.co';
-            if (passInput) passInput.value = 'oper';
-            if (hint) hint.textContent = 'operador@parkpulse.co';
+            if (emailHint) emailHint.textContent = 'Carlos Mendoza (Operador)';
+            if (passHint) passHint.textContent = 'Obligatoria · Clave de Turno';
         } else if (role === 'Cliente') {
-            if (qbAvatar) {
-                qbAvatar.textContent = 'MS';
-                qbAvatar.style.background = 'linear-gradient(135deg, #38bdf8, #818cf8)';
-                qbAvatar.style.borderColor = 'rgba(56, 189, 248, 0.5)';
-            }
-            if (qbName) qbName.textContent = 'Mateo Silva';
-            if (qbRole) qbRole.textContent = '👤 Conductor Ciudadano · Vehículo KLM-456';
             if (emailInput) emailInput.value = 'cliente@parkpulse.co';
-            if (passInput) passInput.value = 'cliente';
-            if (hint) hint.textContent = 'cliente@parkpulse.co';
+            if (emailHint) emailHint.textContent = 'Mateo Silva (Conductor)';
+            if (passHint) passHint.textContent = 'Acceso Libre al Portal';
+        }
+        if (passInput) passInput.value = '';
+    }
+
+    function toggleQuickGate(role) {
+        hideAuthError();
+        const gateAdmin = document.getElementById('gateAdmin');
+        const gateOper = document.getElementById('gateOperador');
+        const cardAdmin = document.getElementById('quickCardAdmin');
+        const cardOper = document.getElementById('quickCardOperador');
+
+        if (role === 'Administrador') {
+            const isShown = gateAdmin && gateAdmin.style.display !== 'none';
+            if (gateAdmin) gateAdmin.style.display = isShown ? 'none' : 'block';
+            if (cardAdmin) cardAdmin.classList.toggle('gate-open', !isShown);
+            if (gateOper) gateOper.style.display = 'none';
+            if (cardOper) cardOper.classList.remove('gate-open');
+            if (!isShown) {
+                const inp = document.getElementById('quickPassAdmin');
+                if (inp) { inp.value = ''; inp.focus(); }
+            }
+        } else if (role === 'Operador') {
+            const isShown = gateOper && gateOper.style.display !== 'none';
+            if (gateOper) gateOper.style.display = isShown ? 'none' : 'block';
+            if (cardOper) cardOper.classList.toggle('gate-open', !isShown);
+            if (gateAdmin) gateAdmin.style.display = 'none';
+            if (cardAdmin) cardAdmin.classList.remove('gate-open');
+            if (!isShown) {
+                const inp = document.getElementById('quickPassOperador');
+                if (inp) { inp.value = ''; inp.focus(); }
+            }
         }
     }
 
-    function quickLoginCurrent() {
-        const roleInput = document.getElementById('authInputRole');
-        const role = roleInput ? roleInput.value : 'Administrador';
-        quickLogin(role);
+    async function executeQuickAuth(role) {
+        hideAuthError();
+
+        if (role === 'Administrador') {
+            const inp = document.getElementById('quickPassAdmin');
+            const pass = inp ? inp.value.trim() : '';
+            if (!pass) {
+                showAuthError('🔒 Debes ingresar la contraseña maestra de Administrador para desbloquear el acceso.');
+                if (inp) inp.focus();
+                return;
+            }
+            await performServerAuth('Administrador', 'admin@parkpulse.co', pass);
+        } else if (role === 'Operador') {
+            const inp = document.getElementById('quickPassOperador');
+            const pass = inp ? inp.value.trim() : '';
+            if (!pass) {
+                showAuthError('🔒 Debes ingresar la contraseña de Operador en turno para validar el acceso.');
+                if (inp) inp.focus();
+                return;
+            }
+            await performServerAuth('Operador', 'operador@parkpulse.co', pass);
+        } else if (role === 'Cliente') {
+            await performServerAuth('Cliente', 'cliente@parkpulse.co', '');
+        }
+    }
+
+    async function handleAuthSubmit(event) {
+        if (event) event.preventDefault();
+        hideAuthError();
+
+        const roleSelect = document.getElementById('authInputRole');
+        const emailInput = document.getElementById('authInputEmail');
+        const passInput = document.getElementById('authInputPassword');
+
+        const role = roleSelect ? roleSelect.value : 'Administrador';
+        let email = emailInput ? emailInput.value.trim() : '';
+        const password = passInput ? passInput.value.trim() : '';
+
+        // Restricción por rol: Admin y Operador REQUIEREN contraseña obligatoria
+        if (role === 'Administrador') {
+            if (!password) {
+                showAuthError('🔒 Acceso Restringido: La contraseña de Administrador es obligatoria.');
+                if (passInput) passInput.focus();
+                return;
+            }
+            if (!email) email = 'admin@parkpulse.co';
+        } else if (role === 'Operador') {
+            if (!password) {
+                showAuthError('🔒 Acceso Restringido: La contraseña de Operador es obligatoria.');
+                if (passInput) passInput.focus();
+                return;
+            }
+            if (!email) email = 'operador@parkpulse.co';
+        } else if (role === 'Cliente') {
+            if (!email) email = 'cliente@parkpulse.co';
+        }
+
+        await performServerAuth(role, email, password);
+    }
+
+    async function performServerAuth(role, email, password) {
+        const btnSubmit = document.querySelector('.btn-auth-submit');
+        const origText = btnSubmit ? btnSubmit.innerHTML : '';
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span>⏳ Validando en Servidor...</span>';
+        }
+
+        try {
+            const endpoint = API_BASE + '/auth.php';
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-User-Role': role
+                },
+                body: JSON.stringify({
+                    action: 'login',
+                    role: role,
+                    email: email,
+                    password: password
+                })
+            });
+
+            const json = await res.json();
+
+            if (res.ok && json.success && json.data) {
+                loginUserSuccess(json.data);
+            } else {
+                showAuthError('❌ ' + (json.message || 'Error de autenticación. Verifica tus credenciales.'));
+            }
+        } catch (err) {
+            console.error('Error de autenticación:', err);
+            showAuthError('❌ Error de comunicación con el servidor MySQL. Verifica que Apache y MySQL estén iniciados en XAMPP.');
+        } finally {
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = origText;
+            }
+        }
     }
 
     function toggleAuthPasswordVisibility() {
@@ -4013,9 +4132,11 @@ html, body {
     }
 
     // Exponer funciones globales al objeto window para llamadas inline
-    window.quickLogin = quickLogin;
-    window.selectAuthRole = selectAuthRole;
-    window.quickLoginCurrent = quickLoginCurrent;
+    window.syncRoleSelection = syncRoleSelection;
+    window.toggleQuickGate = toggleQuickGate;
+    window.executeQuickAuth = executeQuickAuth;
+    window.performServerAuth = performServerAuth;
+    window.showAuthError = showAuthError;
     window.toggleAuthPasswordVisibility = toggleAuthPasswordVisibility;
     window.handleAuthSubmit = handleAuthSubmit;
     window.handleLogout = handleLogout;

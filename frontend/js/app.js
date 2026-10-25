@@ -63,136 +63,177 @@
         if (overlay) overlay.style.display = 'none';
     }
 
-    function handleAuthSubmit(event) {
-        if (event) event.preventDefault();
-        const emailInput = document.getElementById('authInputEmail');
-        const passInput = document.getElementById('authInputPassword');
-        const roleSelect = document.getElementById('authInputRole');
-
-        const email = emailInput ? emailInput.value.trim() : 'usuario@parkflow.com';
-        const pass = passInput ? passInput.value.trim() : '123';
-        const chosenRole = roleSelect ? roleSelect.value : 'Administrador';
-
-        // 1. Si coincide con una cuenta demo predefinida:
-        const match = REGISTERED_ACCOUNTS.find(a => a.email.toLowerCase() === email.toLowerCase());
-        if (match) {
-            loginUserSuccess(match);
-            return;
-        }
-
-        // 2. Si es CUALQUIER otro correo o contraseña (no necesitan ser reales):
-        // Obtenemos un nombre amigable a partir del correo
-        const namePart = email.includes('@') ? email.split('@')[0] : email;
-        const formattedName = namePart.charAt(0).toUpperCase() + namePart.slice(1);
-
-        const customUser = {
-            email: email || 'usuario@parkflow.com',
-            password: pass || '123456',
-            nombre: formattedName,
-            rol: chosenRole,
-            placa: (chosenRole === 'Cliente') ? 'KLM-456' : null
-        };
-
-        loginUserSuccess(customUser);
+    function showAuthScreen() {
+        const overlay = document.getElementById('saasAuthScreen');
+        if (overlay) overlay.style.display = 'flex';
     }
 
-    function quickLogin(roleOrEmail) {
-        let account = null;
-        if (roleOrEmail === 'Administrador' || roleOrEmail.includes('admin')) {
-            account = {
-                email: 'admin@parkpulse.co',
-                password: 'admin',
-                nombre: 'Diana Katerine Pérez',
-                rol: 'Administrador',
-                placa: null
-            };
-        } else if (roleOrEmail === 'Operador' || roleOrEmail.includes('operador')) {
-            account = {
-                email: 'operador@parkpulse.co',
-                password: 'oper',
-                nombre: 'Carlos Mendoza',
-                rol: 'Operador',
-                placa: null
-            };
-        } else if (roleOrEmail === 'Cliente' || roleOrEmail.includes('cliente')) {
-            account = {
-                email: 'cliente@parkpulse.co',
-                password: 'cliente',
-                nombre: 'Mateo Silva',
-                rol: 'Cliente',
-                placa: 'KLM-456'
-            };
-        } else {
-            account = {
-                email: roleOrEmail || 'usuario@parkflow.com',
-                password: '123',
-                nombre: 'Usuario ParkFlow',
-                rol: 'Administrador'
-            };
-        }
-        loginUserSuccess(account);
+    function showAuthError(message) {
+        const errBox = document.getElementById('authErrorMsg');
+        if (!errBox) return;
+        errBox.textContent = message;
+        errBox.style.display = 'block';
+        errBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
 
-    function selectAuthRole(role) {
-        const roleInput = document.getElementById('authInputRole');
-        if (roleInput) roleInput.value = role;
+    function hideAuthError() {
+        const errBox = document.getElementById('authErrorMsg');
+        if (errBox) errBox.style.display = 'none';
+    }
 
-        // Update active tab buttons
-        const tabAdmin = document.getElementById('tabRoleAdmin');
-        const tabOper = document.getElementById('tabRoleOperador');
-        const tabClient = document.getElementById('tabRoleCliente');
-        if (tabAdmin) tabAdmin.classList.toggle('active', role === 'Administrador');
-        if (tabOper) tabOper.classList.toggle('active', role === 'Operador');
-        if (tabClient) tabClient.classList.toggle('active', role === 'Cliente');
-
-        // Update Quick Banner & Form Fields
-        const qbAvatar = document.getElementById('qbAvatar');
-        const qbName = document.getElementById('qbName');
-        const qbRole = document.getElementById('qbRole');
+    function syncRoleSelection(role) {
+        hideAuthError();
         const emailInput = document.getElementById('authInputEmail');
+        const emailHint = document.getElementById('authEmailHint');
+        const passHint = document.getElementById('authPassHint');
         const passInput = document.getElementById('authInputPassword');
-        const hint = document.getElementById('authEmailHint');
 
         if (role === 'Administrador') {
-            if (qbAvatar) {
-                qbAvatar.textContent = 'DK';
-                qbAvatar.style.background = 'linear-gradient(135deg, #00f5ff, #6366f1)';
-                qbAvatar.style.borderColor = 'rgba(0, 245, 255, 0.5)';
-            }
-            if (qbName) qbName.textContent = 'Diana Katerine Pérez';
-            if (qbRole) qbRole.textContent = '👑 Super Administradora · Matriz y Auditoría';
             if (emailInput) emailInput.value = 'admin@parkpulse.co';
-            if (passInput) passInput.value = 'admin';
-            if (hint) hint.textContent = 'admin@parkpulse.co';
+            if (emailHint) emailHint.textContent = 'Diana Katerine Pérez (Única Admin)';
+            if (passHint) passHint.textContent = 'Obligatoria · Contraseña Maestra';
         } else if (role === 'Operador') {
-            if (qbAvatar) {
-                qbAvatar.textContent = 'CM';
-                qbAvatar.style.background = 'linear-gradient(135deg, #10b981, #0284c7)';
-                qbAvatar.style.borderColor = 'rgba(16, 185, 129, 0.5)';
-            }
-            if (qbName) qbName.textContent = 'Carlos Mendoza';
-            if (qbRole) qbRole.textContent = '👷 Operador Activo · Entradas, Salidas y Caja';
             if (emailInput) emailInput.value = 'operador@parkpulse.co';
-            if (passInput) passInput.value = 'oper';
-            if (hint) hint.textContent = 'operador@parkpulse.co';
+            if (emailHint) emailHint.textContent = 'Carlos Mendoza (Operador)';
+            if (passHint) passHint.textContent = 'Obligatoria · Clave de Turno';
         } else if (role === 'Cliente') {
-            if (qbAvatar) {
-                qbAvatar.textContent = 'MS';
-                qbAvatar.style.background = 'linear-gradient(135deg, #38bdf8, #818cf8)';
-                qbAvatar.style.borderColor = 'rgba(56, 189, 248, 0.5)';
-            }
-            if (qbName) qbName.textContent = 'Mateo Silva';
-            if (qbRole) qbRole.textContent = '👤 Conductor Ciudadano · Vehículo KLM-456';
             if (emailInput) emailInput.value = 'cliente@parkpulse.co';
-            if (passInput) passInput.value = 'cliente';
-            if (hint) hint.textContent = 'cliente@parkpulse.co';
+            if (emailHint) emailHint.textContent = 'Mateo Silva (Conductor)';
+            if (passHint) passHint.textContent = 'Acceso Libre al Portal';
+        }
+        if (passInput) passInput.value = '';
+    }
+
+    function toggleQuickGate(role) {
+        hideAuthError();
+        const gateAdmin = document.getElementById('gateAdmin');
+        const gateOper = document.getElementById('gateOperador');
+        const cardAdmin = document.getElementById('quickCardAdmin');
+        const cardOper = document.getElementById('quickCardOperador');
+
+        if (role === 'Administrador') {
+            const isShown = gateAdmin && gateAdmin.style.display !== 'none';
+            if (gateAdmin) gateAdmin.style.display = isShown ? 'none' : 'block';
+            if (cardAdmin) cardAdmin.classList.toggle('gate-open', !isShown);
+            if (gateOper) gateOper.style.display = 'none';
+            if (cardOper) cardOper.classList.remove('gate-open');
+            if (!isShown) {
+                const inp = document.getElementById('quickPassAdmin');
+                if (inp) { inp.value = ''; inp.focus(); }
+            }
+        } else if (role === 'Operador') {
+            const isShown = gateOper && gateOper.style.display !== 'none';
+            if (gateOper) gateOper.style.display = isShown ? 'none' : 'block';
+            if (cardOper) cardOper.classList.toggle('gate-open', !isShown);
+            if (gateAdmin) gateAdmin.style.display = 'none';
+            if (cardAdmin) cardAdmin.classList.remove('gate-open');
+            if (!isShown) {
+                const inp = document.getElementById('quickPassOperador');
+                if (inp) { inp.value = ''; inp.focus(); }
+            }
         }
     }
 
-    function quickLoginCurrent() {
-        const roleInput = document.getElementById('authInputRole');
-        const role = roleInput ? roleInput.value : 'Administrador';
-        quickLogin(role);
+    async function executeQuickAuth(role) {
+        hideAuthError();
+
+        if (role === 'Administrador') {
+            const inp = document.getElementById('quickPassAdmin');
+            const pass = inp ? inp.value.trim() : '';
+            if (!pass) {
+                showAuthError('🔒 Debes ingresar la contraseña maestra de Administrador para desbloquear el acceso.');
+                if (inp) inp.focus();
+                return;
+            }
+            await performServerAuth('Administrador', 'admin@parkpulse.co', pass);
+        } else if (role === 'Operador') {
+            const inp = document.getElementById('quickPassOperador');
+            const pass = inp ? inp.value.trim() : '';
+            if (!pass) {
+                showAuthError('🔒 Debes ingresar la contraseña de Operador en turno para validar el acceso.');
+                if (inp) inp.focus();
+                return;
+            }
+            await performServerAuth('Operador', 'operador@parkpulse.co', pass);
+        } else if (role === 'Cliente') {
+            await performServerAuth('Cliente', 'cliente@parkpulse.co', '');
+        }
+    }
+
+    async function handleAuthSubmit(event) {
+        if (event) event.preventDefault();
+        hideAuthError();
+
+        const roleSelect = document.getElementById('authInputRole');
+        const emailInput = document.getElementById('authInputEmail');
+        const passInput = document.getElementById('authInputPassword');
+
+        const role = roleSelect ? roleSelect.value : 'Administrador';
+        let email = emailInput ? emailInput.value.trim() : '';
+        const password = passInput ? passInput.value.trim() : '';
+
+        // Restricción por rol: Admin y Operador REQUIEREN contraseña obligatoria
+        if (role === 'Administrador') {
+            if (!password) {
+                showAuthError('🔒 Acceso Restringido: La contraseña de Administrador es obligatoria.');
+                if (passInput) passInput.focus();
+                return;
+            }
+            if (!email) email = 'admin@parkpulse.co';
+        } else if (role === 'Operador') {
+            if (!password) {
+                showAuthError('🔒 Acceso Restringido: La contraseña de Operador es obligatoria.');
+                if (passInput) passInput.focus();
+                return;
+            }
+            if (!email) email = 'operador@parkpulse.co';
+        } else if (role === 'Cliente') {
+            if (!email) email = 'cliente@parkpulse.co';
+        }
+
+        await performServerAuth(role, email, password);
+    }
+
+    async function performServerAuth(role, email, password) {
+        const btnSubmit = document.querySelector('.btn-auth-submit');
+        const origText = btnSubmit ? btnSubmit.innerHTML : '';
+        if (btnSubmit) {
+            btnSubmit.disabled = true;
+            btnSubmit.innerHTML = '<span>⏳ Validando en Servidor...</span>';
+        }
+
+        try {
+            const endpoint = API_BASE + '/auth.php';
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-User-Role': role
+                },
+                body: JSON.stringify({
+                    action: 'login',
+                    role: role,
+                    email: email,
+                    password: password
+                })
+            });
+
+            const json = await res.json();
+
+            if (res.ok && json.success && json.data) {
+                loginUserSuccess(json.data);
+            } else {
+                showAuthError('❌ ' + (json.message || 'Error de autenticación. Verifica tus credenciales.'));
+            }
+        } catch (err) {
+            console.error('Error de autenticación:', err);
+            showAuthError('❌ Error de comunicación con el servidor MySQL. Verifica que Apache y MySQL estén iniciados en XAMPP.');
+        } finally {
+            if (btnSubmit) {
+                btnSubmit.disabled = false;
+                btnSubmit.innerHTML = origText;
+            }
+        }
     }
 
     function toggleAuthPasswordVisibility() {
@@ -244,9 +285,11 @@
     }
 
     // Exponer funciones globales al objeto window para llamadas inline
-    window.quickLogin = quickLogin;
-    window.selectAuthRole = selectAuthRole;
-    window.quickLoginCurrent = quickLoginCurrent;
+    window.syncRoleSelection = syncRoleSelection;
+    window.toggleQuickGate = toggleQuickGate;
+    window.executeQuickAuth = executeQuickAuth;
+    window.performServerAuth = performServerAuth;
+    window.showAuthError = showAuthError;
     window.toggleAuthPasswordVisibility = toggleAuthPasswordVisibility;
     window.handleAuthSubmit = handleAuthSubmit;
     window.handleLogout = handleLogout;

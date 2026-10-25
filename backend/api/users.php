@@ -43,39 +43,18 @@ if ($method === 'GET') {
 if ($method === 'POST') {
     $input = getJsonInput();
 
-    // Caso de login / actualización de último acceso
+    // Caso de login: delegar al manejador seguro de autenticación con bcrypt
     if (isset($input['action']) && $input['action'] === 'login') {
-        $email = trim($input['email'] ?? '');
-        $stmt = $pdo->prepare("SELECT * FROM `usuarios` WHERE `email` = ?");
-        $stmt->execute([$email]);
-        $user = $stmt->fetch();
-
-        if (!$user) {
-            sendResponse(false, null, 'Usuario no encontrado', 404);
-        }
-
-        if (!(bool)$user['activo']) {
-            sendResponse(false, null, 'Esta cuenta ha sido desactivada por el administrador', 403);
-        }
-
-        $now = date('Y-m-d H:i:s');
-        $upd = $pdo->prepare("UPDATE `usuarios` SET `ultimo_acceso` = ? WHERE `id` = ?");
-        $upd->execute([$now, $user['id']]);
-
-        $userData = [
-            'id'           => $user['id'],
-            'nombre'       => $user['nombre'],
-            'email'        => $user['email'],
-            'rol'          => $user['rol'],
-            'activo'       => (bool)$user['activo'],
-            'placaAsociada'=> $user['placa_asociada'],
-            'ultimoAcceso' => $now
-        ];
-
-        sendResponse(true, $userData, 'Inicio de sesión exitoso');
+        require __DIR__ . '/auth.php';
+        exit();
     }
 
-    // Creación de nuevo usuario
+    // Creación de nuevo usuario: solo Administrador
+    $currentRole = $_SERVER['HTTP_X_USER_ROLE'] ?? ($input['currentUserRole'] ?? '');
+    if ($currentRole !== 'Administrador') {
+        sendResponse(false, null, 'Acceso denegado (403): Solo el Administrador autenticado puede crear o modificar cuentas de usuario.', 403);
+    }
+
     $nombre = trim($input['nombre'] ?? '');
     $email = trim(strtolower($input['email'] ?? ''));
     $rol = $input['rol'] ?? 'Cliente';

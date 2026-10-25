@@ -15,6 +15,10 @@ if (!$pdo) {
 $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
 if ($method === 'GET') {
+    $role = $_SERVER['HTTP_X_USER_ROLE'] ?? ($_GET['currentUserRole'] ?? '');
+    if ($role !== 'Administrador') {
+        sendResponse(false, null, 'Acceso denegado (403): Solo el Administrador autenticado puede consultar los registros de auditoría.', 403);
+    }
     try {
         $stmt = $pdo->query("SELECT * FROM `auditoria` ORDER BY `created_at` DESC LIMIT 100");
         $rows = $stmt->fetchAll();

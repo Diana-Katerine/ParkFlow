@@ -39,6 +39,10 @@ if ($method === 'GET') {
 
 if ($method === 'PUT') {
     $input = getJsonInput();
+    $role = $_SERVER['HTTP_X_USER_ROLE'] ?? ($input['currentUserRole'] ?? '');
+    if ($role !== 'Administrador') {
+        sendResponse(false, null, 'Acceso denegado (403): Solo el Administrador autenticado puede modificar la matriz tarifaria.', 403);
+    }
     $id = $input['id'] ?? null;
     $tarifaPorMinuto = $input['tarifaPorMinuto'] ?? null;
     $tarifaPorHora = $input['tarifaPorHora'] ?? null;
