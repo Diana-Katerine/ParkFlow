@@ -46,7 +46,7 @@
                     <div class="showcase-stats-grid">
                         <div class="sc-stat-card">
                             <div class="sc-stat-icon">🗺️</div>
-                            <div class="sc-stat-val">92</div>
+                            <div class="sc-stat-val">130</div>
                             <div class="sc-stat-lbl">Bahías Inteligentes</div>
                         </div>
                         <div class="sc-stat-card">
@@ -68,21 +68,21 @@
                                 <span class="radar-live-radar-icon">📡</span>
                                 <span class="radar-title">Mapa de Ocupación de Bahías</span>
                             </div>
-                            <span class="radar-count-tag">85 Libres · 7 Ocupadas · 92 Totales</span>
+                            <span class="radar-count-tag">124 Libres · 6 Ocupadas · 130 Totales</span>
                         </div>
                         <div class="radar-grid">
-                            <div class="radar-spot occupied" title="Zona A-01: Ocupado (BST-902)"><span>A-01</span></div>
-                            <div class="radar-spot free" title="Zona A-02: Disponible"><span>A-02</span></div>
-                            <div class="radar-spot free" title="Zona A-03: Disponible"><span>A-03</span></div>
-                            <div class="radar-spot free" title="Zona A-04: Disponible"><span>A-04</span></div>
-                            <div class="radar-spot occupied" title="Zona B-01: Ocupado (KLM-456)"><span>B-01</span></div>
-                            <div class="radar-spot free" title="Zona B-02: Disponible"><span>B-02</span></div>
+                            <div class="radar-spot occupied" title="Zona AP-01: Ocupado (BGT-902)"><span>AP-01</span></div>
+                            <div class="radar-spot free" title="Zona AP-02: Disponible"><span>AP-02</span></div>
+                            <div class="radar-spot occupied" title="Zona AP-03: Ocupado (MDE-314)"><span>AP-03</span></div>
+                            <div class="radar-spot free" title="Zona AP-04: Disponible"><span>AP-04</span></div>
+                            <div class="radar-spot occupied" title="Zona AG-01: Ocupado (SUV-779)"><span>AG-01</span></div>
+                            <div class="radar-spot free" title="Zona AG-02: Disponible"><span>AG-02</span></div>
+                            <div class="radar-spot occupied" title="Zona M-01: Ocupado (XRT-82A)"><span>M-01</span></div>
+                            <div class="radar-spot free" title="Zona M-02: Disponible"><span>M-02</span></div>
+                            <div class="radar-spot occupied" title="Zona M-05: Ocupado (QWE-45F)"><span>M-05</span></div>
+                            <div class="radar-spot free" title="Zona B-01: Disponible"><span>B-01</span></div>
+                            <div class="radar-spot occupied" title="Zona B-02: Ocupado (BIC-012)"><span>B-02</span></div>
                             <div class="radar-spot free" title="Zona B-03: Disponible"><span>B-03</span></div>
-                            <div class="radar-spot occupied" title="Zona B-04: Ocupado (EVX-108)"><span>B-04</span></div>
-                            <div class="radar-spot occupied" title="Zona C-01: Ocupado (XRT-82A)"><span>C-01</span></div>
-                            <div class="radar-spot free" title="Zona C-02: Disponible"><span>C-02</span></div>
-                            <div class="radar-spot free" title="Zona C-03: Disponible"><span>C-03</span></div>
-                            <div class="radar-spot occupied" title="Zona D-01: Ocupado (SUV-779)"><span>D-01</span></div>
                         </div>
                     </div>
                 </div>
@@ -581,8 +581,12 @@
                         </div>
                         <div class="donut-legend">
                             <div class="legend-row">
-                                <div class="legend-left"><div class="legend-color-dot" style="background:#00f5ff;"></div><span>Automóviles</span></div>
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#00f5ff;"></div><span>Automóviles pequeños</span></div>
                                 <span style="font-weight:700; color:var(--text-heading);" id="distAutoCount">0%</span>
+                            </div>
+                            <div class="legend-row">
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#f59e0b;"></div><span>Automóviles grandes</span></div>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distSuvCount">0%</span>
                             </div>
                             <div class="legend-row">
                                 <div class="legend-left"><div class="legend-color-dot" style="background:#6366f1;"></div><span>Motocicletas</span></div>
@@ -591,14 +595,6 @@
                             <div class="legend-row">
                                 <div class="legend-left"><div class="legend-color-dot" style="background:#10b981;"></div><span>Bicicletas</span></div>
                                 <span style="font-weight:700; color:var(--emerald);" id="distBiciCount">0%</span>
-                            </div>
-                            <div class="legend-row">
-                                <div class="legend-left"><div class="legend-color-dot" style="background:#f59e0b;"></div><span>Camionetas / SUV</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distSuvCount">0%</span>
-                            </div>
-                            <div class="legend-row">
-                                <div class="legend-left"><div class="legend-color-dot" style="background:#ec4899;"></div><span>Eléctricos EV</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distEvCount">0%</span>
                             </div>
                         </div>
                     </div>
@@ -863,10 +859,10 @@
                             <div class="form-row" style="margin-bottom:0;">
                                 <label class="form-label-saas" style="font-weight:700;">Tipo de Vehículo</label>
                                 <select id="clientSelfType" class="form-control-saas" onchange="onClientVehicleTypeChange(this.value)">
-                                    <option value="Automóvil">Automóvil (Zona A)</option>
-                                    <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
-                                    <option value="Motocicleta">Motocicleta (Zona C)</option>
-                                    <option value="Camioneta">Camioneta / SUV (Zona D)</option>
+                                    <option value="Automóviles pequeños">🚗 Automóviles pequeños (Zona Automóviles pequeños)</option>
+                                    <option value="Automóviles grandes">🚙 Automóviles grandes (Zona Automóviles grandes)</option>
+                                    <option value="Motocicletas">🏍️ Motocicletas (Zona Motocicletas)</option>
+                                    <option value="Bicicletas">🚲 Bicicletas (Zona Bicicletas)</option>
                                 </select>
                             </div>
                             <div class="form-row" style="margin-bottom:0;">
@@ -904,10 +900,10 @@
                                 <div class="form-row" style="margin-bottom:0;">
                                     <label class="form-label-saas" style="font-weight:700;">Tipo de Vehículo</label>
                                     <select id="reserveType" class="form-control-saas" onchange="onClientVehicleTypeChange(this.value)">
-                                        <option value="Automóvil">Automóvil (Zona A)</option>
-                                        <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
-                                        <option value="Motocicleta">Motocicleta (Zona C)</option>
-                                        <option value="Camioneta">Camioneta / SUV (Zona D)</option>
+                                        <option value="Automóviles pequeños">🚗 Automóviles pequeños (Zona Automóviles pequeños)</option>
+                                        <option value="Automóviles grandes">🚙 Automóviles grandes (Zona Automóviles grandes)</option>
+                                        <option value="Motocicletas">🏍️ Motocicletas (Zona Motocicletas)</option>
+                                        <option value="Bicicletas">🚲 Bicicletas (Zona Bicicletas)</option>
                                     </select>
                                 </div>
                                 <div class="form-row" style="margin-bottom:0;">
@@ -983,17 +979,17 @@
                             <button type="button" class="category-tab-btn active" id="catBtnAll" onclick="filterClientBaysByCategory('ALL')">
                                 <span>🌐</span> Todos los Espacios (<span id="catCountAll">0</span>)
                             </button>
-                            <button type="button" class="category-tab-btn" id="catBtnAuto" onclick="filterClientBaysByCategory('Automóvil')">
-                                <span>🚗</span> Automóvil (<span id="catCountAuto">0</span>)
+                            <button type="button" class="category-tab-btn" id="catBtnAP" onclick="filterClientBaysByCategory('Automóviles pequeños')">
+                                <span>🚗</span> Automóviles pequeños (<span id="catCountAP">0</span>)
                             </button>
-                            <button type="button" class="category-tab-btn" id="catBtnEV" onclick="filterClientBaysByCategory('Eléctrico EV')">
-                                <span>⚡</span> Eléctrico EV (<span id="catCountEV">0</span>)
+                            <button type="button" class="category-tab-btn" id="catBtnAG" onclick="filterClientBaysByCategory('Automóviles grandes')">
+                                <span>🚙</span> Automóviles grandes (<span id="catCountAG">0</span>)
                             </button>
-                            <button type="button" class="category-tab-btn" id="catBtnMoto" onclick="filterClientBaysByCategory('Motocicleta')">
-                                <span>🏍️</span> Motocicleta (<span id="catCountMoto">0</span>)
+                            <button type="button" class="category-tab-btn" id="catBtnMoto" onclick="filterClientBaysByCategory('Motocicletas')">
+                                <span>🏍️</span> Motocicletas (<span id="catCountMoto">0</span>)
                             </button>
-                            <button type="button" class="category-tab-btn" id="catBtnSUV" onclick="filterClientBaysByCategory('Camioneta')">
-                                <span>🚙</span> Camioneta / SUV (<span id="catCountSUV">0</span>)
+                            <button type="button" class="category-tab-btn" id="catBtnBici" onclick="filterClientBaysByCategory('Bicicletas')">
+                                <span>🚲</span> Bicicletas (<span id="catCountBici">0</span>)
                             </button>
                         </div>
 
@@ -1053,10 +1049,10 @@
                             <div>
                                 <label class="form-label-saas">Tipo de Vehículo</label>
                                 <select id="calcPortalVehicleType" class="form-control-saas" onchange="updatePortalMinuteCalculation()">
-                                    <option value="Automóvil">🚗 Automóvil ($110 / min)</option>
-                                    <option value="Motocicleta">🏍️ Motocicleta ($65 / min)</option>
-                                    <option value="Camioneta">🚙 Camioneta / SUV ($135 / min)</option>
-                                    <option value="Eléctrico EV">⚡ Eléctrico EV ($95 / min)</option>
+                                    <option value="Automóviles pequeños">🚗 Automóviles pequeños ($110 / min)</option>
+                                    <option value="Automóviles grandes">🚙 Automóviles grandes ($135 / min)</option>
+                                    <option value="Motocicletas">🏍️ Motocicletas ($65 / min)</option>
+                                    <option value="Bicicletas">🚲 Bicicletas ($25 / min)</option>
                                 </select>
                             </div>
                             <div>
@@ -1614,11 +1610,10 @@
                 <div class="form-row">
                     <label class="form-label-saas">Tipo de Vehículo</label>
                     <select id="checkInType" class="form-control-saas" onchange="filterAvailableBaysForCheckIn()">
-                        <option value="Automóvil">Automóvil (Zona A)</option>
-                        <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
-                        <option value="Motocicleta">Motocicleta (Zona C)</option>
-                        <option value="Camioneta">Camioneta / SUV (Zona D)</option>
-                        <option value="Bicicleta">Bicicleta (Zona E)</option>
+                        <option value="Automóviles pequeños">🚗 Automóviles pequeños (Zona Automóviles pequeños)</option>
+                        <option value="Automóviles grandes">🚙 Automóviles grandes (Zona Automóviles grandes)</option>
+                        <option value="Motocicletas">🏍️ Motocicletas (Zona Motocicletas)</option>
+                        <option value="Bicicletas">🚲 Bicicletas (Zona Bicicletas)</option>
                     </select>
                 </div>
                 <div class="form-row">
@@ -1761,10 +1756,10 @@
                 <div>
                     <label class="form-label-saas">Tipo de Vehículo</label>
                     <select id="modalCalcVehicleType" class="form-control-saas" onchange="updateModalMinuteCalculation()">
-                        <option value="Automóvil">🚗 Automóvil ($110/min)</option>
-                        <option value="Motocicleta">🏍️ Motocicleta ($65/min)</option>
-                        <option value="Camioneta">🚙 Camioneta ($135/min)</option>
-                        <option value="Eléctrico EV">⚡ Eléctrico EV ($95/min)</option>
+                        <option value="Automóviles pequeños">🚗 Automóviles pequeños ($110/min)</option>
+                        <option value="Automóviles grandes">🚙 Automóviles grandes ($135/min)</option>
+                        <option value="Motocicletas">🏍️ Motocicletas ($65/min)</option>
+                        <option value="Bicicletas">🚲 Bicicletas ($25/min)</option>
                     </select>
                 </div>
                 <div>

@@ -1868,7 +1868,7 @@ html, body {
                     <div class="showcase-stats-grid">
                         <div class="sc-stat-card">
                             <div class="sc-stat-icon">🗺️</div>
-                            <div class="sc-stat-val">92</div>
+                            <div class="sc-stat-val">130</div>
                             <div class="sc-stat-lbl">Bahías Inteligentes</div>
                         </div>
                         <div class="sc-stat-card">
@@ -1890,21 +1890,21 @@ html, body {
                                 <span class="radar-live-radar-icon">📡</span>
                                 <span class="radar-title">Mapa de Ocupación de Bahías</span>
                             </div>
-                            <span class="radar-count-tag">85 Libres · 7 Ocupadas · 92 Totales</span>
+                            <span class="radar-count-tag">124 Libres · 6 Ocupadas · 130 Totales</span>
                         </div>
                         <div class="radar-grid">
-                            <div class="radar-spot occupied" title="Zona A-01: Ocupado (BST-902)"><span>A-01</span></div>
-                            <div class="radar-spot free" title="Zona A-02: Disponible"><span>A-02</span></div>
-                            <div class="radar-spot free" title="Zona A-03: Disponible"><span>A-03</span></div>
-                            <div class="radar-spot free" title="Zona A-04: Disponible"><span>A-04</span></div>
-                            <div class="radar-spot occupied" title="Zona B-01: Ocupado (KLM-456)"><span>B-01</span></div>
-                            <div class="radar-spot free" title="Zona B-02: Disponible"><span>B-02</span></div>
+                            <div class="radar-spot occupied" title="Zona AP-01: Ocupado (BGT-902)"><span>AP-01</span></div>
+                            <div class="radar-spot free" title="Zona AP-02: Disponible"><span>AP-02</span></div>
+                            <div class="radar-spot occupied" title="Zona AP-03: Ocupado (MDE-314)"><span>AP-03</span></div>
+                            <div class="radar-spot free" title="Zona AP-04: Disponible"><span>AP-04</span></div>
+                            <div class="radar-spot occupied" title="Zona AG-01: Ocupado (SUV-779)"><span>AG-01</span></div>
+                            <div class="radar-spot free" title="Zona AG-02: Disponible"><span>AG-02</span></div>
+                            <div class="radar-spot occupied" title="Zona M-01: Ocupado (XRT-82A)"><span>M-01</span></div>
+                            <div class="radar-spot free" title="Zona M-02: Disponible"><span>M-02</span></div>
+                            <div class="radar-spot occupied" title="Zona M-05: Ocupado (QWE-45F)"><span>M-05</span></div>
+                            <div class="radar-spot free" title="Zona B-01: Disponible"><span>B-01</span></div>
+                            <div class="radar-spot occupied" title="Zona B-02: Ocupado (BIC-012)"><span>B-02</span></div>
                             <div class="radar-spot free" title="Zona B-03: Disponible"><span>B-03</span></div>
-                            <div class="radar-spot occupied" title="Zona B-04: Ocupado (EVX-108)"><span>B-04</span></div>
-                            <div class="radar-spot occupied" title="Zona C-01: Ocupado (XRT-82A)"><span>C-01</span></div>
-                            <div class="radar-spot free" title="Zona C-02: Disponible"><span>C-02</span></div>
-                            <div class="radar-spot free" title="Zona C-03: Disponible"><span>C-03</span></div>
-                            <div class="radar-spot occupied" title="Zona D-01: Ocupado (SUV-779)"><span>D-01</span></div>
                         </div>
                     </div>
                 </div>
@@ -2403,8 +2403,12 @@ html, body {
                         </div>
                         <div class="donut-legend">
                             <div class="legend-row">
-                                <div class="legend-left"><div class="legend-color-dot" style="background:#00f5ff;"></div><span>Automóviles</span></div>
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#00f5ff;"></div><span>Automóviles pequeños</span></div>
                                 <span style="font-weight:700; color:var(--text-heading);" id="distAutoCount">0%</span>
+                            </div>
+                            <div class="legend-row">
+                                <div class="legend-left"><div class="legend-color-dot" style="background:#f59e0b;"></div><span>Automóviles grandes</span></div>
+                                <span style="font-weight:700; color:var(--text-heading);" id="distSuvCount">0%</span>
                             </div>
                             <div class="legend-row">
                                 <div class="legend-left"><div class="legend-color-dot" style="background:#6366f1;"></div><span>Motocicletas</span></div>
@@ -2413,14 +2417,6 @@ html, body {
                             <div class="legend-row">
                                 <div class="legend-left"><div class="legend-color-dot" style="background:#10b981;"></div><span>Bicicletas</span></div>
                                 <span style="font-weight:700; color:var(--emerald);" id="distBiciCount">0%</span>
-                            </div>
-                            <div class="legend-row">
-                                <div class="legend-left"><div class="legend-color-dot" style="background:#f59e0b;"></div><span>Camionetas / SUV</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distSuvCount">0%</span>
-                            </div>
-                            <div class="legend-row">
-                                <div class="legend-left"><div class="legend-color-dot" style="background:#ec4899;"></div><span>Eléctricos EV</span></div>
-                                <span style="font-weight:700; color:var(--text-heading);" id="distEvCount">0%</span>
                             </div>
                         </div>
                     </div>
@@ -2685,10 +2681,10 @@ html, body {
                             <div class="form-row" style="margin-bottom:0;">
                                 <label class="form-label-saas" style="font-weight:700;">Tipo de Vehículo</label>
                                 <select id="clientSelfType" class="form-control-saas" onchange="onClientVehicleTypeChange(this.value)">
-                                    <option value="Automóvil">Automóvil (Zona A)</option>
-                                    <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
-                                    <option value="Motocicleta">Motocicleta (Zona C)</option>
-                                    <option value="Camioneta">Camioneta / SUV (Zona D)</option>
+                                    <option value="Automóviles pequeños">🚗 Automóviles pequeños (Zona Automóviles pequeños)</option>
+                                    <option value="Automóviles grandes">🚙 Automóviles grandes (Zona Automóviles grandes)</option>
+                                    <option value="Motocicletas">🏍️ Motocicletas (Zona Motocicletas)</option>
+                                    <option value="Bicicletas">🚲 Bicicletas (Zona Bicicletas)</option>
                                 </select>
                             </div>
                             <div class="form-row" style="margin-bottom:0;">
@@ -2726,10 +2722,10 @@ html, body {
                                 <div class="form-row" style="margin-bottom:0;">
                                     <label class="form-label-saas" style="font-weight:700;">Tipo de Vehículo</label>
                                     <select id="reserveType" class="form-control-saas" onchange="onClientVehicleTypeChange(this.value)">
-                                        <option value="Automóvil">Automóvil (Zona A)</option>
-                                        <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
-                                        <option value="Motocicleta">Motocicleta (Zona C)</option>
-                                        <option value="Camioneta">Camioneta / SUV (Zona D)</option>
+                                        <option value="Automóviles pequeños">🚗 Automóviles pequeños (Zona Automóviles pequeños)</option>
+                                        <option value="Automóviles grandes">🚙 Automóviles grandes (Zona Automóviles grandes)</option>
+                                        <option value="Motocicletas">🏍️ Motocicletas (Zona Motocicletas)</option>
+                                        <option value="Bicicletas">🚲 Bicicletas (Zona Bicicletas)</option>
                                     </select>
                                 </div>
                                 <div class="form-row" style="margin-bottom:0;">
@@ -2805,17 +2801,17 @@ html, body {
                             <button type="button" class="category-tab-btn active" id="catBtnAll" onclick="filterClientBaysByCategory('ALL')">
                                 <span>🌐</span> Todos los Espacios (<span id="catCountAll">0</span>)
                             </button>
-                            <button type="button" class="category-tab-btn" id="catBtnAuto" onclick="filterClientBaysByCategory('Automóvil')">
-                                <span>🚗</span> Automóvil (<span id="catCountAuto">0</span>)
+                            <button type="button" class="category-tab-btn" id="catBtnAP" onclick="filterClientBaysByCategory('Automóviles pequeños')">
+                                <span>🚗</span> Automóviles pequeños (<span id="catCountAP">0</span>)
                             </button>
-                            <button type="button" class="category-tab-btn" id="catBtnEV" onclick="filterClientBaysByCategory('Eléctrico EV')">
-                                <span>⚡</span> Eléctrico EV (<span id="catCountEV">0</span>)
+                            <button type="button" class="category-tab-btn" id="catBtnAG" onclick="filterClientBaysByCategory('Automóviles grandes')">
+                                <span>🚙</span> Automóviles grandes (<span id="catCountAG">0</span>)
                             </button>
-                            <button type="button" class="category-tab-btn" id="catBtnMoto" onclick="filterClientBaysByCategory('Motocicleta')">
-                                <span>🏍️</span> Motocicleta (<span id="catCountMoto">0</span>)
+                            <button type="button" class="category-tab-btn" id="catBtnMoto" onclick="filterClientBaysByCategory('Motocicletas')">
+                                <span>🏍️</span> Motocicletas (<span id="catCountMoto">0</span>)
                             </button>
-                            <button type="button" class="category-tab-btn" id="catBtnSUV" onclick="filterClientBaysByCategory('Camioneta')">
-                                <span>🚙</span> Camioneta / SUV (<span id="catCountSUV">0</span>)
+                            <button type="button" class="category-tab-btn" id="catBtnBici" onclick="filterClientBaysByCategory('Bicicletas')">
+                                <span>🚲</span> Bicicletas (<span id="catCountBici">0</span>)
                             </button>
                         </div>
 
@@ -2875,10 +2871,10 @@ html, body {
                             <div>
                                 <label class="form-label-saas">Tipo de Vehículo</label>
                                 <select id="calcPortalVehicleType" class="form-control-saas" onchange="updatePortalMinuteCalculation()">
-                                    <option value="Automóvil">🚗 Automóvil ($110 / min)</option>
-                                    <option value="Motocicleta">🏍️ Motocicleta ($65 / min)</option>
-                                    <option value="Camioneta">🚙 Camioneta / SUV ($135 / min)</option>
-                                    <option value="Eléctrico EV">⚡ Eléctrico EV ($95 / min)</option>
+                                    <option value="Automóviles pequeños">🚗 Automóviles pequeños ($110 / min)</option>
+                                    <option value="Automóviles grandes">🚙 Automóviles grandes ($135 / min)</option>
+                                    <option value="Motocicletas">🏍️ Motocicletas ($65 / min)</option>
+                                    <option value="Bicicletas">🚲 Bicicletas ($25 / min)</option>
                                 </select>
                             </div>
                             <div>
@@ -3436,11 +3432,10 @@ html, body {
                 <div class="form-row">
                     <label class="form-label-saas">Tipo de Vehículo</label>
                     <select id="checkInType" class="form-control-saas" onchange="filterAvailableBaysForCheckIn()">
-                        <option value="Automóvil">Automóvil (Zona A)</option>
-                        <option value="Eléctrico EV">Eléctrico EV (Zona B)</option>
-                        <option value="Motocicleta">Motocicleta (Zona C)</option>
-                        <option value="Camioneta">Camioneta / SUV (Zona D)</option>
-                        <option value="Bicicleta">Bicicleta (Zona E)</option>
+                        <option value="Automóviles pequeños">🚗 Automóviles pequeños (Zona Automóviles pequeños)</option>
+                        <option value="Automóviles grandes">🚙 Automóviles grandes (Zona Automóviles grandes)</option>
+                        <option value="Motocicletas">🏍️ Motocicletas (Zona Motocicletas)</option>
+                        <option value="Bicicletas">🚲 Bicicletas (Zona Bicicletas)</option>
                     </select>
                 </div>
                 <div class="form-row">
@@ -3583,10 +3578,10 @@ html, body {
                 <div>
                     <label class="form-label-saas">Tipo de Vehículo</label>
                     <select id="modalCalcVehicleType" class="form-control-saas" onchange="updateModalMinuteCalculation()">
-                        <option value="Automóvil">🚗 Automóvil ($110/min)</option>
-                        <option value="Motocicleta">🏍️ Motocicleta ($65/min)</option>
-                        <option value="Camioneta">🚙 Camioneta ($135/min)</option>
-                        <option value="Eléctrico EV">⚡ Eléctrico EV ($95/min)</option>
+                        <option value="Automóviles pequeños">🚗 Automóviles pequeños ($110/min)</option>
+                        <option value="Automóviles grandes">🚙 Automóviles grandes ($135/min)</option>
+                        <option value="Motocicletas">🏍️ Motocicletas ($65/min)</option>
+                        <option value="Bicicletas">🚲 Bicicletas ($25/min)</option>
                     </select>
                 </div>
                 <div>
@@ -4797,73 +4792,66 @@ html, body {
 
     // Renderizar Gráficas Dinámicas de Flujo e Ingresos
     function renderAdminCharts(periodTickets) {
-        // 1. Gráfica de Donut: Distribución de Flota y Recaudo por Categoría
+        // 1. Gráfica de Donut: Distribución de Flota y Recaudo por las 4 Zonas Oficiales
         const allTickets = saasState.tickets || [];
         const allSpots = saasState.spots || [];
 
-        let countAuto = 0, countMoto = 0, countBici = 0, countSuv = 0, countEv = 0;
+        let countAP = 0, countAG = 0, countMoto = 0, countBici = 0;
 
         allTickets.forEach(t => {
             const cat = (t.tipoVehiculo || '').toLowerCase();
-            if (cat.includes('auto')) countAuto++;
+            if (cat.includes('pequeñ') || (cat.includes('auto') && !cat.includes('grand'))) countAP++;
+            else if (cat.includes('grand') || cat.includes('camioneta') || cat.includes('suv')) countAG++;
             else if (cat.includes('moto')) countMoto++;
             else if (cat.includes('bici')) countBici++;
-            else if (cat.includes('camioneta') || cat.includes('suv')) countSuv++;
-            else if (cat.includes('eléctrico') || cat.includes('ev')) countEv++;
-            else countAuto++;
+            else countAP++;
         });
 
-        if (countAuto + countMoto + countBici + countSuv + countEv === 0) {
+        if (countAP + countAG + countMoto + countBici === 0) {
             allSpots.forEach(s => {
-                const tipo = (s.tipoPermitido || '').toLowerCase();
-                if (tipo.includes('auto')) countAuto++;
+                const tipo = (s.tipoPermitido || s.zona || '').toLowerCase();
+                if (tipo.includes('pequeñ') || (tipo.includes('auto') && !tipo.includes('grand'))) countAP++;
+                else if (tipo.includes('grand') || tipo.includes('camioneta') || tipo.includes('suv')) countAG++;
                 else if (tipo.includes('moto')) countMoto++;
                 else if (tipo.includes('bici')) countBici++;
-                else if (tipo.includes('camioneta') || tipo.includes('suv')) countSuv++;
-                else if (tipo.includes('eléctrico') || tipo.includes('ev')) countEv++;
             });
         }
 
-        const totalFlota = Math.max(1, countAuto + countMoto + countBici + countSuv + countEv);
-        const pAuto = Math.round((countAuto / totalFlota) * 100);
+        const totalFlota = Math.max(1, countAP + countAG + countMoto + countBici);
+        const pAP = Math.round((countAP / totalFlota) * 100);
+        const pAG = Math.round((countAG / totalFlota) * 100);
         const pMoto = Math.round((countMoto / totalFlota) * 100);
-        const pBici = Math.round((countBici / totalFlota) * 100);
-        const pSuv = Math.round((countSuv / totalFlota) * 100);
-        const pEv = Math.max(0, 100 - (pAuto + pMoto + pBici + pSuv));
+        const pBici = Math.max(0, 100 - (pAP + pAG + pMoto));
 
         const distAuto = document.getElementById('distAutoCount');
-        if (distAuto) distAuto.textContent = `${pAuto}% (${countAuto})`;
+        if (distAuto) distAuto.textContent = `${pAP}% (${countAP})`;
+        const distSuv = document.getElementById('distSuvCount');
+        if (distSuv) distSuv.textContent = `${pAG}% (${countAG})`;
         const distMoto = document.getElementById('distMotoCount');
         if (distMoto) distMoto.textContent = `${pMoto}% (${countMoto})`;
         const distBici = document.getElementById('distBiciCount');
         if (distBici) distBici.textContent = `${pBici}% (${countBici})`;
-        const distSuv = document.getElementById('distSuvCount');
-        if (distSuv) distSuv.textContent = `${pSuv}% (${countSuv})`;
-        const distEv = document.getElementById('distEvCount');
-        if (distEv) distEv.textContent = `${pEv}% (${countEv})`;
 
         // Ajustar arcos SVG del donut (Circunferencia: 2 * PI * 38 ≈ 238.76)
         const C = 238.76;
-        const lenAuto = (pAuto / 100) * C;
+        const lenAP = (pAP / 100) * C;
+        const lenAG = (pAG / 100) * C;
         const lenMoto = (pMoto / 100) * C;
         const lenBici = (pBici / 100) * C;
-        const lenSuv = (pSuv / 100) * C;
-        const lenEv = (pEv / 100) * C;
 
         const donutSvg = document.getElementById('adminFleetDonutSvg');
         if (donutSvg) {
             const circles = donutSvg.querySelectorAll('circle');
-            if (circles.length >= 6) {
-                circles[1].setAttribute('stroke-dasharray', `${lenAuto} ${C}`);
+            if (circles.length >= 5) {
+                circles[1].setAttribute('stroke-dasharray', `${lenAP} ${C}`);
                 circles[1].setAttribute('stroke-dashoffset', '0');
-                circles[2].setAttribute('stroke-dasharray', `${lenMoto} ${C}`);
-                circles[2].setAttribute('stroke-dashoffset', `-${lenAuto}`);
-                circles[3].setAttribute('stroke-dasharray', `${lenBici} ${C}`);
-                circles[3].setAttribute('stroke-dashoffset', `-${lenAuto + lenMoto}`);
-                circles[4].setAttribute('stroke-dasharray', `${lenSuv} ${C}`);
-                circles[4].setAttribute('stroke-dashoffset', `-${lenAuto + lenMoto + lenBici}`);
-                circles[5].setAttribute('stroke-dasharray', `${lenEv} ${C}`);
-                circles[5].setAttribute('stroke-dashoffset', `-${lenAuto + lenMoto + lenBici + lenSuv}`);
+                circles[2].setAttribute('stroke-dasharray', `${lenAG} ${C}`);
+                circles[2].setAttribute('stroke-dashoffset', `-${lenAP}`);
+                circles[3].setAttribute('stroke-dasharray', `${lenMoto} ${C}`);
+                circles[3].setAttribute('stroke-dashoffset', `-${lenAP + lenAG}`);
+                circles[4].setAttribute('stroke-dasharray', `${lenBici} ${C}`);
+                circles[4].setAttribute('stroke-dashoffset', `-${lenAP + lenAG + lenMoto}`);
+                if (circles[5]) circles[5].style.display = 'none';
             }
         }
 
@@ -5429,7 +5417,11 @@ html, body {
         const select = document.getElementById('checkInBay');
         select.innerHTML = '';
 
-        const freeBays = saasState.spots.filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === type);
+        const freeBays = (saasState.spots || []).filter(s => {
+            if (s.estado !== 'DISPONIBLE') return false;
+            return s.tipoPermitido === type || s.zona === type || (s.tipoPermitido || '').toLowerCase().includes(type.toLowerCase());
+        });
+
         if (freeBays.length === 0) {
             select.innerHTML = `<option value="">No hay bahías disponibles para ${type}</option>`;
             return;
@@ -5452,7 +5444,10 @@ html, body {
         if (!typeSelect || !baySelect) return;
 
         const selectedType = typeSelect.value;
-        const available = saasState.spots.filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === selectedType);
+        const available = (saasState.spots || []).filter(s => {
+            if (s.estado !== 'DISPONIBLE') return false;
+            return s.tipoPermitido === selectedType || s.zona === selectedType || (s.tipoPermitido || '').toLowerCase().includes(selectedType.toLowerCase());
+        });
 
         baySelect.innerHTML = '';
         if (available.length === 0) {
@@ -5629,7 +5624,11 @@ html, body {
     let checkOutBaseMinutes = 1;
 
     function calculateStayFee(tipoVehiculo, minutes, mode = 'MINUTE') {
-        const rate = (saasState.rates && saasState.rates.find(r => r.tipoVehiculo === tipoVehiculo)) || {
+        const norm = (tipoVehiculo || '').toLowerCase();
+        const rate = (saasState.rates && saasState.rates.find(r => {
+            const rt = (r.tipoVehiculo || '').toLowerCase();
+            return rt === norm || rt.includes(norm) || norm.includes(rt);
+        })) || {
             tarifaPorMinuto: 110,
             tarifaPorHora: 5800,
             tarifaPlenaDia: 42000,
@@ -6051,10 +6050,14 @@ html, body {
 
         const btns = {
             'ALL': 'catBtnAll',
-            'Automóvil': 'catBtnAuto',
-            'Eléctrico EV': 'catBtnEV',
+            'Automóviles pequeños': 'catBtnAP',
+            'Automóviles grandes': 'catBtnAG',
+            'Motocicletas': 'catBtnMoto',
+            'Bicicletas': 'catBtnBici',
+            'Automóvil': 'catBtnAP',
+            'Camioneta': 'catBtnAG',
             'Motocicleta': 'catBtnMoto',
-            'Camioneta': 'catBtnSUV'
+            'Bicicleta': 'catBtnBici'
         };
 
         Object.entries(btns).forEach(([cat, btnId]) => {
@@ -6077,20 +6080,25 @@ html, body {
 
         let spotsList = saasState.spots || [];
         if (currentClientCategoryFilter !== 'ALL') {
-            spotsList = spotsList.filter(s => s.tipoPermitido === currentClientCategoryFilter);
+            const filter = currentClientCategoryFilter.toLowerCase();
+            spotsList = spotsList.filter(s => {
+                const tipo = (s.tipoPermitido || '').toLowerCase();
+                const zona = (s.zona || '').toLowerCase();
+                return tipo === filter || tipo.includes(filter) || filter.includes(tipo) || zona.includes(filter);
+            });
         }
 
         const countAll = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE').length;
-        const countAuto = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === 'Automóvil').length;
-        const countEV = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === 'Eléctrico EV').length;
-        const countMoto = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === 'Motocicleta').length;
-        const countSUV = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === 'Camioneta').length;
+        const countAP = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('pequeñ') || (s.zona || '').toLowerCase().includes('pequeñ') || s.tipoPermitido === 'Automóvil')).length;
+        const countAG = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('grand') || (s.zona || '').toLowerCase().includes('grand') || s.tipoPermitido === 'Camioneta')).length;
+        const countMoto = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('moto') || (s.zona || '').toLowerCase().includes('moto'))).length;
+        const countBici = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('bici') || (s.zona || '').toLowerCase().includes('bici'))).length;
 
         const elAll = document.getElementById('catCountAll'); if (elAll) elAll.textContent = countAll;
-        const elAuto = document.getElementById('catCountAuto'); if (elAuto) elAuto.textContent = countAuto;
-        const elEV = document.getElementById('catCountEV'); if (elEV) elEV.textContent = countEV;
+        const elAP = document.getElementById('catCountAP'); if (elAP) elAP.textContent = countAP;
+        const elAG = document.getElementById('catCountAG'); if (elAG) elAG.textContent = countAG;
         const elMoto = document.getElementById('catCountMoto'); if (elMoto) elMoto.textContent = countMoto;
-        const elSUV = document.getElementById('catCountSUV'); if (elSUV) elSUV.textContent = countSUV;
+        const elBici = document.getElementById('catCountBici'); if (elBici) elBici.textContent = countBici;
 
         if (spotsList.length === 0) {
             container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:2rem; color:var(--text-muted);">No hay bahías registradas para esta categoría.</div>`;
@@ -6105,7 +6113,8 @@ html, body {
             const stateClass = isAvailable ? 'bay-disponible' : isReserved ? 'bay-reservado' : 'bay-ocupado';
             const isSelected = (selectedClientBayCode === s.codigo);
 
-            const icon = s.tipoPermitido === 'Automóvil' ? '🚗' : s.tipoPermitido === 'Eléctrico EV' ? '⚡' : s.tipoPermitido === 'Motocicleta' ? '🏍️' : '🚙';
+            const tipoLower = (s.tipoPermitido || s.zona || '').toLowerCase();
+            const icon = tipoLower.includes('moto') ? '🏍️' : tipoLower.includes('bici') ? '🚲' : tipoLower.includes('grand') || tipoLower.includes('camioneta') ? '🚙' : '🚗';
             const stateLabel = isAvailable ? 'Libre' : isReserved ? 'Reservado' : 'Ocupado';
 
             return `
@@ -6179,7 +6188,10 @@ html, body {
         if (!typeSelect || !baySelect) return;
 
         const selectedType = typeSelect.value;
-        const available = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && s.tipoPermitido === selectedType);
+        const available = (saasState.spots || []).filter(s => {
+            if (s.estado !== 'DISPONIBLE') return false;
+            return s.tipoPermitido === selectedType || s.zona === selectedType || (s.tipoPermitido || '').toLowerCase().includes(selectedType.toLowerCase());
+        });
 
         baySelect.innerHTML = '';
         if (available.length === 0) {
@@ -6255,9 +6267,18 @@ html, body {
 
         if (!costEl) return;
 
-        const hourlyRates = { 'Automóvil': 5800, 'Eléctrico EV': 5000, 'Motocicleta': 3400, 'Camioneta': 7200 };
-        const dailyRates = { 'Automóvil': 42000, 'Eléctrico EV': 38000, 'Motocicleta': 24000, 'Camioneta': 52000 };
-        const nightRates = { 'Automóvil': 28000, 'Eléctrico EV': 25000, 'Motocicleta': 16000, 'Camioneta': 34000 };
+        const hourlyRates = { 
+            'Automóviles pequeños': 5800, 'Automóviles grandes': 7200, 'Motocicletas': 3400, 'Bicicletas': 1200,
+            'Automóvil': 5800, 'Camioneta': 7200, 'Motocicleta': 3400, 'Bicicleta': 1200 
+        };
+        const dailyRates = { 
+            'Automóviles pequeños': 42000, 'Automóviles grandes': 52000, 'Motocicletas': 24000, 'Bicicletas': 8000,
+            'Automóvil': 42000, 'Camioneta': 52000, 'Motocicleta': 24000, 'Bicicleta': 8000 
+        };
+        const nightRates = { 
+            'Automóviles pequeños': 28000, 'Automóviles grandes': 34000, 'Motocicletas': 16000, 'Bicicletas': 5000,
+            'Automóvil': 28000, 'Camioneta': 34000, 'Motocicleta': 16000, 'Bicicleta': 5000 
+        };
 
         let total = 0;
         if (modality === 'HORAS') {
@@ -6453,13 +6474,10 @@ html, body {
     // Renderizar Matriz 2D de Bahías
     function renderBayMatrix() {
         const zoneConfig = {
-            'Zona A · Estándar': { icon: '🚗', tipo: 'Automóvil' },
-            'Zona B · EV & VIP': { icon: '⚡', tipo: 'Eléctrico EV' },
-            'Zona C · Motos': { icon: '🏍️', tipo: 'Motocicleta' },
-            'Zona D · Camionetas': { icon: '🚙', tipo: 'Camioneta' },
-            'Zona E · Estándar N2': { icon: '🚗', tipo: 'Automóvil' },
-            'Zona F · Flotas S3': { icon: '🚙', tipo: 'Automóvil / Camioneta' },
-            'Zona G · Eco & Bicicletas': { icon: '🚲', tipo: 'Bicicleta' }
+            'Automóviles pequeños': { icon: '🚗', tipo: 'Automóviles pequeños' },
+            'Automóviles grandes': { icon: '🚙', tipo: 'Automóviles grandes' },
+            'Motocicletas': { icon: '🏍️', tipo: 'Motocicletas' },
+            'Bicicletas': { icon: '🚲', tipo: 'Bicicletas' }
         };
 
         const zones = {};
@@ -6470,7 +6488,8 @@ html, body {
         (saasState.spots || []).forEach(s => {
             const zKey = s.zona || 'Zona General';
             if (!zones[zKey]) {
-                const icon = (s.tipoPermitido === 'Motocicleta' ? '🏍️' : (s.tipoPermitido === 'Eléctrico EV' ? '⚡' : (s.tipoPermitido === 'Camioneta' ? '🚙' : (s.tipoPermitido === 'Bicicleta' ? '🚲' : '🚗'))));
+                const tipoLower = (s.tipoPermitido || s.zona || '').toLowerCase();
+                const icon = tipoLower.includes('moto') ? '🏍️' : tipoLower.includes('bici') ? '🚲' : tipoLower.includes('grand') || tipoLower.includes('camioneta') ? '🚙' : '🚗';
                 zones[zKey] = { spots: [], icon: icon, tipo: s.tipoPermitido };
             }
             zones[zKey].spots.push(s);
@@ -6552,7 +6571,14 @@ html, body {
     function renderRatesTable() {
         const tbody = document.getElementById('saasRatesTableBody');
         if (!tbody) return;
-        const sortOrder = { 'Automóvil': 1, 'Motocicleta': 2, 'Camioneta': 3, 'Eléctrico EV': 4 };
+        const sortOrder = { 
+            'Automóviles pequeños': 1, 
+            'Automóviles grandes': 2, 
+            'Motocicletas': 3, 
+            'Bicicletas': 4,
+            'Automóvil': 5, 
+            'Camioneta': 6 
+        };
         const sortedRates = [...(saasState.rates || [])].sort((a,b) => (sortOrder[a.tipoVehiculo] || 99) - (sortOrder[b.tipoVehiculo] || 99));
 
         const role = saasState.currentRole || 'Administrador';

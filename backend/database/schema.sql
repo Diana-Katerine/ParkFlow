@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS `usuarios` (
 -- 2. Tabla de Tarifas
 CREATE TABLE IF NOT EXISTS `tarifas` (
     `id` VARCHAR(50) NOT NULL PRIMARY KEY,
-    `tipo_vehiculo` ENUM('Automóvil', 'Motocicleta', 'Camioneta', 'Eléctrico EV') NOT NULL UNIQUE,
+    `tipo_vehiculo` VARCHAR(100) NOT NULL UNIQUE,
     `tarifa_por_minuto` DECIMAL(10,2) NOT NULL,
     `tarifa_por_hora` DECIMAL(10,2) NOT NULL,
     `tarifa_plena_dia` DECIMAL(10,2) NOT NULL,
@@ -38,7 +38,7 @@ CREATE TABLE IF NOT EXISTS `espacios` (
     `codigo` VARCHAR(20) NOT NULL UNIQUE,
     `nivel` VARCHAR(50) NOT NULL,
     `zona` VARCHAR(100) NOT NULL,
-    `tipo_permitido` ENUM('Automóvil', 'Motocicleta', 'Camioneta', 'Eléctrico EV') NOT NULL,
+    `tipo_permitido` VARCHAR(100) NOT NULL,
     `estado` ENUM('DISPONIBLE', 'OCUPADO', 'RESERVADO', 'BLOQUEADO') NOT NULL DEFAULT 'DISPONIBLE',
     `es_vip` TINYINT(1) NOT NULL DEFAULT 0,
     `potencia_ev_kw` DECIMAL(5,2) NULL,
@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `tickets` (
     `id` VARCHAR(50) NOT NULL PRIMARY KEY,
     `ticket_codigo` VARCHAR(50) NOT NULL UNIQUE,
     `placa` VARCHAR(20) NOT NULL,
-    `tipo_vehiculo` ENUM('Automóvil', 'Motocicleta', 'Camioneta', 'Eléctrico EV') NOT NULL,
+    `tipo_vehiculo` VARCHAR(100) NOT NULL,
     `spot_codigo` VARCHAR(20) NOT NULL,
     `fecha_ingreso` VARCHAR(60) NOT NULL,
     `fecha_salida` VARCHAR(60) NULL,

@@ -70,12 +70,12 @@ try {
         $stmtUser->execute($u);
     }
 
-    // 4. Sembrar Matriz Tarifaria Oficial (4 Categorías Comerciales)
+    // 4. Sembrar Matriz Tarifaria Oficial (4 Zonas Solicitadas)
     $rates = [
-        ['RATE-AUTO', 'Automóvil', 110.00, 5800.00, 42000.00, 5, '2026-10-05 09:00'],
-        ['RATE-MOTO', 'Motocicleta', 65.00, 3400.00, 24000.00, 5, '2026-10-05 09:00'],
-        ['RATE-SUV', 'Camioneta', 135.00, 7200.00, 52000.00, 5, '2026-10-05 09:00'],
-        ['RATE-EV', 'Eléctrico EV', 95.00, 5000.00, 38000.00, 10, '2026-10-05 09:00']
+        ['RATE-AP', 'Automóviles pequeños', 110.00, 5800.00, 42000.00, 5, '2026-10-25 09:00'],
+        ['RATE-AG', 'Automóviles grandes', 135.00, 7200.00, 52000.00, 5, '2026-10-25 09:00'],
+        ['RATE-MOTO', 'Motocicletas', 65.00, 3400.00, 24000.00, 5, '2026-10-25 09:00'],
+        ['RATE-BICI', 'Bicicletas', 25.00, 1200.00, 8000.00, 10, '2026-10-25 09:00']
     ];
 
     $stmtRate = $pdo->prepare("INSERT INTO `tarifas` (`id`, `tipo_vehiculo`, `tarifa_por_minuto`, `tarifa_por_hora`, `tarifa_plena_dia`, `fraccion_gracia_min`, `actualizado_en`) 
@@ -85,122 +85,56 @@ try {
         $stmtRate->execute($r);
     }
 
-    // 5. Sembrar Espacios / Bahías (Exactamente 24 Bahías en 4 Zonas de 6 cupos)
-    $spots = [
-        // Zona A · Estándar (Automóvil) - Nivel S1
-        ['SP-A01', 'A-01', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'OCUPADO', 0, null, 99.9, 'BGT-902', 'TCK-2026-8841'],
-        ['SP-A02', 'A-02', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-A03', 'A-03', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'OCUPADO', 0, null, 99.7, 'MDE-314', 'TCK-2026-8839'],
-        ['SP-A04', 'A-04', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-A05', 'A-05', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.6, null, null],
-        ['SP-A06', 'A-06', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'BLOQUEADO', 0, null, 84.2, null, null],
+    // 5. Sembrar Espacios / Bahías (130 Bahías distribuidas en las 4 Zonas)
+    $spots = [];
 
-        // Zona B · EV & VIP (Eléctrico EV) - Nivel S1
-        ['SP-B01', 'B-01', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'OCUPADO', 1, 22.0, 99.9, 'KLM-456', 'TCK-2026-8842'],
-        ['SP-B02', 'B-02', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 22.0, 99.9, null, null],
-        ['SP-B03', 'B-03', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 0, 11.4, 99.8, null, null],
-        ['SP-B04', 'B-04', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'OCUPADO', 1, 50.0, 99.9, 'EVX-108', 'TCK-2026-8844'],
-        ['SP-B05', 'B-05', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 0, 11.4, 99.7, null, null],
-        ['SP-B06', 'B-06', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 22.0, 99.9, null, null],
+    // Zona 1: Automóviles pequeños (40 bahías: AP-01 a AP-40)
+    for ($i = 1; $i <= 40; $i++) {
+        $pad = str_pad($i, 2, '0', STR_PAD_LEFT);
+        $code = "AP-{$pad}";
+        $state = 'DISPONIBLE';
+        $placa = null;
+        $tck = null;
+        if ($code === 'AP-01') { $state = 'OCUPADO'; $placa = 'BGT-902'; $tck = 'TCK-2026-8841'; }
+        elseif ($code === 'AP-03') { $state = 'OCUPADO'; $placa = 'MDE-314'; $tck = 'TCK-2026-8839'; }
+        elseif ($code === 'AP-08') { $state = 'BLOQUEADO'; }
+        $spots[] = ["SP-AP{$pad}", $code, 'Nivel S1', 'Automóviles pequeños', 'Automóviles pequeños', $state, ($i <= 4 ? 1 : 0), null, round(99.4 + sin($i)*0.4, 1), $placa, $tck];
+    }
 
-        // Zona C · Motos (Motocicleta) - Nivel S1
-        ['SP-C01', 'C-01', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'OCUPADO', 0, null, 99.5, 'XRT-82A', 'TCK-2026-8843'],
-        ['SP-C02', 'C-02', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-C03', 'C-03', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-C04', 'C-04', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-C05', 'C-05', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'OCUPADO', 0, null, 99.6, 'QWE-45F', 'TCK-2026-8845'],
-        ['SP-C06', 'C-06', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
+    // Zona 2: Automóviles grandes (30 bahías: AG-01 a AG-30)
+    for ($i = 1; $i <= 30; $i++) {
+        $pad = str_pad($i, 2, '0', STR_PAD_LEFT);
+        $code = "AG-{$pad}";
+        $state = 'DISPONIBLE';
+        $placa = null;
+        $tck = null;
+        if ($code === 'AG-01') { $state = 'OCUPADO'; $placa = 'SUV-779'; $tck = 'TCK-2026-8840'; }
+        elseif ($code === 'AG-05') { $state = 'BLOQUEADO'; }
+        $spots[] = ["SP-AG{$pad}", $code, 'Nivel S2', 'Automóviles grandes', 'Automóviles grandes', $state, ($i <= 3 ? 1 : 0), null, round(99.5 + cos($i)*0.3, 1), $placa, $tck];
+    }
 
-        // Zona D · Camionetas (Camioneta / SUV) - Nivel S2
-        ['SP-D01', 'D-01', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'OCUPADO', 1, null, 99.9, 'SUV-779', 'TCK-2026-8840'],
-        ['SP-D02', 'D-02', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-D03', 'D-03', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-D04', 'D-04', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-D05', 'D-05', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'BLOQUEADO', 0, null, 78.5, null, null],
-        ['SP-D06', 'D-06', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.8, null, null],
+    // Zona 3: Motocicletas (35 bahías: M-01 a M-35)
+    for ($i = 1; $i <= 35; $i++) {
+        $pad = str_pad($i, 2, '0', STR_PAD_LEFT);
+        $code = "M-{$pad}";
+        $state = 'DISPONIBLE';
+        $placa = null;
+        $tck = null;
+        if ($code === 'M-01') { $state = 'OCUPADO'; $placa = 'XRT-82A'; $tck = 'TCK-2026-8843'; }
+        elseif ($code === 'M-05') { $state = 'OCUPADO'; $placa = 'QWE-45F'; $tck = 'TCK-2026-8845'; }
+        $spots[] = ["SP-MO{$pad}", $code, 'Nivel S1', 'Motocicletas', 'Motocicletas', $state, 0, null, round(99.6 + sin($i*2)*0.3, 1), $placa, $tck];
+    }
 
-        // Zona A Extendida (A-07 a A-16)
-        ['SP-A07', 'A-07', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-A08', 'A-08', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-A09', 'A-09', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-A10', 'A-10', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-A11', 'A-11', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-A12', 'A-12', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.6, null, null],
-        ['SP-A13', 'A-13', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-A14', 'A-14', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-A15', 'A-15', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-A16', 'A-16', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-
-        // Zona B Extendida (B-07 a B-14)
-        ['SP-B07', 'B-07', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 22.0, 99.9, null, null],
-        ['SP-B08', 'B-08', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 0, 11.4, 99.8, null, null],
-        ['SP-B09', 'B-09', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 50.0, 99.9, null, null],
-        ['SP-B10', 'B-10', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 0, 22.0, 99.7, null, null],
-        ['SP-B11', 'B-11', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 22.0, 99.9, null, null],
-        ['SP-B12', 'B-12', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 0, 11.4, 99.8, null, null],
-        ['SP-B13', 'B-13', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 50.0, 99.9, null, null],
-        ['SP-B14', 'B-14', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 22.0, 99.8, null, null],
-
-        // Zona C Extendida (C-07 a C-16)
-        ['SP-C07', 'C-07', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-C08', 'C-08', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-C09', 'C-09', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-C10', 'C-10', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-C11', 'C-11', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-C12', 'C-12', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-C13', 'C-13', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-C14', 'C-14', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-C15', 'C-15', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-C16', 'C-16', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
-
-        // Zona D Extendida (D-07 a D-14)
-        ['SP-D07', 'D-07', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 1, null, 99.9, null, null],
-        ['SP-D08', 'D-08', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-D09', 'D-09', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-D10', 'D-10', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 1, null, 99.9, null, null],
-        ['SP-D11', 'D-11', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-D12', 'D-12', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-D13', 'D-13', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-D14', 'D-14', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 1, null, 99.8, null, null],
-
-        // Zona E: Estándar N2 (E-01 a E-12)
-        ['SP-E01', 'E-01', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-E02', 'E-02', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-E03', 'E-03', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-E04', 'E-04', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-E05', 'E-05', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-E06', 'E-06', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-E07', 'E-07', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-E08', 'E-08', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-E09', 'E-09', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-E10', 'E-10', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-E11', 'E-11', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-E12', 'E-12', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-
-        // Zona F: Flotas S3 (F-01 a F-12)
-        ['SP-F01', 'F-01', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-F02', 'F-02', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-F03', 'F-03', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-F04', 'F-04', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-F05', 'F-05', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-F06', 'F-06', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-F07', 'F-07', 'Nivel S3', 'Zona F · Flotas S3', 'Camioneta', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-F08', 'F-08', 'Nivel S3', 'Zona F · Flotas S3', 'Camioneta', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-F09', 'F-09', 'Nivel S3', 'Zona F · Flotas S3', 'Camioneta', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-F10', 'F-10', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-F11', 'F-11', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-F12', 'F-12', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
-
-        // Zona G: Eco & Bicicletas (G-01 a G-08)
-        ['SP-G01', 'G-01', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-G02', 'G-02', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-G03', 'G-03', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-G04', 'G-04', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-G05', 'G-05', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
-        ['SP-G06', 'G-06', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
-        ['SP-G07', 'G-07', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.7, null, null],
-        ['SP-G08', 'G-08', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
-    ];
+    // Zona 4: Bicicletas (25 bahías: B-01 a B-25)
+    for ($i = 1; $i <= 25; $i++) {
+        $pad = str_pad($i, 2, '0', STR_PAD_LEFT);
+        $code = "B-{$pad}";
+        $state = 'DISPONIBLE';
+        $placa = null;
+        $tck = null;
+        if ($code === 'B-02') { $state = 'OCUPADO'; $placa = 'BIC-012'; $tck = 'TCK-2026-8846'; }
+        $spots[] = ["SP-BI{$pad}", $code, 'Nivel S1', 'Bicicletas', 'Bicicletas', $state, 0, null, round(99.7 + cos($i*3)*0.2, 1), $placa, $tck];
+    }
 
     $stmtSpot = $pdo->prepare("INSERT INTO `espacios` (`id`, `codigo`, `nivel`, `zona`, `tipo_permitido`, `estado`, `es_vip`, `potencia_ev_kw`, `salud_sensor`, `placa_actual`, `ticket_actual_id`) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -216,14 +150,13 @@ try {
     };
 
     $tickets = [
-        // 7 Tickets Activos (En Patio, exactamente correspondientes a las bahías ocupadas)
-        ['LOG-1001', 'TCK-2026-8839', 'MDE-314', 'Automóvil', 'A-03', $isoAgo(1005), null, null, null, null, 'ACTIVO', 'Mateo Restrepo', null, 1, 'Carlos E. Giraldo'],
-        ['LOG-1002', 'TCK-2026-8840', 'SUV-779', 'Camioneta', 'D-01', $isoAgo(260), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Inversiones Del Norte'],
-        ['LOG-1003', 'TCK-2026-8841', 'BGT-902', 'Automóvil', 'A-01', $isoAgo(135), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Laura Castellanos'],
-        ['LOG-1004', 'TCK-2026-8842', 'KLM-456', 'Eléctrico EV', 'B-01', $isoAgo(82), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Diana K. Pérez'],
-        ['LOG-1005', 'TCK-2026-8843', 'XRT-82A', 'Motocicleta', 'C-01', $isoAgo(47), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Santiago Ríos'],
-        ['LOG-1006', 'TCK-2026-8844', 'EVX-108', 'Eléctrico EV', 'B-04', $isoAgo(29), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Valeria Duque'],
-        ['LOG-1007', 'TCK-2026-8845', 'QWE-45F', 'Motocicleta', 'C-05', $isoAgo(18), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Andrés Felipe Mora'],
+        // Tickets Activos en Patio
+        ['LOG-1001', 'TCK-2026-8839', 'MDE-314', 'Automóviles pequeños', 'AP-03', $isoAgo(1005), null, null, null, null, 'ACTIVO', 'Mateo Restrepo', null, 1, 'Carlos E. Giraldo'],
+        ['LOG-1002', 'TCK-2026-8840', 'SUV-779', 'Automóviles grandes',   'AG-01', $isoAgo(260), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Inversiones Del Norte'],
+        ['LOG-1003', 'TCK-2026-8841', 'BGT-902', 'Automóviles pequeños', 'AP-01', $isoAgo(135), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Laura Castellanos'],
+        ['LOG-1004', 'TCK-2026-8843', 'XRT-82A', 'Motocicletas',         'M-01',  $isoAgo(47), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Santiago Ríos'],
+        ['LOG-1005', 'TCK-2026-8845', 'QWE-45F', 'Motocicletas',         'M-05',  $isoAgo(18), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Andrés Felipe Mora'],
+        ['LOG-1006', 'TCK-2026-8846', 'BIC-012', 'Bicicletas',           'B-02',  $isoAgo(12), null, null, null, null, 'ACTIVO', 'Camila Mendoza', null, 0, 'Usuario EcoBici'],
 
         // Finalizados - HOY (Últimas 24h) -> 4 Tickets Finalizados
         ['LOG-0996', 'TCK-2026-8834', 'HJK-512', 'Automóvil', 'A-02', $isoAgo(210), $isoAgo(90), 120, 11600.00, 'QR Digital', 'FINALIZADO', 'Camila Mendoza', 'Camila Mendoza', 0, 'Patricia Londoño'],
