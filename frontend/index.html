@@ -155,22 +155,76 @@
 
                 <!-- Panel de Recuperación Segura de Contraseña -->
                 <div class="auth-recovery-card" id="authRecoveryCard">
-                    <div class="recovery-card-header">
-                        <div class="recovery-badge-icon">🔑</div>
-                        <div class="recovery-text-wrap">
-                            <div class="recovery-title">Recuperar Contraseña</div>
-                            <div class="recovery-desc">Ingresa tu correo o usuario para restablecer tus credenciales de acceso:</div>
+                    <!-- Paso 1: Solicitar Código -->
+                    <div id="recoveryStep1">
+                        <div class="recovery-card-header">
+                            <div class="recovery-badge-icon">🔑</div>
+                            <div class="recovery-text-wrap">
+                                <div class="recovery-title">Recuperar Contraseña</div>
+                                <div class="recovery-desc">Ingresa tu correo o usuario para generar tu código seguro de acceso:</div>
+                            </div>
+                        </div>
+
+                        <div class="recovery-input-group">
+                            <div class="auth-input-wrapper recovery-input-wrapper">
+                                <span class="input-leading-icon">✉️</span>
+                                <input type="email" id="authRecoveryEmail" class="auth-text-input" placeholder="Correo registrado (ej: admin@parkpulse.co)..." onkeydown="if(event.key==='Enter') executePasswordRecovery()">
+                            </div>
+                            <button type="button" class="btn-recovery-submit" id="btnRecoverySubmit" onclick="executePasswordRecovery()">
+                                Recuperar →
+                            </button>
+                        </div>
+
+                        <div class="recovery-switch-row">
+                            <a href="javascript:void(0)" onclick="showRecoveryStep(2)" class="recovery-sublink">
+                                ¿Ya tienes tu código de seguridad? <strong>Ingresar código aquí →</strong>
+                            </a>
                         </div>
                     </div>
 
-                    <div class="recovery-input-group">
-                        <div class="auth-input-wrapper recovery-input-wrapper">
-                            <span class="input-leading-icon">✉️</span>
-                            <input type="email" id="authRecoveryEmail" class="auth-text-input" placeholder="Correo registrado (ej: admin@parkpulse.co)..." onkeydown="if(event.key==='Enter') executePasswordRecovery()">
+                    <!-- Paso 2: Ingresar Código y Nueva Contraseña -->
+                    <div id="recoveryStep2" style="display:none;">
+                        <div class="recovery-card-header">
+                            <div class="recovery-badge-icon">🔐</div>
+                            <div class="recovery-text-wrap">
+                                <div class="recovery-step-badge">PASO 2 DE 2 · VALIDACIÓN DE CÓDIGO</div>
+                                <div class="recovery-title">Ingresa tu Código y Nueva Contraseña</div>
+                                <div class="recovery-desc">Escribe el código recibido y tu nueva contraseña para ingresar:</div>
+                            </div>
                         </div>
-                        <button type="button" class="btn-recovery-submit" id="btnRecoverySubmit" onclick="executePasswordRecovery()">
-                            Recuperar →
+
+                        <div class="auth-field" style="margin-bottom:0.5rem;">
+                            <label class="auth-field-label" for="resetInputCode">
+                                <span>Código de Seguridad (6 dígitos)</span>
+                                <span class="field-hint-text" id="resetCodeHint">Ej: 67563D</span>
+                            </label>
+                            <div class="auth-input-wrapper">
+                                <span class="input-leading-icon">🏷️</span>
+                                <input type="text" id="resetInputCode" class="auth-text-input" placeholder="Ingresa el código (ej: 67563D)..." maxlength="12" style="letter-spacing:0.1em; font-weight:700; text-transform:uppercase;">
+                            </div>
+                        </div>
+
+                        <div class="auth-field" style="margin-bottom:0.5rem;">
+                            <label class="auth-field-label" for="resetInputNewPass">
+                                <span>Nueva Contraseña Segura</span>
+                                <span class="field-hint-text">Mínimo 5 caracteres</span>
+                            </label>
+                            <div class="auth-input-wrapper">
+                                <span class="input-leading-icon">🔒</span>
+                                <input type="password" id="resetInputNewPass" class="auth-text-input" placeholder="Escribe tu nueva contraseña..." autocomplete="new-password">
+                                <button type="button" class="btn-toggle-eye" onclick="toggleResetPassVisibility()" title="Mostrar u ocultar">👁️</button>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary btn-reset-submit" id="btnResetSubmit" onclick="executePasswordReset()" style="width:100%; margin-top:0.4rem;">
+                            🚀 Restablecer Contraseña e Iniciar Sesión →
                         </button>
+
+                        <div class="recovery-switch-row" style="margin-top:0.5rem;">
+                            <a href="javascript:void(0)" onclick="showRecoveryStep(1)" class="recovery-sublink">
+                                ← Volver a solicitar otro código
+                            </a>
+                        </div>
                     </div>
 
                     <div id="recoveryFeedback" class="recovery-feedback-box" style="display:none;"></div>

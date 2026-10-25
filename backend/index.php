@@ -1689,6 +1689,39 @@ html, body {
     border: 1px solid rgba(244, 63, 94, 0.35);
     color: #fca5a5;
 }
+.recovery-switch-row {
+    margin-top: 0.45rem;
+    text-align: center;
+}
+.recovery-sublink {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.recovery-sublink strong {
+    color: var(--primary);
+}
+.recovery-sublink:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+.recovery-step-badge {
+    font-size: 0.58rem;
+    color: var(--primary);
+    background: rgba(0, 245, 255, 0.12);
+    border: 1px solid rgba(0, 245, 255, 0.25);
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    margin-bottom: 0.2rem;
+}
+.btn-reset-submit {
+    box-shadow: 0 4px 16px rgba(0, 245, 255, 0.3);
+}
 
 /* Responsive Breakpoints for Auth Screen */
 @media (max-width: 860px) {
@@ -1958,22 +1991,76 @@ html, body {
 
                 <!-- Panel de Recuperación Segura de Contraseña -->
                 <div class="auth-recovery-card" id="authRecoveryCard">
-                    <div class="recovery-card-header">
-                        <div class="recovery-badge-icon">🔑</div>
-                        <div class="recovery-text-wrap">
-                            <div class="recovery-title">Recuperar Contraseña</div>
-                            <div class="recovery-desc">Ingresa tu correo o usuario para restablecer tus credenciales de acceso:</div>
+                    <!-- Paso 1: Solicitar Código -->
+                    <div id="recoveryStep1">
+                        <div class="recovery-card-header">
+                            <div class="recovery-badge-icon">🔑</div>
+                            <div class="recovery-text-wrap">
+                                <div class="recovery-title">Recuperar Contraseña</div>
+                                <div class="recovery-desc">Ingresa tu correo o usuario para generar tu código seguro de acceso:</div>
+                            </div>
+                        </div>
+
+                        <div class="recovery-input-group">
+                            <div class="auth-input-wrapper recovery-input-wrapper">
+                                <span class="input-leading-icon">✉️</span>
+                                <input type="email" id="authRecoveryEmail" class="auth-text-input" placeholder="Correo registrado (ej: admin@parkpulse.co)..." onkeydown="if(event.key==='Enter') executePasswordRecovery()">
+                            </div>
+                            <button type="button" class="btn-recovery-submit" id="btnRecoverySubmit" onclick="executePasswordRecovery()">
+                                Recuperar →
+                            </button>
+                        </div>
+
+                        <div class="recovery-switch-row">
+                            <a href="javascript:void(0)" onclick="showRecoveryStep(2)" class="recovery-sublink">
+                                ¿Ya tienes tu código de seguridad? <strong>Ingresar código aquí →</strong>
+                            </a>
                         </div>
                     </div>
 
-                    <div class="recovery-input-group">
-                        <div class="auth-input-wrapper recovery-input-wrapper">
-                            <span class="input-leading-icon">✉️</span>
-                            <input type="email" id="authRecoveryEmail" class="auth-text-input" placeholder="Correo registrado (ej: admin@parkpulse.co)..." onkeydown="if(event.key==='Enter') executePasswordRecovery()">
+                    <!-- Paso 2: Ingresar Código y Nueva Contraseña -->
+                    <div id="recoveryStep2" style="display:none;">
+                        <div class="recovery-card-header">
+                            <div class="recovery-badge-icon">🔐</div>
+                            <div class="recovery-text-wrap">
+                                <div class="recovery-step-badge">PASO 2 DE 2 · VALIDACIÓN DE CÓDIGO</div>
+                                <div class="recovery-title">Ingresa tu Código y Nueva Contraseña</div>
+                                <div class="recovery-desc">Escribe el código recibido y tu nueva contraseña para ingresar:</div>
+                            </div>
                         </div>
-                        <button type="button" class="btn-recovery-submit" id="btnRecoverySubmit" onclick="executePasswordRecovery()">
-                            Recuperar →
+
+                        <div class="auth-field" style="margin-bottom:0.5rem;">
+                            <label class="auth-field-label" for="resetInputCode">
+                                <span>Código de Seguridad (6 dígitos)</span>
+                                <span class="field-hint-text" id="resetCodeHint">Ej: 67563D</span>
+                            </label>
+                            <div class="auth-input-wrapper">
+                                <span class="input-leading-icon">🏷️</span>
+                                <input type="text" id="resetInputCode" class="auth-text-input" placeholder="Ingresa el código (ej: 67563D)..." maxlength="12" style="letter-spacing:0.1em; font-weight:700; text-transform:uppercase;">
+                            </div>
+                        </div>
+
+                        <div class="auth-field" style="margin-bottom:0.5rem;">
+                            <label class="auth-field-label" for="resetInputNewPass">
+                                <span>Nueva Contraseña Segura</span>
+                                <span class="field-hint-text">Mínimo 5 caracteres</span>
+                            </label>
+                            <div class="auth-input-wrapper">
+                                <span class="input-leading-icon">🔒</span>
+                                <input type="password" id="resetInputNewPass" class="auth-text-input" placeholder="Escribe tu nueva contraseña..." autocomplete="new-password">
+                                <button type="button" class="btn-toggle-eye" onclick="toggleResetPassVisibility()" title="Mostrar u ocultar">👁️</button>
+                            </div>
+                        </div>
+
+                        <button type="button" class="btn btn-primary btn-reset-submit" id="btnResetSubmit" onclick="executePasswordReset()" style="width:100%; margin-top:0.4rem;">
+                            🚀 Restablecer Contraseña e Iniciar Sesión →
                         </button>
+
+                        <div class="recovery-switch-row" style="margin-top:0.5rem;">
+                            <a href="javascript:void(0)" onclick="showRecoveryStep(1)" class="recovery-sublink">
+                                ← Volver a solicitar otro código
+                            </a>
+                        </div>
                     </div>
 
                     <div id="recoveryFeedback" class="recovery-feedback-box" style="display:none;"></div>
@@ -3837,6 +3924,38 @@ html, body {
         }
     }
 
+    let activeRecoveryEmail = '';
+
+    function showRecoveryStep(step) {
+        const step1 = document.getElementById('recoveryStep1');
+        const step2 = document.getElementById('recoveryStep2');
+        const box = document.getElementById('recoveryFeedback');
+        if (box) box.style.display = 'none';
+
+        if (step === 2) {
+            if (step1) step1.style.display = 'none';
+            if (step2) step2.style.display = 'block';
+            const codeInp = document.getElementById('resetInputCode');
+            const passInp = document.getElementById('resetInputNewPass');
+            if (codeInp && !codeInp.value) {
+                codeInp.focus();
+            } else if (passInp) {
+                passInp.focus();
+            }
+        } else {
+            if (step2) step2.style.display = 'none';
+            if (step1) step1.style.display = 'block';
+            const emailInp = document.getElementById('authRecoveryEmail');
+            if (emailInp) emailInp.focus();
+        }
+    }
+
+    function toggleResetPassVisibility() {
+        const passInput = document.getElementById('resetInputNewPass');
+        if (!passInput) return;
+        passInput.type = passInput.type === 'password' ? 'text' : 'password';
+    }
+
     async function executePasswordRecovery() {
         const inp = document.getElementById('authRecoveryEmail');
         const btn = document.getElementById('btnRecoverySubmit');
@@ -3856,7 +3975,7 @@ html, body {
         const origBtnText = btn ? btn.innerHTML : '';
         if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '<span>⏳ Enviando...</span>';
+            btn.innerHTML = '<span>⏳ Generando...</span>';
         }
         if (box) box.style.display = 'none';
 
@@ -3873,15 +3992,34 @@ html, body {
 
             const json = await res.json();
 
-            if (box) {
-                box.style.display = 'block';
-                if (res.ok && json.success && json.data) {
+            if (res.ok && json.success && json.data) {
+                activeRecoveryEmail = json.data.email || email;
+                
+                // Prellenar código en el Paso 2
+                const codeInp = document.getElementById('resetInputCode');
+                const codeHint = document.getElementById('resetCodeHint');
+                if (codeInp) codeInp.value = json.data.codigo_seguridad;
+                if (codeHint) codeHint.innerText = 'Generado: ' + json.data.codigo_seguridad;
+
+                if (box) {
+                    box.style.display = 'block';
                     box.className = 'recovery-feedback-box success';
-                    box.innerHTML = `✅ <strong>Solicitud procesada:</strong> Se generó código de verificación para <strong>${json.data.nombre}</strong> (${json.data.rol}).<br>` +
-                        `<span style="display:inline-block; margin-top:4px; padding:2px 8px; background:rgba(0,245,255,0.18); border-radius:4px; font-weight:bold; color:#00f5ff;">Código de Seguridad: ${json.data.codigo_seguridad}</span><br>` +
-                        `<small style="color:var(--text-muted); display:block; margin-top:4px;">${json.data.instrucciones}</small>`;
-                    if (inp) inp.value = '';
-                } else {
+                    box.innerHTML = `✅ <strong>Código generado:</strong> <span style="font-size:1.1em; color:#00f5ff; font-weight:bold; letter-spacing:0.1em;">${json.data.codigo_seguridad}</span> para <strong>${json.data.nombre}</strong> (${json.data.rol}).<br>` +
+                        `<small style="color:var(--text-muted);">Cargando formulario de validación...</small>`;
+                }
+
+                // Transición automática al Paso 2 después de 800ms
+                setTimeout(() => {
+                    showRecoveryStep(2);
+                    if (box) {
+                        box.style.display = 'block';
+                        box.className = 'recovery-feedback-box success';
+                        box.innerHTML = `✅ Código <strong>${json.data.codigo_seguridad}</strong> verificado. Ingresa ahora tu nueva contraseña para acceder:`;
+                    }
+                }, 900);
+            } else {
+                if (box) {
+                    box.style.display = 'block';
                     box.className = 'recovery-feedback-box error';
                     box.innerHTML = '❌ ' + (json.message || 'No fue posible procesar la recuperación de contraseña.');
                 }
@@ -3897,6 +4035,98 @@ html, body {
             if (btn) {
                 btn.disabled = false;
                 btn.innerHTML = origBtnText;
+            }
+        }
+    }
+
+    async function executePasswordReset() {
+        const codeInp = document.getElementById('resetInputCode');
+        const passInp = document.getElementById('resetInputNewPass');
+        const btn = document.getElementById('btnResetSubmit');
+        const box = document.getElementById('recoveryFeedback');
+
+        const code = codeInp ? codeInp.value.trim().toUpperCase() : '';
+        const newPass = passInp ? passInp.value.trim() : '';
+
+        // Determinar correo a restablecer
+        let email = activeRecoveryEmail;
+        if (!email) {
+            const recoveryInp = document.getElementById('authRecoveryEmail');
+            const mainEmailInp = document.getElementById('authInputEmail');
+            email = (recoveryInp && recoveryInp.value.trim()) || (mainEmailInp && mainEmailInp.value.trim()) || 'admin@parkpulse.co';
+        }
+
+        if (!code) {
+            if (box) {
+                box.style.display = 'block';
+                box.className = 'recovery-feedback-box error';
+                box.innerHTML = '⚠️ Por favor escribe el código de seguridad recibido.';
+            }
+            if (codeInp) codeInp.focus();
+            return;
+        }
+
+        if (!newPass || newPass.length < 5) {
+            if (box) {
+                box.style.display = 'block';
+                box.className = 'recovery-feedback-box error';
+                box.innerHTML = '⚠️ La nueva contraseña debe tener mínimo 5 caracteres.';
+            }
+            if (passInp) passInp.focus();
+            return;
+        }
+
+        const origText = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳ Validando y Actualizando...</span>';
+        }
+
+        try {
+            const endpoint = API_BASE + '/auth.php';
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'reset_password',
+                    email: email,
+                    codigo: code,
+                    nueva_password: newPass
+                })
+            });
+
+            const json = await res.json();
+
+            if (res.ok && json.success && json.data) {
+                if (box) {
+                    box.style.display = 'block';
+                    box.className = 'recovery-feedback-box success';
+                    box.innerHTML = `🎉 <strong>¡Éxito!</strong> Contraseña actualizada correctamente. Iniciando sesión...`;
+                }
+
+                // Iniciar sesión inmediatamente con la cuenta recuperada
+                setTimeout(() => {
+                    loginUserSuccess(json.data);
+                    showRbacToast(`¡Contraseña restablecida con éxito! Bienvenido/a <strong>${json.data.nombre}</strong>.`, false);
+                }, 800);
+            } else {
+                if (box) {
+                    box.style.display = 'block';
+                    box.className = 'recovery-feedback-box error';
+                    box.innerHTML = '❌ ' + (json.message || 'Código incorrecto o expirado.');
+                }
+            }
+        } catch (err) {
+            console.error('Error al restablecer contraseña:', err);
+            if (box) {
+                box.style.display = 'block';
+                box.className = 'recovery-feedback-box error';
+                box.innerHTML = '❌ Error de comunicación con el servidor MySQL.';
+            }
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origText;
             }
         }
     }
@@ -4028,7 +4258,10 @@ html, body {
     // Exponer funciones globales al objeto window para llamadas inline
     window.syncRoleSelection = syncRoleSelection;
     window.focusRecoveryField = focusRecoveryField;
+    window.showRecoveryStep = showRecoveryStep;
+    window.toggleResetPassVisibility = toggleResetPassVisibility;
     window.executePasswordRecovery = executePasswordRecovery;
+    window.executePasswordReset = executePasswordReset;
     window.performServerAuth = performServerAuth;
     window.showAuthError = showAuthError;
     window.toggleAuthPasswordVisibility = toggleAuthPasswordVisibility;

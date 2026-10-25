@@ -1679,6 +1679,39 @@ html, body {
     border: 1px solid rgba(244, 63, 94, 0.35);
     color: #fca5a5;
 }
+.recovery-switch-row {
+    margin-top: 0.45rem;
+    text-align: center;
+}
+.recovery-sublink {
+    font-size: 0.68rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.recovery-sublink strong {
+    color: var(--primary);
+}
+.recovery-sublink:hover {
+    color: var(--primary);
+    text-decoration: underline;
+}
+.recovery-step-badge {
+    font-size: 0.58rem;
+    color: var(--primary);
+    background: rgba(0, 245, 255, 0.12);
+    border: 1px solid rgba(0, 245, 255, 0.25);
+    border-radius: 4px;
+    padding: 0.1rem 0.4rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    display: inline-block;
+    margin-bottom: 0.2rem;
+}
+.btn-reset-submit {
+    box-shadow: 0 4px 16px rgba(0, 245, 255, 0.3);
+}
 
 /* Responsive Breakpoints for Auth Screen */
 @media (max-width: 860px) {

@@ -188,6 +188,14 @@ if ($method === 'POST') {
         $secCode = strtoupper(bin2hex(random_bytes(3))); // Ej: 'A7B2C9'
         $resetToken = 'PF-RST-' . date('YmdHis') . '-' . bin2hex(random_bytes(4));
 
+        // Persistir código de seguridad con expiración de 30 minutos en MySQL
+        try {
+            $updStmt = $pdo->prepare("UPDATE `usuarios` SET `reset_code` = ?, `reset_expiry` = DATE_ADD(NOW(), INTERVAL 30 MINUTE) WHERE `id` = ?");
+            $updStmt->execute([$secCode, $user['id']]);
+        } catch (Exception $e) {
+            // Continuar incluso si la columna no existiera
+        }
+
         // Registrar en bitácora de auditoría
         logAuthAudit($pdo, $user['email'], $user['rol'], 'SOLICITUD_RECUPERACION', "Generado código de recuperación: $secCode (Token: $resetToken)", 'EXITOSO_200');
 
@@ -199,8 +207,78 @@ if ($method === 'POST') {
             'rol'             => $user['rol'],
             'codigo_seguridad'=> $secCode,
             'token'           => $resetToken,
-            'instrucciones'   => "Se ha generado el código seguro $secCode para la cuenta de " . $user['nombre'] . ". Comunícate con la administración de ParkFlow o utiliza este código para validar tu identidad."
+            'instrucciones'   => "Ingresa este código en el campo de verificación inferior junto con tu nueva contraseña para ingresar inmediatamente."
         ], $detailMsg);
+    }
+
+    // 5. ACCIÓN: RESTABLECER CONTRASEÑA CON CÓDIGO DE VERIFICACIÓN
+    if ($action === 'reset_password' || $action === 'change_password_with_code') {
+        $email = trim(strtolower($input['email'] ?? ''));
+        $code  = trim(strtoupper($input['codigo'] ?? $input['code'] ?? ''));
+        $newPass = (string)($input['nueva_password'] ?? $input['password'] ?? '');
+
+        if (empty($email)) {
+            sendResponse(false, null, 'El correo electrónico es requerido.', 400);
+        }
+        if (empty($code)) {
+            sendResponse(false, null, 'Debes ingresar el código de seguridad de 6 caracteres.', 400);
+        }
+        if (strlen($newPass) < 5) {
+            sendResponse(false, null, 'La nueva contraseña debe tener mínimo 5 caracteres.', 400);
+        }
+
+        // Buscar usuario
+        $stmt = $pdo->prepare("SELECT * FROM `usuarios` WHERE LOWER(`email`) = ? LIMIT 1");
+        $stmt->execute([$email]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            sendResponse(false, null, 'Usuario no encontrado.', 404);
+        }
+
+        // Validar código contra la columna en usuarios o contra la bitácora de auditoría
+        $codeValid = false;
+        if (!empty($user['reset_code']) && strtoupper($user['reset_code']) === $code) {
+            $codeValid = true;
+        } else {
+            // Respaldo: verificar en la bitácora de auditoría reciente (últimos 45 minutos)
+            $auditStmt = $pdo->prepare("SELECT `detalle` FROM `auditoria` WHERE `usuario_email` = ? AND `accion` = 'SOLICITUD_RECUPERACION' AND `resultado` = 'EXITOSO_200' AND `timestamp` >= DATE_SUB(NOW(), INTERVAL 45 MINUTE) ORDER BY `timestamp` DESC LIMIT 1");
+            $auditStmt->execute([$user['email']]);
+            $auditRow = $auditStmt->fetch();
+            if ($auditRow && strpos($auditRow['detalle'], $code) !== false) {
+                $codeValid = true;
+            }
+        }
+
+        if (!$codeValid) {
+            logAuthAudit($pdo, $user['email'], $user['rol'], 'RESTABLECER_CODIGO_INVALIDO', "Intento fallido con código: $code", 'BLOQUEADO_403');
+            sendResponse(false, null, 'El código de seguridad ingresado no es válido o ha expirado. Verifica el código e intenta nuevamente.', 401);
+        }
+
+        // Código válido: generar nuevo hash Bcrypt
+        $newHash = password_hash($newPass, PASSWORD_BCRYPT);
+        $now = date('Y-m-d H:i:s');
+
+        $upd = $pdo->prepare("UPDATE `usuarios` SET `password_hash` = ?, `reset_code` = NULL, `reset_expiry` = NULL, `ultimo_acceso` = ? WHERE `id` = ?");
+        $upd->execute([$newHash, $now, $user['id']]);
+
+        // Registrar en auditoría
+        logAuthAudit($pdo, $user['email'], $user['rol'], 'RESTABLECIMIENTO_EXITOSO', 'Contraseña actualizada exitosamente mediante código de recuperación y cifrada con Bcrypt', 'EXITOSO_200');
+
+        $tokenPrefix = $user['rol'] === 'Administrador' ? 'pf_adm_' : ($user['rol'] === 'Operador' ? 'pf_opr_' : 'pf_cli_');
+        $token = $tokenPrefix . bin2hex(random_bytes(16));
+
+        $userData = [
+            'id'           => $user['id'],
+            'nombre'       => $user['nombre'],
+            'email'        => $user['email'],
+            'rol'          => $user['rol'],
+            'activo'       => true,
+            'token'        => $token,
+            'ultimoAcceso' => $now
+        ];
+
+        sendResponse(true, $userData, '¡Contraseña restablecida exitosamente! Has iniciado sesión en el sistema.');
     }
 }
 
