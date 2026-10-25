@@ -166,6 +166,42 @@ if ($method === 'POST') {
 
         sendResponse(false, null, 'Rol no válido solicitado.', 400);
     }
+
+    // 4. ACCIÓN: RECUPERACIÓN SEGURA DE CONTRASEÑA
+    if ($action === 'recover_password' || $action === 'forgot_password') {
+        $email = trim(strtolower($input['email'] ?? ''));
+        if (empty($email)) {
+            sendResponse(false, null, 'Por favor ingresa un correo electrónico registrado.', 400);
+        }
+
+        // Buscar en la base de datos MySQL si el usuario existe
+        $stmt = $pdo->prepare("SELECT `id`, `nombre`, `email`, `rol`, `activo` FROM `usuarios` WHERE LOWER(`email`) = ? OR LOWER(`email`) LIKE ? LIMIT 1");
+        $stmt->execute([$email, "%$email%"]);
+        $user = $stmt->fetch();
+
+        if (!$user) {
+            logAuthAudit($pdo, $email, 'Desconocido', 'RECUPERAR_CLAVE_NO_EXISTE', 'Intento de recuperación con correo no registrado', 'BLOQUEADO_403');
+            sendResponse(false, null, 'No se encontró ninguna cuenta asociada al correo proporcionado.', 404);
+        }
+
+        // Generar código de seguridad temporal y token criptográfico
+        $secCode = strtoupper(bin2hex(random_bytes(3))); // Ej: 'A7B2C9'
+        $resetToken = 'PF-RST-' . date('YmdHis') . '-' . bin2hex(random_bytes(4));
+
+        // Registrar en bitácora de auditoría
+        logAuthAudit($pdo, $user['email'], $user['rol'], 'SOLICITUD_RECUPERACION', "Generado código de recuperación: $secCode (Token: $resetToken)", 'EXITOSO_200');
+
+        $detailMsg = "Solicitud de recuperación procesada exitosamente para " . htmlspecialchars($user['nombre']) . " (" . htmlspecialchars($user['rol']) . ").";
+
+        sendResponse(true, [
+            'email'           => $user['email'],
+            'nombre'          => $user['nombre'],
+            'rol'             => $user['rol'],
+            'codigo_seguridad'=> $secCode,
+            'token'           => $resetToken,
+            'instrucciones'   => "Se ha generado el código seguro $secCode para la cuenta de " . $user['nombre'] . ". Comunícate con la administración de ParkFlow o utiliza este código para validar tu identidad."
+        ], $detailMsg);
+    }
 }
 
 // Endpoint de verificación de sesión

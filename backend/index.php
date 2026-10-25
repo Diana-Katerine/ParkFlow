@@ -1563,213 +1563,131 @@ html, body {
     filter: brightness(1.08);
 }
 
-/* Redesigned Restricted Quick Access Section */
-.auth-quick-cards-wrapper {
+/* Auxiliary Login Links */
+.auth-aux-row {
     display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 0.6rem;
-    padding-top: 0.65rem;
-    border-top: 1px solid var(--border);
+    justify-content: flex-end;
+    margin-top: -0.25rem;
+    margin-bottom: 0.4rem;
 }
-.auth-quick-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 0.15rem;
-}
-.quick-title {
-    font-size: 0.68rem;
+.link-forgot-pass {
+    background: none;
+    border: none;
     color: var(--primary);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-.quick-security-badge {
-    font-size: 0.62rem;
-    color: var(--rose);
-    background: rgba(244, 63, 94, 0.12);
-    border: 1px solid rgba(244, 63, 94, 0.3);
-    padding: 0.15rem 0.45rem;
-    border-radius: 4px;
-    font-weight: 700;
-    letter-spacing: 0.04em;
-}
-
-.quick-restricted-card {
-    background: var(--bg-surface-elevated);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
     transition: all 0.2s;
-    overflow: hidden;
+    font-family: inherit;
+    opacity: 0.88;
 }
-.admin-card {
-    border-left: 3px solid #00f5ff;
-}
-.admin-card:hover, .admin-card.gate-open {
-    border-color: rgba(0, 245, 255, 0.45);
-    background: rgba(0, 245, 255, 0.04);
-    box-shadow: 0 0 14px rgba(0, 245, 255, 0.15);
-}
-.oper-card {
-    border-left: 3px solid #10b981;
-}
-.oper-card:hover, .oper-card.gate-open {
-    border-color: rgba(16, 185, 129, 0.45);
-    background: rgba(16, 185, 129, 0.04);
-    box-shadow: 0 0 14px rgba(16, 185, 129, 0.15);
-}
-.client-card {
-    border-left: 3px solid #38bdf8;
-    cursor: pointer;
-}
-.client-card:hover {
-    border-color: rgba(56, 189, 248, 0.45);
-    background: rgba(56, 189, 248, 0.04);
+.link-forgot-pass:hover {
+    opacity: 1;
+    text-decoration: underline;
+    text-shadow: 0 0 8px rgba(0, 245, 255, 0.4);
 }
 
-.qrc-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.65rem 0.85rem;
-    cursor: pointer;
-    gap: 0.5rem;
+/* Panel de Recuperación de Contraseña */
+.auth-recovery-card {
+    margin-top: 0.85rem;
+    padding: 0.85rem;
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(0, 245, 255, 0.18);
+    border-radius: var(--radius-md);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    transition: all 0.25s ease;
 }
-.qrc-icon-title {
+.auth-recovery-card:focus-within, .auth-recovery-card.highlight-focus {
+    border-color: rgba(0, 245, 255, 0.45);
+    box-shadow: 0 0 16px rgba(0, 245, 255, 0.2);
+}
+.recovery-card-header {
     display: flex;
     align-items: center;
     gap: 0.65rem;
+    margin-bottom: 0.65rem;
 }
-.qrc-badge-icon {
+.recovery-badge-icon {
     width: 32px;
     height: 32px;
     border-radius: var(--radius-sm);
+    background: rgba(0, 245, 255, 0.12);
+    border: 1px solid rgba(0, 245, 255, 0.25);
+    color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 1.05rem;
     flex-shrink: 0;
 }
-.admin-icon {
-    background: rgba(0, 245, 255, 0.12);
-    color: var(--primary);
-    border: 1px solid rgba(0, 245, 255, 0.25);
+.recovery-text-wrap {
+    flex: 1;
 }
-.oper-icon {
-    background: rgba(16, 185, 129, 0.12);
-    color: var(--emerald);
-    border: 1px solid rgba(16, 185, 129, 0.25);
-}
-.client-icon {
-    background: rgba(56, 189, 248, 0.12);
-    color: #38bdf8;
-    border: 1px solid rgba(56, 189, 248, 0.25);
-}
-.qrc-title {
+.recovery-title {
     font-size: 0.82rem;
     font-weight: 700;
     color: var(--text-heading);
+    letter-spacing: -0.01em;
 }
-.qrc-desc {
+.recovery-desc {
     font-size: 0.68rem;
     color: var(--text-muted);
-    line-height: 1.3;
+    line-height: 1.35;
+    margin-top: 0.1rem;
 }
-.qrc-action-indicator {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    flex-shrink: 0;
-}
-.pill-locked {
-    font-size: 0.62rem;
-    padding: 0.15rem 0.45rem;
-    border-radius: 9999px;
-    background: rgba(0, 245, 255, 0.12);
-    color: var(--primary);
-    font-weight: 700;
-    border: 1px solid rgba(0, 245, 255, 0.25);
-}
-.pill-locked.oper {
-    background: rgba(16, 185, 129, 0.12);
-    color: var(--emerald);
-    border-color: rgba(16, 185, 129, 0.25);
-}
-.pill-open {
-    font-size: 0.62rem;
-    padding: 0.15rem 0.45rem;
-    border-radius: 9999px;
-    background: rgba(56, 189, 248, 0.12);
-    color: #38bdf8;
-    font-weight: 700;
-    border: 1px solid rgba(56, 189, 248, 0.25);
-}
-.qrc-chevron {
-    font-size: 0.65rem;
-    color: var(--text-muted);
-    transition: transform 0.2s;
-}
-.gate-open .qrc-chevron {
-    transform: rotate(180deg);
-}
-
-/* Password Gate */
-.quick-pwd-gate {
-    padding: 0.6rem 0.85rem 0.75rem;
-    background: rgba(6, 9, 17, 0.65);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    animation: fadeIn 0.2s ease;
-}
-.gate-hint {
-    font-size: 0.68rem;
-    color: var(--text-muted);
-    margin-bottom: 0.35rem;
-    font-weight: 600;
-}
-.gate-input-row {
+.recovery-input-group {
     display: flex;
     gap: 0.45rem;
 }
-.gate-pwd-input {
+.recovery-input-wrapper {
     flex: 1;
-    background: var(--bg-surface);
-    border: 1px solid var(--border);
-    color: var(--text-heading);
-    padding: 0.45rem 0.65rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.78rem;
-    outline: none;
-    font-family: inherit;
 }
-.gate-pwd-input:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px rgba(0, 245, 255, 0.15);
-}
-.btn-gate-submit {
-    padding: 0.45rem 0.75rem;
-    border-radius: var(--radius-sm);
-    font-size: 0.75rem;
-    font-weight: 700;
-    border: none;
-    cursor: pointer;
-    transition: all 0.15s;
-    white-space: nowrap;
-    font-family: inherit;
-}
-.admin-btn {
+.btn-recovery-submit {
     background: linear-gradient(135deg, #00f5ff, #0284c7);
     color: #060911;
-    box-shadow: 0 0 10px rgba(0, 245, 255, 0.25);
+    font-weight: 700;
+    font-size: 0.75rem;
+    border: none;
+    border-radius: var(--radius-sm);
+    padding: 0 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 10px rgba(0, 245, 255, 0.2);
 }
-.oper-btn {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: #ffffff;
-    box-shadow: 0 0 10px rgba(16, 185, 129, 0.25);
-}
-.btn-gate-submit:hover {
+.btn-recovery-submit:hover {
     transform: translateY(-1px);
-    filter: brightness(1.1);
+    box-shadow: 0 4px 14px rgba(0, 245, 255, 0.35);
+    filter: brightness(1.08);
+}
+.btn-recovery-submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+.recovery-feedback-box {
+    margin-top: 0.65rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+    line-height: 1.4;
+    animation: fadeIn 0.25s ease;
+}
+.recovery-feedback-box.success {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #a7f3d0;
+}
+.recovery-feedback-box.error {
+    background: rgba(244, 63, 94, 0.12);
+    border: 1px solid rgba(244, 63, 94, 0.35);
+    color: #fca5a5;
 }
 
 /* Responsive Breakpoints for Auth Screen */
@@ -2027,87 +1945,38 @@ html, body {
                         </div>
                     </div>
 
+                    <div class="auth-aux-row">
+                        <button type="button" class="link-forgot-pass" onclick="focusRecoveryField()">
+                            ¿Olvidaste tu contraseña? Recuperar clave
+                        </button>
+                    </div>
+
                     <button type="button" class="btn btn-primary btn-auth-submit" onclick="handleAuthSubmit(event)">
                         🚀 Ingresar al Sistema ParkFlow →
                     </button>
                 </form>
 
-                <!-- Redesigned Restricted Quick Access Section -->
-                <div class="auth-quick-cards-wrapper">
-                    <div class="auth-quick-header">
-                        <span class="quick-title">⚡ O ENTRA CON 1 SOLO CLIC EN UN PERFIL:</span>
-                        <span class="quick-security-badge">🔒 VALIDACIÓN OBLIGATORIA</span>
-                    </div>
-
-                    <!-- Card 1: Administrador (Restringido) -->
-                    <div class="quick-restricted-card admin-card" id="quickCardAdmin">
-                        <div class="qrc-top" onclick="toggleQuickGate('Administrador')">
-                            <div class="qrc-icon-title">
-                                <div class="qrc-badge-icon admin-icon">👑</div>
-                                <div>
-                                    <div class="qrc-title">Ingresar como Administrador</div>
-                                    <div class="qrc-desc">Acceso total: Métricas, Operaciones, Tarifas, Usuarios y Auditoría</div>
-                                </div>
-                            </div>
-                            <div class="qrc-action-indicator">
-                                <span class="pill-locked">🔒 Restringido</span>
-                                <span class="qrc-chevron">▼</span>
-                            </div>
-                        </div>
-                        <!-- Password gate unfolded upon click -->
-                        <div class="quick-pwd-gate" id="gateAdmin" style="display:none;">
-                            <div class="gate-hint">🔒 Validación de Administrador · Contraseña Requerida:</div>
-                            <div class="gate-input-row">
-                                <input type="password" id="quickPassAdmin" class="gate-pwd-input" placeholder="Escribe la clave de Administrador..." onkeydown="if(event.key==='Enter') executeQuickAuth('Administrador')">
-                                <button type="button" class="btn-gate-submit admin-btn" onclick="executeQuickAuth('Administrador')">
-                                    Desbloquear →
-                                </button>
-                            </div>
+                <!-- Panel de Recuperación Segura de Contraseña -->
+                <div class="auth-recovery-card" id="authRecoveryCard">
+                    <div class="recovery-card-header">
+                        <div class="recovery-badge-icon">🔑</div>
+                        <div class="recovery-text-wrap">
+                            <div class="recovery-title">Recuperar Contraseña</div>
+                            <div class="recovery-desc">Ingresa tu correo o usuario para restablecer tus credenciales de acceso:</div>
                         </div>
                     </div>
 
-                    <!-- Card 2: Operador (Restringido) -->
-                    <div class="quick-restricted-card oper-card" id="quickCardOperador">
-                        <div class="qrc-top" onclick="toggleQuickGate('Operador')">
-                            <div class="qrc-icon-title">
-                                <div class="qrc-badge-icon oper-icon">👷</div>
-                                <div>
-                                    <div class="qrc-title">Ingresar como Operador</div>
-                                    <div class="qrc-desc">Acceso operativo: Entradas, Salidas, Cobros de Tickets y Bahías</div>
-                                </div>
-                            </div>
-                            <div class="qrc-action-indicator">
-                                <span class="pill-locked oper">🔒 Restringido</span>
-                                <span class="qrc-chevron">▼</span>
-                            </div>
+                    <div class="recovery-input-group">
+                        <div class="auth-input-wrapper recovery-input-wrapper">
+                            <span class="input-leading-icon">✉️</span>
+                            <input type="email" id="authRecoveryEmail" class="auth-text-input" placeholder="Correo registrado (ej: admin@parkpulse.co)..." onkeydown="if(event.key==='Enter') executePasswordRecovery()">
                         </div>
-                        <!-- Password gate unfolded upon click -->
-                        <div class="quick-pwd-gate" id="gateOperador" style="display:none;">
-                            <div class="gate-hint">🔒 Validación de Operador en Turno · Contraseña Requerida:</div>
-                            <div class="gate-input-row">
-                                <input type="password" id="quickPassOperador" class="gate-pwd-input" placeholder="Escribe la clave de Operador..." onkeydown="if(event.key==='Enter') executeQuickAuth('Operador')">
-                                <button type="button" class="btn-gate-submit oper-btn" onclick="executeQuickAuth('Operador')">
-                                    Validar Turno →
-                                </button>
-                            </div>
-                        </div>
+                        <button type="button" class="btn-recovery-submit" id="btnRecoverySubmit" onclick="executePasswordRecovery()">
+                            Recuperar →
+                        </button>
                     </div>
 
-                    <!-- Card 3: Cliente (Libre) -->
-                    <div class="quick-restricted-card client-card" onclick="executeQuickAuth('Cliente')">
-                        <div class="qrc-top">
-                            <div class="qrc-icon-title">
-                                <div class="qrc-badge-icon client-icon">👤</div>
-                                <div>
-                                    <div class="qrc-title">Ingresar como Cliente / Conductor</div>
-                                    <div class="qrc-desc">Acceso ciudadano: Consulta de estancias, tiempos y tarifas</div>
-                                </div>
-                            </div>
-                            <div class="qrc-action-indicator">
-                                <span class="pill-open">Entrar →</span>
-                            </div>
-                        </div>
-                    </div>
+                    <div id="recoveryFeedback" class="recovery-feedback-box" style="display:none;"></div>
                 </div>
             </div>
         </div>
@@ -3951,59 +3820,84 @@ html, body {
         if (passInput) passInput.value = '';
     }
 
-    function toggleQuickGate(role) {
-        hideAuthError();
-        const gateAdmin = document.getElementById('gateAdmin');
-        const gateOper = document.getElementById('gateOperador');
-        const cardAdmin = document.getElementById('quickCardAdmin');
-        const cardOper = document.getElementById('quickCardOperador');
-
-        if (role === 'Administrador') {
-            const isShown = gateAdmin && gateAdmin.style.display !== 'none';
-            if (gateAdmin) gateAdmin.style.display = isShown ? 'none' : 'block';
-            if (cardAdmin) cardAdmin.classList.toggle('gate-open', !isShown);
-            if (gateOper) gateOper.style.display = 'none';
-            if (cardOper) cardOper.classList.remove('gate-open');
-            if (!isShown) {
-                const inp = document.getElementById('quickPassAdmin');
-                if (inp) { inp.value = ''; inp.focus(); }
+    function focusRecoveryField() {
+        const card = document.getElementById('authRecoveryCard');
+        const inp = document.getElementById('authRecoveryEmail');
+        if (card) {
+            card.classList.add('highlight-focus');
+            setTimeout(() => card.classList.remove('highlight-focus'), 1800);
+        }
+        if (inp) {
+            const mainEmail = document.getElementById('authInputEmail');
+            if (mainEmail && mainEmail.value.trim() && !inp.value.trim()) {
+                inp.value = mainEmail.value.trim();
             }
-        } else if (role === 'Operador') {
-            const isShown = gateOper && gateOper.style.display !== 'none';
-            if (gateOper) gateOper.style.display = isShown ? 'none' : 'block';
-            if (cardOper) cardOper.classList.toggle('gate-open', !isShown);
-            if (gateAdmin) gateAdmin.style.display = 'none';
-            if (cardAdmin) cardAdmin.classList.remove('gate-open');
-            if (!isShown) {
-                const inp = document.getElementById('quickPassOperador');
-                if (inp) { inp.value = ''; inp.focus(); }
-            }
+            inp.focus();
+            inp.select();
         }
     }
 
-    async function executeQuickAuth(role) {
-        hideAuthError();
+    async function executePasswordRecovery() {
+        const inp = document.getElementById('authRecoveryEmail');
+        const btn = document.getElementById('btnRecoverySubmit');
+        const box = document.getElementById('recoveryFeedback');
+        const email = inp ? inp.value.trim() : '';
 
-        if (role === 'Administrador') {
-            const inp = document.getElementById('quickPassAdmin');
-            const pass = inp ? inp.value.trim() : '';
-            if (!pass) {
-                showAuthError('🔒 Debes ingresar la contraseña maestra de Administrador para desbloquear el acceso.');
-                if (inp) inp.focus();
-                return;
+        if (!email) {
+            if (box) {
+                box.style.display = 'block';
+                box.className = 'recovery-feedback-box error';
+                box.innerHTML = '⚠️ Por favor ingresa el correo electrónico o usuario asociado a tu cuenta.';
             }
-            await performServerAuth('Administrador', 'admin@parkpulse.co', pass);
-        } else if (role === 'Operador') {
-            const inp = document.getElementById('quickPassOperador');
-            const pass = inp ? inp.value.trim() : '';
-            if (!pass) {
-                showAuthError('🔒 Debes ingresar la contraseña de Operador en turno para validar el acceso.');
-                if (inp) inp.focus();
-                return;
+            if (inp) inp.focus();
+            return;
+        }
+
+        const origBtnText = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳ Enviando...</span>';
+        }
+        if (box) box.style.display = 'none';
+
+        try {
+            const endpoint = API_BASE + '/auth.php';
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'recover_password',
+                    email: email
+                })
+            });
+
+            const json = await res.json();
+
+            if (box) {
+                box.style.display = 'block';
+                if (res.ok && json.success && json.data) {
+                    box.className = 'recovery-feedback-box success';
+                    box.innerHTML = `✅ <strong>Solicitud procesada:</strong> Se generó código de verificación para <strong>${json.data.nombre}</strong> (${json.data.rol}).<br>` +
+                        `<span style="display:inline-block; margin-top:4px; padding:2px 8px; background:rgba(0,245,255,0.18); border-radius:4px; font-weight:bold; color:#00f5ff;">Código de Seguridad: ${json.data.codigo_seguridad}</span><br>` +
+                        `<small style="color:var(--text-muted); display:block; margin-top:4px;">${json.data.instrucciones}</small>`;
+                    if (inp) inp.value = '';
+                } else {
+                    box.className = 'recovery-feedback-box error';
+                    box.innerHTML = '❌ ' + (json.message || 'No fue posible procesar la recuperación de contraseña.');
+                }
             }
-            await performServerAuth('Operador', 'operador@parkpulse.co', pass);
-        } else if (role === 'Cliente') {
-            await performServerAuth('Cliente', 'cliente@parkpulse.co', '');
+        } catch (err) {
+            console.error('Error al recuperar contraseña:', err);
+            if (box) {
+                box.style.display = 'block';
+                box.className = 'recovery-feedback-box error';
+                box.innerHTML = '❌ Error de comunicación con el servidor. Verifica que los servicios de Apache y MySQL estén activos.';
+            }
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origBtnText;
+            }
         }
     }
 
@@ -4133,8 +4027,8 @@ html, body {
 
     // Exponer funciones globales al objeto window para llamadas inline
     window.syncRoleSelection = syncRoleSelection;
-    window.toggleQuickGate = toggleQuickGate;
-    window.executeQuickAuth = executeQuickAuth;
+    window.focusRecoveryField = focusRecoveryField;
+    window.executePasswordRecovery = executePasswordRecovery;
     window.performServerAuth = performServerAuth;
     window.showAuthError = showAuthError;
     window.toggleAuthPasswordVisibility = toggleAuthPasswordVisibility;

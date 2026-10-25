@@ -104,59 +104,84 @@
         if (passInput) passInput.value = '';
     }
 
-    function toggleQuickGate(role) {
-        hideAuthError();
-        const gateAdmin = document.getElementById('gateAdmin');
-        const gateOper = document.getElementById('gateOperador');
-        const cardAdmin = document.getElementById('quickCardAdmin');
-        const cardOper = document.getElementById('quickCardOperador');
-
-        if (role === 'Administrador') {
-            const isShown = gateAdmin && gateAdmin.style.display !== 'none';
-            if (gateAdmin) gateAdmin.style.display = isShown ? 'none' : 'block';
-            if (cardAdmin) cardAdmin.classList.toggle('gate-open', !isShown);
-            if (gateOper) gateOper.style.display = 'none';
-            if (cardOper) cardOper.classList.remove('gate-open');
-            if (!isShown) {
-                const inp = document.getElementById('quickPassAdmin');
-                if (inp) { inp.value = ''; inp.focus(); }
+    function focusRecoveryField() {
+        const card = document.getElementById('authRecoveryCard');
+        const inp = document.getElementById('authRecoveryEmail');
+        if (card) {
+            card.classList.add('highlight-focus');
+            setTimeout(() => card.classList.remove('highlight-focus'), 1800);
+        }
+        if (inp) {
+            const mainEmail = document.getElementById('authInputEmail');
+            if (mainEmail && mainEmail.value.trim() && !inp.value.trim()) {
+                inp.value = mainEmail.value.trim();
             }
-        } else if (role === 'Operador') {
-            const isShown = gateOper && gateOper.style.display !== 'none';
-            if (gateOper) gateOper.style.display = isShown ? 'none' : 'block';
-            if (cardOper) cardOper.classList.toggle('gate-open', !isShown);
-            if (gateAdmin) gateAdmin.style.display = 'none';
-            if (cardAdmin) cardAdmin.classList.remove('gate-open');
-            if (!isShown) {
-                const inp = document.getElementById('quickPassOperador');
-                if (inp) { inp.value = ''; inp.focus(); }
-            }
+            inp.focus();
+            inp.select();
         }
     }
 
-    async function executeQuickAuth(role) {
-        hideAuthError();
+    async function executePasswordRecovery() {
+        const inp = document.getElementById('authRecoveryEmail');
+        const btn = document.getElementById('btnRecoverySubmit');
+        const box = document.getElementById('recoveryFeedback');
+        const email = inp ? inp.value.trim() : '';
 
-        if (role === 'Administrador') {
-            const inp = document.getElementById('quickPassAdmin');
-            const pass = inp ? inp.value.trim() : '';
-            if (!pass) {
-                showAuthError('🔒 Debes ingresar la contraseña maestra de Administrador para desbloquear el acceso.');
-                if (inp) inp.focus();
-                return;
+        if (!email) {
+            if (box) {
+                box.style.display = 'block';
+                box.className = 'recovery-feedback-box error';
+                box.innerHTML = '⚠️ Por favor ingresa el correo electrónico o usuario asociado a tu cuenta.';
             }
-            await performServerAuth('Administrador', 'admin@parkpulse.co', pass);
-        } else if (role === 'Operador') {
-            const inp = document.getElementById('quickPassOperador');
-            const pass = inp ? inp.value.trim() : '';
-            if (!pass) {
-                showAuthError('🔒 Debes ingresar la contraseña de Operador en turno para validar el acceso.');
-                if (inp) inp.focus();
-                return;
+            if (inp) inp.focus();
+            return;
+        }
+
+        const origBtnText = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span>⏳ Enviando...</span>';
+        }
+        if (box) box.style.display = 'none';
+
+        try {
+            const endpoint = API_BASE + '/auth.php';
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'recover_password',
+                    email: email
+                })
+            });
+
+            const json = await res.json();
+
+            if (box) {
+                box.style.display = 'block';
+                if (res.ok && json.success && json.data) {
+                    box.className = 'recovery-feedback-box success';
+                    box.innerHTML = `✅ <strong>Solicitud procesada:</strong> Se generó código de verificación para <strong>${json.data.nombre}</strong> (${json.data.rol}).<br>` +
+                        `<span style="display:inline-block; margin-top:4px; padding:2px 8px; background:rgba(0,245,255,0.18); border-radius:4px; font-weight:bold; color:#00f5ff;">Código de Seguridad: ${json.data.codigo_seguridad}</span><br>` +
+                        `<small style="color:var(--text-muted); display:block; margin-top:4px;">${json.data.instrucciones}</small>`;
+                    if (inp) inp.value = '';
+                } else {
+                    box.className = 'recovery-feedback-box error';
+                    box.innerHTML = '❌ ' + (json.message || 'No fue posible procesar la recuperación de contraseña.');
+                }
             }
-            await performServerAuth('Operador', 'operador@parkpulse.co', pass);
-        } else if (role === 'Cliente') {
-            await performServerAuth('Cliente', 'cliente@parkpulse.co', '');
+        } catch (err) {
+            console.error('Error al recuperar contraseña:', err);
+            if (box) {
+                box.style.display = 'block';
+                box.className = 'recovery-feedback-box error';
+                box.innerHTML = '❌ Error de comunicación con el servidor. Verifica que los servicios de Apache y MySQL estén activos.';
+            }
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = origBtnText;
+            }
         }
     }
 
@@ -286,8 +311,8 @@
 
     // Exponer funciones globales al objeto window para llamadas inline
     window.syncRoleSelection = syncRoleSelection;
-    window.toggleQuickGate = toggleQuickGate;
-    window.executeQuickAuth = executeQuickAuth;
+    window.focusRecoveryField = focusRecoveryField;
+    window.executePasswordRecovery = executePasswordRecovery;
     window.performServerAuth = performServerAuth;
     window.showAuthError = showAuthError;
     window.toggleAuthPasswordVisibility = toggleAuthPasswordVisibility;

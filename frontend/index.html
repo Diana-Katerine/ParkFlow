@@ -142,87 +142,38 @@
                         </div>
                     </div>
 
+                    <div class="auth-aux-row">
+                        <button type="button" class="link-forgot-pass" onclick="focusRecoveryField()">
+                            ¿Olvidaste tu contraseña? Recuperar clave
+                        </button>
+                    </div>
+
                     <button type="button" class="btn btn-primary btn-auth-submit" onclick="handleAuthSubmit(event)">
                         🚀 Ingresar al Sistema ParkFlow →
                     </button>
                 </form>
 
-                <!-- Redesigned Restricted Quick Access Section -->
-                <div class="auth-quick-cards-wrapper">
-                    <div class="auth-quick-header">
-                        <span class="quick-title">⚡ O ENTRA CON 1 SOLO CLIC EN UN PERFIL:</span>
-                        <span class="quick-security-badge">🔒 VALIDACIÓN OBLIGATORIA</span>
-                    </div>
-
-                    <!-- Card 1: Administrador (Restringido) -->
-                    <div class="quick-restricted-card admin-card" id="quickCardAdmin">
-                        <div class="qrc-top" onclick="toggleQuickGate('Administrador')">
-                            <div class="qrc-icon-title">
-                                <div class="qrc-badge-icon admin-icon">👑</div>
-                                <div>
-                                    <div class="qrc-title">Ingresar como Administrador</div>
-                                    <div class="qrc-desc">Acceso total: Métricas, Operaciones, Tarifas, Usuarios y Auditoría</div>
-                                </div>
-                            </div>
-                            <div class="qrc-action-indicator">
-                                <span class="pill-locked">🔒 Restringido</span>
-                                <span class="qrc-chevron">▼</span>
-                            </div>
-                        </div>
-                        <!-- Password gate unfolded upon click -->
-                        <div class="quick-pwd-gate" id="gateAdmin" style="display:none;">
-                            <div class="gate-hint">🔒 Validación de Administrador · Contraseña Requerida:</div>
-                            <div class="gate-input-row">
-                                <input type="password" id="quickPassAdmin" class="gate-pwd-input" placeholder="Escribe la clave de Administrador..." onkeydown="if(event.key==='Enter') executeQuickAuth('Administrador')">
-                                <button type="button" class="btn-gate-submit admin-btn" onclick="executeQuickAuth('Administrador')">
-                                    Desbloquear →
-                                </button>
-                            </div>
+                <!-- Panel de Recuperación Segura de Contraseña -->
+                <div class="auth-recovery-card" id="authRecoveryCard">
+                    <div class="recovery-card-header">
+                        <div class="recovery-badge-icon">🔑</div>
+                        <div class="recovery-text-wrap">
+                            <div class="recovery-title">Recuperar Contraseña</div>
+                            <div class="recovery-desc">Ingresa tu correo o usuario para restablecer tus credenciales de acceso:</div>
                         </div>
                     </div>
 
-                    <!-- Card 2: Operador (Restringido) -->
-                    <div class="quick-restricted-card oper-card" id="quickCardOperador">
-                        <div class="qrc-top" onclick="toggleQuickGate('Operador')">
-                            <div class="qrc-icon-title">
-                                <div class="qrc-badge-icon oper-icon">👷</div>
-                                <div>
-                                    <div class="qrc-title">Ingresar como Operador</div>
-                                    <div class="qrc-desc">Acceso operativo: Entradas, Salidas, Cobros de Tickets y Bahías</div>
-                                </div>
-                            </div>
-                            <div class="qrc-action-indicator">
-                                <span class="pill-locked oper">🔒 Restringido</span>
-                                <span class="qrc-chevron">▼</span>
-                            </div>
+                    <div class="recovery-input-group">
+                        <div class="auth-input-wrapper recovery-input-wrapper">
+                            <span class="input-leading-icon">✉️</span>
+                            <input type="email" id="authRecoveryEmail" class="auth-text-input" placeholder="Correo registrado (ej: admin@parkpulse.co)..." onkeydown="if(event.key==='Enter') executePasswordRecovery()">
                         </div>
-                        <!-- Password gate unfolded upon click -->
-                        <div class="quick-pwd-gate" id="gateOperador" style="display:none;">
-                            <div class="gate-hint">🔒 Validación de Operador en Turno · Contraseña Requerida:</div>
-                            <div class="gate-input-row">
-                                <input type="password" id="quickPassOperador" class="gate-pwd-input" placeholder="Escribe la clave de Operador..." onkeydown="if(event.key==='Enter') executeQuickAuth('Operador')">
-                                <button type="button" class="btn-gate-submit oper-btn" onclick="executeQuickAuth('Operador')">
-                                    Validar Turno →
-                                </button>
-                            </div>
-                        </div>
+                        <button type="button" class="btn-recovery-submit" id="btnRecoverySubmit" onclick="executePasswordRecovery()">
+                            Recuperar →
+                        </button>
                     </div>
 
-                    <!-- Card 3: Cliente (Libre) -->
-                    <div class="quick-restricted-card client-card" onclick="executeQuickAuth('Cliente')">
-                        <div class="qrc-top">
-                            <div class="qrc-icon-title">
-                                <div class="qrc-badge-icon client-icon">👤</div>
-                                <div>
-                                    <div class="qrc-title">Ingresar como Cliente / Conductor</div>
-                                    <div class="qrc-desc">Acceso ciudadano: Consulta de estancias, tiempos y tarifas</div>
-                                </div>
-                            </div>
-                            <div class="qrc-action-indicator">
-                                <span class="pill-open">Entrar →</span>
-                            </div>
-                        </div>
-                    </div>
+                    <div id="recoveryFeedback" class="recovery-feedback-box" style="display:none;"></div>
                 </div>
             </div>
         </div>
