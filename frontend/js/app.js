@@ -2667,15 +2667,28 @@
 
     // Renderizar Matriz 2D de Bahías
     function renderBayMatrix() {
-        const zones = {
-            'Zona A · Estándar': { spots: [], icon: '🚗', tipo: 'Automóvil' },
-            'Zona B · EV & VIP': { spots: [], icon: '⚡', tipo: 'Eléctrico EV' },
-            'Zona C · Motos': { spots: [], icon: '🏍️', tipo: 'Motocicleta' },
-            'Zona D · Camionetas': { spots: [], icon: '🚙', tipo: 'Camioneta' }
+        const zoneConfig = {
+            'Zona A · Estándar': { icon: '🚗', tipo: 'Automóvil' },
+            'Zona B · EV & VIP': { icon: '⚡', tipo: 'Eléctrico EV' },
+            'Zona C · Motos': { icon: '🏍️', tipo: 'Motocicleta' },
+            'Zona D · Camionetas': { icon: '🚙', tipo: 'Camioneta' },
+            'Zona E · Estándar N2': { icon: '🚗', tipo: 'Automóvil' },
+            'Zona F · Flotas S3': { icon: '🚙', tipo: 'Automóvil / Camioneta' },
+            'Zona G · Eco & Bicicletas': { icon: '🚲', tipo: 'Bicicleta' }
         };
 
+        const zones = {};
+        for (const [zKey, zConf] of Object.entries(zoneConfig)) {
+            zones[zKey] = { spots: [], icon: zConf.icon, tipo: zConf.tipo };
+        }
+
         (saasState.spots || []).forEach(s => {
-            if (zones[s.zona]) zones[s.zona].spots.push(s);
+            const zKey = s.zona || 'Zona General';
+            if (!zones[zKey]) {
+                const icon = (s.tipoPermitido === 'Motocicleta' ? '🏍️' : (s.tipoPermitido === 'Eléctrico EV' ? '⚡' : (s.tipoPermitido === 'Camioneta' ? '🚙' : (s.tipoPermitido === 'Bicicleta' ? '🚲' : '🚗'))));
+                zones[zKey] = { spots: [], icon: icon, tipo: s.tipoPermitido };
+            }
+            zones[zKey].spots.push(s);
         });
 
         const container = document.getElementById('saasZonesContainer');
@@ -2683,11 +2696,13 @@
         container.innerHTML = '';
 
         for (const [zoneName, zData] of Object.entries(zones)) {
+            if (zData.spots.length === 0) continue;
+
             const zDiv = document.createElement('div');
             zDiv.className = 'zone-box';
 
-            // Ordenar numéricamente por código (ej: A-01 a A-06)
-            zData.spots.sort((a, b) => (a.codigo || '').localeCompare(b.codigo || ''));
+            // Ordenar naturalmente por código (A-01, A-02, ... A-16)
+            zData.spots.sort((a, b) => (a.codigo || '').localeCompare(b.codigo || '', undefined, { numeric: true, sensitivity: 'base' }));
 
             const freeCount = zData.spots.filter(s => s.estado === 'DISPONIBLE').length;
 

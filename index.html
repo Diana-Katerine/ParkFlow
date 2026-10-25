@@ -849,7 +849,7 @@ html, body {
 
         .bays-matrix {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
             gap: 0.65rem;
         }
 
@@ -1868,7 +1868,7 @@ html, body {
                     <div class="showcase-stats-grid">
                         <div class="sc-stat-card">
                             <div class="sc-stat-icon">🗺️</div>
-                            <div class="sc-stat-val">24</div>
+                            <div class="sc-stat-val">92</div>
                             <div class="sc-stat-lbl">Bahías Inteligentes</div>
                         </div>
                         <div class="sc-stat-card">
@@ -1890,7 +1890,7 @@ html, body {
                                 <span class="radar-live-radar-icon">📡</span>
                                 <span class="radar-title">Mapa de Ocupación de Bahías</span>
                             </div>
-                            <span class="radar-count-tag">18 Libres · 6 Ocupadas</span>
+                            <span class="radar-count-tag">85 Libres · 7 Ocupadas · 92 Totales</span>
                         </div>
                         <div class="radar-grid">
                             <div class="radar-spot occupied" title="Zona A-01: Ocupado (BST-902)"><span>A-01</span></div>
@@ -6452,15 +6452,28 @@ html, body {
 
     // Renderizar Matriz 2D de Bahías
     function renderBayMatrix() {
-        const zones = {
-            'Zona A · Estándar': { spots: [], icon: '🚗', tipo: 'Automóvil' },
-            'Zona B · EV & VIP': { spots: [], icon: '⚡', tipo: 'Eléctrico EV' },
-            'Zona C · Motos': { spots: [], icon: '🏍️', tipo: 'Motocicleta' },
-            'Zona D · Camionetas': { spots: [], icon: '🚙', tipo: 'Camioneta' }
+        const zoneConfig = {
+            'Zona A · Estándar': { icon: '🚗', tipo: 'Automóvil' },
+            'Zona B · EV & VIP': { icon: '⚡', tipo: 'Eléctrico EV' },
+            'Zona C · Motos': { icon: '🏍️', tipo: 'Motocicleta' },
+            'Zona D · Camionetas': { icon: '🚙', tipo: 'Camioneta' },
+            'Zona E · Estándar N2': { icon: '🚗', tipo: 'Automóvil' },
+            'Zona F · Flotas S3': { icon: '🚙', tipo: 'Automóvil / Camioneta' },
+            'Zona G · Eco & Bicicletas': { icon: '🚲', tipo: 'Bicicleta' }
         };
 
+        const zones = {};
+        for (const [zKey, zConf] of Object.entries(zoneConfig)) {
+            zones[zKey] = { spots: [], icon: zConf.icon, tipo: zConf.tipo };
+        }
+
         (saasState.spots || []).forEach(s => {
-            if (zones[s.zona]) zones[s.zona].spots.push(s);
+            const zKey = s.zona || 'Zona General';
+            if (!zones[zKey]) {
+                const icon = (s.tipoPermitido === 'Motocicleta' ? '🏍️' : (s.tipoPermitido === 'Eléctrico EV' ? '⚡' : (s.tipoPermitido === 'Camioneta' ? '🚙' : (s.tipoPermitido === 'Bicicleta' ? '🚲' : '🚗'))));
+                zones[zKey] = { spots: [], icon: icon, tipo: s.tipoPermitido };
+            }
+            zones[zKey].spots.push(s);
         });
 
         const container = document.getElementById('saasZonesContainer');
@@ -6468,11 +6481,13 @@ html, body {
         container.innerHTML = '';
 
         for (const [zoneName, zData] of Object.entries(zones)) {
+            if (zData.spots.length === 0) continue;
+
             const zDiv = document.createElement('div');
             zDiv.className = 'zone-box';
 
-            // Ordenar numéricamente por código (ej: A-01 a A-06)
-            zData.spots.sort((a, b) => (a.codigo || '').localeCompare(b.codigo || ''));
+            // Ordenar naturalmente por código (A-01, A-02, ... A-16)
+            zData.spots.sort((a, b) => (a.codigo || '').localeCompare(b.codigo || '', undefined, { numeric: true, sensitivity: 'base' }));
 
             const freeCount = zData.spots.filter(s => s.estado === 'DISPONIBLE').length;
 

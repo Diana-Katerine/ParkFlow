@@ -118,6 +118,88 @@ try {
         ['SP-D04', 'D-04', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.9, null, null],
         ['SP-D05', 'D-05', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'BLOQUEADO', 0, null, 78.5, null, null],
         ['SP-D06', 'D-06', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.8, null, null],
+
+        // Zona A Extendida (A-07 a A-16)
+        ['SP-A07', 'A-07', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-A08', 'A-08', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-A09', 'A-09', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-A10', 'A-10', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-A11', 'A-11', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-A12', 'A-12', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.6, null, null],
+        ['SP-A13', 'A-13', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-A14', 'A-14', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-A15', 'A-15', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-A16', 'A-16', 'Nivel S1', 'Zona A · Estándar', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
+
+        // Zona B Extendida (B-07 a B-14)
+        ['SP-B07', 'B-07', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 22.0, 99.9, null, null],
+        ['SP-B08', 'B-08', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 0, 11.4, 99.8, null, null],
+        ['SP-B09', 'B-09', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 50.0, 99.9, null, null],
+        ['SP-B10', 'B-10', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 0, 22.0, 99.7, null, null],
+        ['SP-B11', 'B-11', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 22.0, 99.9, null, null],
+        ['SP-B12', 'B-12', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 0, 11.4, 99.8, null, null],
+        ['SP-B13', 'B-13', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 50.0, 99.9, null, null],
+        ['SP-B14', 'B-14', 'Nivel S1', 'Zona B · EV & VIP', 'Eléctrico EV', 'DISPONIBLE', 1, 22.0, 99.8, null, null],
+
+        // Zona C Extendida (C-07 a C-16)
+        ['SP-C07', 'C-07', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-C08', 'C-08', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-C09', 'C-09', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-C10', 'C-10', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-C11', 'C-11', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-C12', 'C-12', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-C13', 'C-13', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-C14', 'C-14', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-C15', 'C-15', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-C16', 'C-16', 'Nivel S1', 'Zona C · Motos', 'Motocicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
+
+        // Zona D Extendida (D-07 a D-14)
+        ['SP-D07', 'D-07', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 1, null, 99.9, null, null],
+        ['SP-D08', 'D-08', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-D09', 'D-09', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-D10', 'D-10', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 1, null, 99.9, null, null],
+        ['SP-D11', 'D-11', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-D12', 'D-12', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-D13', 'D-13', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-D14', 'D-14', 'Nivel S2', 'Zona D · Camionetas', 'Camioneta', 'DISPONIBLE', 1, null, 99.8, null, null],
+
+        // Zona E: Estándar N2 (E-01 a E-12)
+        ['SP-E01', 'E-01', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-E02', 'E-02', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-E03', 'E-03', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-E04', 'E-04', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-E05', 'E-05', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-E06', 'E-06', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-E07', 'E-07', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-E08', 'E-08', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-E09', 'E-09', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-E10', 'E-10', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-E11', 'E-11', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-E12', 'E-12', 'Nivel S2', 'Zona E · Estándar N2', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+
+        // Zona F: Flotas S3 (F-01 a F-12)
+        ['SP-F01', 'F-01', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-F02', 'F-02', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-F03', 'F-03', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-F04', 'F-04', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-F05', 'F-05', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-F06', 'F-06', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-F07', 'F-07', 'Nivel S3', 'Zona F · Flotas S3', 'Camioneta', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-F08', 'F-08', 'Nivel S3', 'Zona F · Flotas S3', 'Camioneta', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-F09', 'F-09', 'Nivel S3', 'Zona F · Flotas S3', 'Camioneta', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-F10', 'F-10', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-F11', 'F-11', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-F12', 'F-12', 'Nivel S3', 'Zona F · Flotas S3', 'Automóvil', 'DISPONIBLE', 0, null, 99.9, null, null],
+
+        // Zona G: Eco & Bicicletas (G-01 a G-08)
+        ['SP-G01', 'G-01', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-G02', 'G-02', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-G03', 'G-03', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-G04', 'G-04', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-G05', 'G-05', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.8, null, null],
+        ['SP-G06', 'G-06', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
+        ['SP-G07', 'G-07', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.7, null, null],
+        ['SP-G08', 'G-08', 'Nivel S1', 'Zona G · Eco & Bicicletas', 'Bicicleta', 'DISPONIBLE', 0, null, 99.9, null, null],
     ];
 
     $stmtSpot = $pdo->prepare("INSERT INTO `espacios` (`id`, `codigo`, `nivel`, `zona`, `tipo_permitido`, `estado`, `es_vip`, `potencia_ev_kw`, `salud_sensor`, `placa_actual`, `ticket_actual_id`) 
