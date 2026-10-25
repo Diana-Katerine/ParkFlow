@@ -335,6 +335,8 @@ html, body {
         /* Main View Area */
         .saas-main {
             margin-left: var(--sidebar-width);
+            width: calc(100% - var(--sidebar-width));
+            max-width: calc(100% - var(--sidebar-width));
             flex: 1;
             height: 100vh;
             display: flex;
@@ -343,10 +345,12 @@ html, body {
             overflow: hidden;
             position: relative;
             background: var(--bg-base);
+            box-sizing: border-box;
         }
 
         /* SaaS Topbar */
         header.saas-topbar {
+            width: 100%;
             height: 64px;
             min-height: 64px;
             max-height: 64px;
@@ -359,6 +363,7 @@ html, body {
             justify-content: space-between;
             gap: 1rem;
             z-index: 100;
+            box-sizing: border-box;
             box-shadow: 0 4px 16px rgba(0, 0, 0, 0.45);
         }
 
@@ -370,7 +375,7 @@ html, body {
         }
 
         .mobile-toggle {
-            display: none;
+            display: none !important;
             background: transparent;
             border: 1px solid var(--border);
             color: var(--text-body);
@@ -530,12 +535,14 @@ html, body {
         /* SaaS Content Container */
         .saas-content {
             flex: 1;
+            width: 100%;
+            min-height: 0;
             overflow-y: auto;
             overflow-x: hidden;
             padding: 1.5rem 1.75rem 3rem;
-            max-width: 1560px;
-            width: 100%;
-            margin: 0 auto;
+            max-width: 100%;
+            margin: 0;
+            box-sizing: border-box;
         }
 
         /* View Panels */
@@ -779,6 +786,7 @@ html, body {
             text-transform: uppercase;
             letter-spacing: 0.05em;
             border-bottom: 1px solid var(--border);
+            white-space: nowrap;
         }
 
         table.saas-table td {
@@ -786,6 +794,7 @@ html, body {
             border-bottom: 1px solid var(--border);
             color: var(--text-body);
             vertical-align: middle;
+            white-space: nowrap;
         }
 
         table.saas-table tr:last-child td { border-bottom: none; }
@@ -1792,6 +1801,7 @@ html, body {
                 <!-- MONITOR EN VIVO DE MOVIMIENTOS DEL PARQUEADERO -->
                 <div class="table-card">
                     <div class="table-toolbar" style="flex-wrap:wrap; gap:0.75rem;">
+                        <div>
                             <h3 style="font-size:1rem; font-weight:800; color:var(--text-heading); display:flex; align-items:center; flex-wrap:wrap; gap:0.4rem;">
                                 <span>🔄 Monitor de Movimientos del Parqueadero en Tiempo Real</span>
                                 <span id="adminMovementsPeriodBadge" style="font-size:0.75rem; font-weight:700; color:var(--primary); background:rgba(0,245,255,0.1); padding:0.15rem 0.5rem; border-radius:4px; border:1px solid rgba(0,245,255,0.25);">· Período: Hoy</span>
