@@ -537,12 +537,10 @@
             statusDotColor: '#10b981',
             defaultView: 'view-operations',
             allowedViews: [
-                'view-overview',
                 'view-operations',
                 'view-matrix',
-                'view-rates',
-                'view-client-portal',
-                'view-patterns'
+                'view-overview',
+                'view-rates'
             ],
             canCheckIn: true,
             canCheckOut: true,
@@ -552,10 +550,10 @@
             canResetDb: false
         },
         'Cliente': {
-            name: 'Mateo Silva',
-            roleTitle: '👤 Conductor / KLM-456',
-            email: 'mateo.silva@gmail.com',
-            avatar: 'MS',
+            name: 'Cliente / Conductor',
+            roleTitle: '👤 Cliente / Conductor',
+            email: '',
+            avatar: 'CL',
             avatarBg: 'linear-gradient(135deg, #a855f7, #ec4899)',
             avatarBorder: 'rgba(168, 85, 247, 0.45)',
             badge: 'Cliente / Autoservicio',
@@ -566,8 +564,7 @@
             allowedViews: [
                 'view-client-portal',
                 'view-matrix',
-                'view-rates',
-                'view-patterns'
+                'view-rates'
             ],
             canCheckIn: true,
             canCheckOut: false,
@@ -646,7 +643,7 @@
             lockText.textContent = `Sesión Protegida · ${activeRole}`;
         }
 
-        // 2. Navigation items
+        // 2. Navigation items: MOSTRAR ÚNICAMENTE MÓDULOS PERMITIDOS
         document.querySelectorAll('.nav-item-btn').forEach(btn => {
             const onclickAttr = btn.getAttribute('onclick') || '';
             let targetView = null;
@@ -664,21 +661,31 @@
             const normalBadge = btn.querySelector('.nav-pill-badge:not(.pill-locked)');
 
             if (isAllowed) {
+                btn.style.display = 'flex';
                 btn.classList.remove('restricted');
                 btn.removeAttribute('title');
                 if (lockBadge) lockBadge.remove();
                 if (normalBadge) normalBadge.style.display = 'inline-block';
             } else {
+                // Ocultar por completo: solo mostrar a lo que tiene acceso
+                btn.style.display = 'none';
                 btn.classList.add('restricted');
-                btn.setAttribute('title', `Acceso restringido para rol ${role}. Requiere: ${MODULE_NAMES[targetView].minRole}`);
-                if (normalBadge) normalBadge.style.display = 'none';
-                if (!lockBadge) {
-                    const badge = document.createElement('span');
-                    badge.className = 'nav-pill-badge pill-locked';
-                    badge.textContent = '🔒 Bloqueado';
-                    btn.appendChild(badge);
-                }
+                if (lockBadge) lockBadge.remove();
             }
+        });
+
+        // 2.1 Ocultar encabezados de sección vacíos en la barra lateral
+        document.querySelectorAll('.sidebar-nav .nav-group-label').forEach(label => {
+            let nextEl = label.nextElementSibling;
+            let hasVisibleChild = false;
+            while (nextEl && !nextEl.classList.contains('nav-group-label')) {
+                if (nextEl.classList.contains('nav-item-btn') && nextEl.style.display !== 'none') {
+                    hasVisibleChild = true;
+                    break;
+                }
+                nextEl = nextEl.nextElementSibling;
+            }
+            label.style.display = hasVisibleChild ? 'block' : 'none';
         });
 
         // 3. Topbar "Registrar Entrada" button
