@@ -1965,3 +1965,32 @@ html, body {
     border-radius: var(--radius-lg);
     padding: 1.5rem;
 }
+
+/* Visual Bay Selection Highlight */
+.bay-selected-target {
+    border: 2px solid var(--primary) !important;
+    background: linear-gradient(135deg, rgba(0, 245, 255, 0.22), rgba(99, 102, 241, 0.2)) !important;
+    box-shadow: 0 0 20px rgba(0, 245, 255, 0.6), inset 0 0 10px rgba(0, 245, 255, 0.3) !important;
+    transform: translateY(-3px) scale(1.04) !important;
+    z-index: 5;
+    animation: pulseSelectedBay 1.8s infinite ease-in-out;
+}
+
+@keyframes pulseSelectedBay {
+    0%, 100% {
+        box-shadow: 0 0 18px rgba(0, 245, 255, 0.6), inset 0 0 8px rgba(0, 245, 255, 0.25);
+    }
+    50% {
+        box-shadow: 0 0 26px rgba(0, 245, 255, 0.9), inset 0 0 14px rgba(0, 245, 255, 0.45);
+    }
+}
+
+.bay-reservado {
+    border-color: rgba(245, 158, 11, 0.5) !important;
+    color: var(--amber) !important;
+}
+
+.bay-reservado .bay-state-tag {
+    background: var(--amber-subtle) !important;
+    color: var(--amber) !important;
+}
