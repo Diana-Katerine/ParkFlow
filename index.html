@@ -3105,7 +3105,7 @@ html, body {
                                 </div>
                                 <div class="form-row" style="margin-bottom:0;">
                                     <label class="form-label-saas" style="font-weight:700;">Bahía a Reservar <span style="color:var(--rose);">*</span></label>
-                                    <select id="reserveBay" class="form-control-saas" required onchange="calculateReservationCost()">
+                                    <select id="reserveBay" class="form-control-saas" required onchange="onReserveBayDropdownChange(this.value)">
                                         <option value="">Selecciona una bahía...</option>
                                     </select>
                                 </div>
@@ -3140,6 +3140,67 @@ html, body {
                                 <div style="display:flex; flex-direction:column; justify-content:center;">
                                     <span style="font-size:0.7rem; color:var(--text-muted); text-transform:uppercase; font-weight:700;">Total Estimado de Reserva:</span>
                                     <span id="reserveCostEstimate" style="font-size:1.4rem; font-weight:800; color:var(--amber); font-family:'JetBrains Mono';">$3.600 COP</span>
+                                </div>
+                            </div>
+
+                            <!-- SELECTOR VISUAL DE BAHÍAS PARA RESERVA -->
+                            <div style="background:var(--bg-base); border:1px solid rgba(245, 158, 11, 0.35); border-radius:var(--radius-md); padding:1.25rem; display:flex; flex-direction:column; gap:1rem; margin-bottom:1.25rem;">
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.75rem;">
+                                    <div>
+                                        <div style="font-weight:800; font-size:0.95rem; color:var(--text-heading); display:flex; align-items:center; gap:0.5rem;">
+                                            <span>🗺️</span> Elige y Visualiza tu Espacio para Reservar
+                                        </div>
+                                        <p style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">
+                                            Haz clic en cualquier espacio verde disponible para apartarlo con anticipación
+                                        </p>
+                                    </div>
+
+                                    <!-- Indicador de Bahía Seleccionada para Reserva -->
+                                    <div id="reserveSelectedBayIndicator" style="display:flex; align-items:center; gap:0.6rem; background:rgba(245, 158, 11, 0.08); border:1px solid rgba(245, 158, 11, 0.35); border-radius:var(--radius-sm); padding:0.4rem 0.85rem; font-size:0.82rem;">
+                                        <span style="color:var(--text-muted);">Espacio a reservar:</span>
+                                        <strong id="reserveSelectedBayCodeDisplay" style="color:var(--amber); font-family:'JetBrains Mono'; font-size:1.15rem;">Ninguno</strong>
+                                        <span id="reserveSelectedBayZoneDisplay" style="color:var(--emerald); font-size:0.75rem;">(Haz clic en una bahía disponible)</span>
+                                    </div>
+                                </div>
+
+                                <!-- Filtros de Categoría Rápidos -->
+                                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                                    <button type="button" class="category-tab-btn active" id="reserveCatBtnAll" onclick="filterReserveBaysByCategory('ALL')">
+                                        <span>🌐</span> Todos (<span id="reserveCatCountAll">0</span>)
+                                    </button>
+                                    <button type="button" class="category-tab-btn" id="reserveCatBtnAP" onclick="filterReserveBaysByCategory('Automóviles pequeños')">
+                                        <span>🚗</span> Aut. pequeños (<span id="reserveCatCountAP">0</span>)
+                                    </button>
+                                    <button type="button" class="category-tab-btn" id="reserveCatBtnAG" onclick="filterReserveBaysByCategory('Automóviles grandes')">
+                                        <span>🚙</span> Aut. grandes (<span id="reserveCatCountAG">0</span>)
+                                    </button>
+                                    <button type="button" class="category-tab-btn" id="reserveCatBtnMoto" onclick="filterReserveBaysByCategory('Motocicletas')">
+                                        <span>🏍️</span> Motos (<span id="reserveCatCountMoto">0</span>)
+                                    </button>
+                                    <button type="button" class="category-tab-btn" id="reserveCatBtnBici" onclick="filterReserveBaysByCategory('Bicicletas')">
+                                        <span>🚲</span> Bicis (<span id="reserveCatCountBici">0</span>)
+                                    </button>
+                                </div>
+
+                                <!-- Leyenda de colores -->
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; font-size:0.72rem;">
+                                    <div style="display:flex; align-items:center; gap:1rem;">
+                                        <span style="display:flex; align-items:center; gap:0.35rem; color:var(--emerald); font-weight:700;">
+                                            <span style="width:10px; height:10px; border-radius:50%; background:var(--emerald); display:inline-block;"></span> Disponible (Clic para reservar)
+                                        </span>
+                                        <span style="display:flex; align-items:center; gap:0.35rem; color:var(--rose); font-weight:700;">
+                                            <span style="width:10px; height:10px; border-radius:50%; background:var(--rose); display:inline-block;"></span> Ocupado
+                                        </span>
+                                        <span style="display:flex; align-items:center; gap:0.35rem; color:var(--amber); font-weight:700;">
+                                            <span style="width:10px; height:10px; border-radius:50%; background:var(--amber); display:inline-block;"></span> Reservado
+                                        </span>
+                                    </div>
+                                    <span style="color:var(--text-muted); font-size:0.72rem;">130 Bahías en Tiempo Real</span>
+                                </div>
+
+                                <!-- Matriz Visual de Bahías con scroll elegante -->
+                                <div id="reserveBaysMatrixContainer" class="bays-matrix" style="grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap:0.65rem; max-height:360px; overflow-y:auto; padding-right:4px;">
+                                    <!-- Inyectado dinámicamente -->
                                 </div>
                             </div>
 
@@ -5213,6 +5274,7 @@ html, body {
             }
         } else if (viewId === 'view-client-reserve') {
             filterAvailableBaysForReservation();
+            renderReserveBaysMap();
             renderClientReservations();
         } else if (viewId === 'view-client-bays') {
             renderClientCategorizedMap();
@@ -5307,6 +5369,7 @@ html, body {
         renderBayMatrix();
         renderClientCategorizedMap();
         renderEntryBaysMap();
+        renderReserveBaysMap();
         filterAvailableBaysForClientSelf();
         renderClientReservations();
         filterAvailableBaysForReservation();
@@ -6745,6 +6808,7 @@ html, body {
     // =========================================================================
     let currentClientCategoryFilter = 'ALL';
     let currentEntryCategoryFilter = 'ALL';
+    let currentReserveCategoryFilter = 'ALL';
     let selectedClientBayCode = null;
 
     function switchClientActionTab(tab) {
@@ -6775,6 +6839,7 @@ html, body {
 
         filterClientBaysByCategory(type);
         filterEntryBaysByCategory(type);
+        filterReserveBaysByCategory(type);
         filterAvailableBaysForClientSelf();
         filterAvailableBaysForReservation();
         calculateReservationCost();
@@ -6935,12 +7000,149 @@ html, body {
         if (!codigo) return;
         selectedClientBayCode = codigo;
         renderEntryBaysMap();
+        renderReserveBaysMap();
         renderClientCategorizedMap();
 
         const bayCard = document.getElementById(`entry-bay-${codigo}`);
         if (bayCard) {
             bayCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+    }
+
+    // Filtrar bahías dentro del formulario de Reservas Anticipadas
+    function filterReserveBaysByCategory(category) {
+        currentReserveCategoryFilter = category;
+
+        const btns = {
+            'ALL': 'reserveCatBtnAll',
+            'Automóviles pequeños': 'reserveCatBtnAP',
+            'Automóviles grandes': 'reserveCatBtnAG',
+            'Motocicletas': 'reserveCatBtnMoto',
+            'Bicicletas': 'reserveCatBtnBici',
+            'Automóvil': 'reserveCatBtnAP',
+            'Camioneta': 'reserveCatBtnAG',
+            'Motocicleta': 'reserveCatBtnMoto',
+            'Bicicleta': 'reserveCatBtnBici'
+        };
+
+        const activeId = btns[category] || 'reserveCatBtnAll';
+        ['reserveCatBtnAll', 'reserveCatBtnAP', 'reserveCatBtnAG', 'reserveCatBtnMoto', 'reserveCatBtnBici'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                if (id === activeId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            }
+        });
+
+        renderReserveBaysMap();
+    }
+
+    // Renderizar Mapa de Bahías dentro de Reservas Anticipadas
+    function renderReserveBaysMap() {
+        const container = document.getElementById('reserveBaysMatrixContainer');
+        if (!container) return;
+
+        let spotsList = saasState.spots || [];
+        if (currentReserveCategoryFilter !== 'ALL') {
+            const filter = currentReserveCategoryFilter.toLowerCase();
+            spotsList = spotsList.filter(s => {
+                const tipo = (s.tipoPermitido || '').toLowerCase();
+                const zona = (s.zona || '').toLowerCase();
+                return tipo === filter || tipo.includes(filter) || filter.includes(tipo) || zona.includes(filter);
+            });
+        }
+
+        const countAll = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE').length;
+        const countAP = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('pequeñ') || (s.zona || '').toLowerCase().includes('pequeñ') || s.tipoPermitido === 'Automóvil')).length;
+        const countAG = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('grand') || (s.zona || '').toLowerCase().includes('grand') || s.tipoPermitido === 'Camioneta')).length;
+        const countMoto = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('moto') || (s.zona || '').toLowerCase().includes('moto'))).length;
+        const countBici = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('bici') || (s.zona || '').toLowerCase().includes('bici'))).length;
+
+        const elAll = document.getElementById('reserveCatCountAll'); if (elAll) elAll.textContent = countAll;
+        const elAP = document.getElementById('reserveCatCountAP'); if (elAP) elAP.textContent = countAP;
+        const elAG = document.getElementById('reserveCatCountAG'); if (elAG) elAG.textContent = countAG;
+        const elMoto = document.getElementById('reserveCatCountMoto'); if (elMoto) elMoto.textContent = countMoto;
+        const elBici = document.getElementById('reserveCatCountBici'); if (elBici) elBici.textContent = countBici;
+
+        // Actualizar indicador de espacio seleccionado para reserva
+        const codeDisplay = document.getElementById('reserveSelectedBayCodeDisplay');
+        const zoneDisplay = document.getElementById('reserveSelectedBayZoneDisplay');
+        const indicatorBox = document.getElementById('reserveSelectedBayIndicator');
+
+        if (selectedClientBayCode) {
+            const spot = (saasState.spots || []).find(s => s.codigo === selectedClientBayCode);
+            if (codeDisplay) codeDisplay.textContent = selectedClientBayCode;
+            if (zoneDisplay) {
+                const zText = spot ? `${spot.tipoPermitido || spot.zona} · ${spot.estado === 'DISPONIBLE' ? 'Libre' : spot.estado}` : 'Seleccionado';
+                zoneDisplay.textContent = `(${zText})`;
+                zoneDisplay.style.color = (spot && spot.estado === 'DISPONIBLE') ? 'var(--emerald)' : 'var(--amber)';
+            }
+            if (indicatorBox) {
+                indicatorBox.style.background = 'rgba(245, 158, 11, 0.16)';
+                indicatorBox.style.borderColor = 'var(--amber)';
+                indicatorBox.style.boxShadow = '0 0 14px rgba(245, 158, 11, 0.35)';
+            }
+        } else {
+            if (codeDisplay) codeDisplay.textContent = 'Ninguno';
+            if (zoneDisplay) {
+                zoneDisplay.textContent = '(Haz clic en una bahía disponible)';
+                zoneDisplay.style.color = 'var(--text-muted)';
+            }
+            if (indicatorBox) {
+                indicatorBox.style.background = 'rgba(245, 158, 11, 0.08)';
+                indicatorBox.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+                indicatorBox.style.boxShadow = 'none';
+            }
+        }
+
+        if (spotsList.length === 0) {
+            container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:2rem; color:var(--text-muted);">No hay bahías para este filtro.</div>`;
+            return;
+        }
+
+        container.innerHTML = spotsList.map(s => {
+            const isAvailable = (s.estado === 'DISPONIBLE');
+            const isReserved = (s.estado === 'RESERVADO');
+            const isOccupied = (s.estado === 'OCUPADO');
+
+            const stateClass = isAvailable ? 'bay-disponible' : isReserved ? 'bay-reservado' : 'bay-ocupado';
+            const isSelected = (selectedClientBayCode === s.codigo);
+
+            const tipoLower = (s.tipoPermitido || s.zona || '').toLowerCase();
+            const icon = tipoLower.includes('moto') ? '🏍️' : tipoLower.includes('bici') ? '🚲' : tipoLower.includes('grand') || tipoLower.includes('camioneta') ? '🚙' : '🚗';
+            const stateLabel = isAvailable ? 'Libre' : isReserved ? 'Reservado' : 'Ocupado';
+
+            return `
+                <div class="bay-cell ${stateClass} ${isSelected ? 'bay-selected-target' : ''}" 
+                     onclick="selectBayForClient('${s.codigo}', '${s.tipoPermitido}', '${s.estado}')"
+                     style="cursor:pointer;"
+                     id="reserve-bay-${s.codigo}"
+                     title="${s.codigo} · ${s.zona} (${s.estado}) - Clic para reservar">
+                    <div style="font-size:0.9rem; margin-bottom:0.2rem;">${icon}</div>
+                    <div class="bay-code">${s.codigo}</div>
+                    <div class="bay-plate-text">${s.placaActual || (isReserved ? 'RESERVA' : s.tipoPermitido)}</div>
+                    <span class="bay-state-tag">${stateLabel}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Cambio desde el select dropdown de bahías en Reservas
+    function onReserveBayDropdownChange(codigo) {
+        if (!codigo) return;
+        selectedClientBayCode = codigo;
+        renderReserveBaysMap();
+        renderEntryBaysMap();
+        renderClientCategorizedMap();
+
+        const bayCard = document.getElementById(`reserve-bay-${codigo}`);
+        if (bayCard) {
+            bayCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        calculateReservationCost();
     }
 
     function renderClientCategorizedMap() {
@@ -7059,6 +7261,7 @@ html, body {
         }
 
         renderEntryBaysMap();
+        renderReserveBaysMap();
         renderClientCategorizedMap();
         calculateReservationCost();
 
@@ -7347,6 +7550,9 @@ html, body {
     window.filterEntryBaysByCategory = filterEntryBaysByCategory;
     window.renderEntryBaysMap = renderEntryBaysMap;
     window.onClientSelfBayDropdownChange = onClientSelfBayDropdownChange;
+    window.filterReserveBaysByCategory = filterReserveBaysByCategory;
+    window.renderReserveBaysMap = renderReserveBaysMap;
+    window.onReserveBayDropdownChange = onReserveBayDropdownChange;
     window.renderClientCategorizedMap = renderClientCategorizedMap;
     window.selectBayForClient = selectBayForClient;
     window.filterAvailableBaysForReservation = filterAvailableBaysForReservation;

@@ -800,6 +800,7 @@
             }
         } else if (viewId === 'view-client-reserve') {
             filterAvailableBaysForReservation();
+            renderReserveBaysMap();
             renderClientReservations();
         } else if (viewId === 'view-client-bays') {
             renderClientCategorizedMap();
@@ -894,6 +895,7 @@
         renderBayMatrix();
         renderClientCategorizedMap();
         renderEntryBaysMap();
+        renderReserveBaysMap();
         filterAvailableBaysForClientSelf();
         renderClientReservations();
         filterAvailableBaysForReservation();
@@ -2332,6 +2334,7 @@
     // =========================================================================
     let currentClientCategoryFilter = 'ALL';
     let currentEntryCategoryFilter = 'ALL';
+    let currentReserveCategoryFilter = 'ALL';
     let selectedClientBayCode = null;
 
     function switchClientActionTab(tab) {
@@ -2362,6 +2365,7 @@
 
         filterClientBaysByCategory(type);
         filterEntryBaysByCategory(type);
+        filterReserveBaysByCategory(type);
         filterAvailableBaysForClientSelf();
         filterAvailableBaysForReservation();
         calculateReservationCost();
@@ -2522,12 +2526,149 @@
         if (!codigo) return;
         selectedClientBayCode = codigo;
         renderEntryBaysMap();
+        renderReserveBaysMap();
         renderClientCategorizedMap();
 
         const bayCard = document.getElementById(`entry-bay-${codigo}`);
         if (bayCard) {
             bayCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+    }
+
+    // Filtrar bahías dentro del formulario de Reservas Anticipadas
+    function filterReserveBaysByCategory(category) {
+        currentReserveCategoryFilter = category;
+
+        const btns = {
+            'ALL': 'reserveCatBtnAll',
+            'Automóviles pequeños': 'reserveCatBtnAP',
+            'Automóviles grandes': 'reserveCatBtnAG',
+            'Motocicletas': 'reserveCatBtnMoto',
+            'Bicicletas': 'reserveCatBtnBici',
+            'Automóvil': 'reserveCatBtnAP',
+            'Camioneta': 'reserveCatBtnAG',
+            'Motocicleta': 'reserveCatBtnMoto',
+            'Bicicleta': 'reserveCatBtnBici'
+        };
+
+        const activeId = btns[category] || 'reserveCatBtnAll';
+        ['reserveCatBtnAll', 'reserveCatBtnAP', 'reserveCatBtnAG', 'reserveCatBtnMoto', 'reserveCatBtnBici'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                if (id === activeId) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            }
+        });
+
+        renderReserveBaysMap();
+    }
+
+    // Renderizar Mapa de Bahías dentro de Reservas Anticipadas
+    function renderReserveBaysMap() {
+        const container = document.getElementById('reserveBaysMatrixContainer');
+        if (!container) return;
+
+        let spotsList = saasState.spots || [];
+        if (currentReserveCategoryFilter !== 'ALL') {
+            const filter = currentReserveCategoryFilter.toLowerCase();
+            spotsList = spotsList.filter(s => {
+                const tipo = (s.tipoPermitido || '').toLowerCase();
+                const zona = (s.zona || '').toLowerCase();
+                return tipo === filter || tipo.includes(filter) || filter.includes(tipo) || zona.includes(filter);
+            });
+        }
+
+        const countAll = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE').length;
+        const countAP = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('pequeñ') || (s.zona || '').toLowerCase().includes('pequeñ') || s.tipoPermitido === 'Automóvil')).length;
+        const countAG = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('grand') || (s.zona || '').toLowerCase().includes('grand') || s.tipoPermitido === 'Camioneta')).length;
+        const countMoto = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('moto') || (s.zona || '').toLowerCase().includes('moto'))).length;
+        const countBici = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('bici') || (s.zona || '').toLowerCase().includes('bici'))).length;
+
+        const elAll = document.getElementById('reserveCatCountAll'); if (elAll) elAll.textContent = countAll;
+        const elAP = document.getElementById('reserveCatCountAP'); if (elAP) elAP.textContent = countAP;
+        const elAG = document.getElementById('reserveCatCountAG'); if (elAG) elAG.textContent = countAG;
+        const elMoto = document.getElementById('reserveCatCountMoto'); if (elMoto) elMoto.textContent = countMoto;
+        const elBici = document.getElementById('reserveCatCountBici'); if (elBici) elBici.textContent = countBici;
+
+        // Actualizar indicador de espacio seleccionado para reserva
+        const codeDisplay = document.getElementById('reserveSelectedBayCodeDisplay');
+        const zoneDisplay = document.getElementById('reserveSelectedBayZoneDisplay');
+        const indicatorBox = document.getElementById('reserveSelectedBayIndicator');
+
+        if (selectedClientBayCode) {
+            const spot = (saasState.spots || []).find(s => s.codigo === selectedClientBayCode);
+            if (codeDisplay) codeDisplay.textContent = selectedClientBayCode;
+            if (zoneDisplay) {
+                const zText = spot ? `${spot.tipoPermitido || spot.zona} · ${spot.estado === 'DISPONIBLE' ? 'Libre' : spot.estado}` : 'Seleccionado';
+                zoneDisplay.textContent = `(${zText})`;
+                zoneDisplay.style.color = (spot && spot.estado === 'DISPONIBLE') ? 'var(--emerald)' : 'var(--amber)';
+            }
+            if (indicatorBox) {
+                indicatorBox.style.background = 'rgba(245, 158, 11, 0.16)';
+                indicatorBox.style.borderColor = 'var(--amber)';
+                indicatorBox.style.boxShadow = '0 0 14px rgba(245, 158, 11, 0.35)';
+            }
+        } else {
+            if (codeDisplay) codeDisplay.textContent = 'Ninguno';
+            if (zoneDisplay) {
+                zoneDisplay.textContent = '(Haz clic en una bahía disponible)';
+                zoneDisplay.style.color = 'var(--text-muted)';
+            }
+            if (indicatorBox) {
+                indicatorBox.style.background = 'rgba(245, 158, 11, 0.08)';
+                indicatorBox.style.borderColor = 'rgba(245, 158, 11, 0.35)';
+                indicatorBox.style.boxShadow = 'none';
+            }
+        }
+
+        if (spotsList.length === 0) {
+            container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:2rem; color:var(--text-muted);">No hay bahías para este filtro.</div>`;
+            return;
+        }
+
+        container.innerHTML = spotsList.map(s => {
+            const isAvailable = (s.estado === 'DISPONIBLE');
+            const isReserved = (s.estado === 'RESERVADO');
+            const isOccupied = (s.estado === 'OCUPADO');
+
+            const stateClass = isAvailable ? 'bay-disponible' : isReserved ? 'bay-reservado' : 'bay-ocupado';
+            const isSelected = (selectedClientBayCode === s.codigo);
+
+            const tipoLower = (s.tipoPermitido || s.zona || '').toLowerCase();
+            const icon = tipoLower.includes('moto') ? '🏍️' : tipoLower.includes('bici') ? '🚲' : tipoLower.includes('grand') || tipoLower.includes('camioneta') ? '🚙' : '🚗';
+            const stateLabel = isAvailable ? 'Libre' : isReserved ? 'Reservado' : 'Ocupado';
+
+            return `
+                <div class="bay-cell ${stateClass} ${isSelected ? 'bay-selected-target' : ''}" 
+                     onclick="selectBayForClient('${s.codigo}', '${s.tipoPermitido}', '${s.estado}')"
+                     style="cursor:pointer;"
+                     id="reserve-bay-${s.codigo}"
+                     title="${s.codigo} · ${s.zona} (${s.estado}) - Clic para reservar">
+                    <div style="font-size:0.9rem; margin-bottom:0.2rem;">${icon}</div>
+                    <div class="bay-code">${s.codigo}</div>
+                    <div class="bay-plate-text">${s.placaActual || (isReserved ? 'RESERVA' : s.tipoPermitido)}</div>
+                    <span class="bay-state-tag">${stateLabel}</span>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Cambio desde el select dropdown de bahías en Reservas
+    function onReserveBayDropdownChange(codigo) {
+        if (!codigo) return;
+        selectedClientBayCode = codigo;
+        renderReserveBaysMap();
+        renderEntryBaysMap();
+        renderClientCategorizedMap();
+
+        const bayCard = document.getElementById(`reserve-bay-${codigo}`);
+        if (bayCard) {
+            bayCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        calculateReservationCost();
     }
 
     function renderClientCategorizedMap() {
@@ -2646,6 +2787,7 @@
         }
 
         renderEntryBaysMap();
+        renderReserveBaysMap();
         renderClientCategorizedMap();
         calculateReservationCost();
 
@@ -2934,6 +3076,9 @@
     window.filterEntryBaysByCategory = filterEntryBaysByCategory;
     window.renderEntryBaysMap = renderEntryBaysMap;
     window.onClientSelfBayDropdownChange = onClientSelfBayDropdownChange;
+    window.filterReserveBaysByCategory = filterReserveBaysByCategory;
+    window.renderReserveBaysMap = renderReserveBaysMap;
+    window.onReserveBayDropdownChange = onReserveBayDropdownChange;
     window.renderClientCategorizedMap = renderClientCategorizedMap;
     window.selectBayForClient = selectBayForClient;
     window.filterAvailableBaysForReservation = filterAvailableBaysForReservation;
