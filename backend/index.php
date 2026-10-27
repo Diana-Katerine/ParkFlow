@@ -2969,23 +2969,25 @@ html, body {
                                     </div>
                                 </div>
 
-                                <!-- Filtros de Categoría Rápidos -->
-                                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
-                                    <button type="button" class="category-tab-btn active" id="entryCatBtnAll" onclick="filterEntryBaysByCategory('ALL')">
-                                        <span>🌐</span> Todos (<span id="entryCatCountAll">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="entryCatBtnAP" onclick="filterEntryBaysByCategory('Automóviles pequeños')">
-                                        <span>🚗</span> Aut. pequeños (<span id="entryCatCountAP">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="entryCatBtnAG" onclick="filterEntryBaysByCategory('Automóviles grandes')">
-                                        <span>🚙</span> Aut. grandes (<span id="entryCatCountAG">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="entryCatBtnMoto" onclick="filterEntryBaysByCategory('Motocicletas')">
-                                        <span>🏍️</span> Motos (<span id="entryCatCountMoto">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="entryCatBtnBici" onclick="filterEntryBaysByCategory('Bicicletas')">
-                                        <span>🚲</span> Bicis (<span id="entryCatCountBici">0</span>)
-                                    </button>
+                                <!-- Filtros Rápidos por Categoría -->
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                                    <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                        <button type="button" class="category-tab-btn active" id="entryCatBtnAP" onclick="filterEntryBaysByCategory('Automóviles pequeños')">
+                                            <span>🚗</span> Aut. pequeños (<span id="entryCatCountAP">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="entryCatBtnAG" onclick="filterEntryBaysByCategory('Automóviles grandes')">
+                                            <span>🚙</span> Aut. grandes (<span id="entryCatCountAG">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="entryCatBtnMoto" onclick="filterEntryBaysByCategory('Motocicletas')">
+                                            <span>🏍️</span> Motos (<span id="entryCatCountMoto">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="entryCatBtnBici" onclick="filterEntryBaysByCategory('Bicicletas')">
+                                            <span>🚲</span> Bicis (<span id="entryCatCountBici">0</span>)
+                                        </button>
+                                    </div>
+                                    <div style="font-size:0.75rem; color:var(--primary); font-weight:700;">
+                                        Bahías exclusivas para: <span id="entryCurrentTypeName">Automóviles pequeños</span>
+                                    </div>
                                 </div>
 
                                 <!-- Leyenda de colores -->
@@ -3001,7 +3003,7 @@ html, body {
                                             <span style="width:10px; height:10px; border-radius:50%; background:var(--amber); display:inline-block;"></span> Reservado
                                         </span>
                                     </div>
-                                    <span style="color:var(--text-muted); font-size:0.72rem;">130 Bahías en Tiempo Real</span>
+                                    <span id="entryBaysCountSummary" style="color:var(--text-muted); font-size:0.72rem;">Cargando bahías...</span>
                                 </div>
 
                                 <!-- Matriz Visual de Bahías con scroll elegante -->
@@ -3163,23 +3165,25 @@ html, body {
                                     </div>
                                 </div>
 
-                                <!-- Filtros de Categoría Rápidos -->
-                                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
-                                    <button type="button" class="category-tab-btn active" id="reserveCatBtnAll" onclick="filterReserveBaysByCategory('ALL')">
-                                        <span>🌐</span> Todos (<span id="reserveCatCountAll">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="reserveCatBtnAP" onclick="filterReserveBaysByCategory('Automóviles pequeños')">
-                                        <span>🚗</span> Aut. pequeños (<span id="reserveCatCountAP">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="reserveCatBtnAG" onclick="filterReserveBaysByCategory('Automóviles grandes')">
-                                        <span>🚙</span> Aut. grandes (<span id="reserveCatCountAG">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="reserveCatBtnMoto" onclick="filterReserveBaysByCategory('Motocicletas')">
-                                        <span>🏍️</span> Motos (<span id="reserveCatCountMoto">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="reserveCatBtnBici" onclick="filterReserveBaysByCategory('Bicicletas')">
-                                        <span>🚲</span> Bicis (<span id="reserveCatCountBici">0</span>)
-                                    </button>
+                                <!-- Filtros Rápidos por Categoría -->
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                                    <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                        <button type="button" class="category-tab-btn active" id="reserveCatBtnAP" onclick="filterReserveBaysByCategory('Automóviles pequeños')">
+                                            <span>🚗</span> Aut. pequeños (<span id="reserveCatCountAP">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="reserveCatBtnAG" onclick="filterReserveBaysByCategory('Automóviles grandes')">
+                                            <span>🚙</span> Aut. grandes (<span id="reserveCatCountAG">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="reserveCatBtnMoto" onclick="filterReserveBaysByCategory('Motocicletas')">
+                                            <span>🏍️</span> Motos (<span id="reserveCatCountMoto">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="reserveCatBtnBici" onclick="filterReserveBaysByCategory('Bicicletas')">
+                                            <span>🚲</span> Bicis (<span id="reserveCatCountBici">0</span>)
+                                        </button>
+                                    </div>
+                                    <div style="font-size:0.75rem; color:var(--amber); font-weight:700;">
+                                        Bahías exclusivas para: <span id="reserveCurrentTypeName">Automóviles pequeños</span>
+                                    </div>
                                 </div>
 
                                 <!-- Leyenda de colores -->
@@ -3195,7 +3199,7 @@ html, body {
                                             <span style="width:10px; height:10px; border-radius:50%; background:var(--amber); display:inline-block;"></span> Reservado
                                         </span>
                                     </div>
-                                    <span style="color:var(--text-muted); font-size:0.72rem;">130 Bahías en Tiempo Real</span>
+                                    <span id="reserveBaysCountSummary" style="color:var(--text-muted); font-size:0.72rem;">Cargando bahías...</span>
                                 </div>
 
                                 <!-- Matriz Visual de Bahías con scroll elegante -->
@@ -6837,12 +6841,38 @@ html, body {
         if (selfType) selfType.value = type;
         if (resType) resType.value = type;
 
-        filterClientBaysByCategory(type);
-        filterEntryBaysByCategory(type);
-        filterReserveBaysByCategory(type);
+        currentClientCategoryFilter = type;
+        currentEntryCategoryFilter = type;
+        currentReserveCategoryFilter = type;
+
         filterAvailableBaysForClientSelf();
         filterAvailableBaysForReservation();
+        renderEntryBaysMap();
+        renderReserveBaysMap();
+        renderClientCategorizedMap();
         calculateReservationCost();
+    }
+
+    // Helper para obtener estrictamente las bahías correspondientes a un tipo de vehículo
+    function getSpotsForVehicleType(selectedType) {
+        const sel = (selectedType || 'Automóviles pequeños').toLowerCase();
+        return (saasState.spots || []).filter(s => {
+            const tipo = (s.tipoPermitido || '').toLowerCase();
+            const zona = (s.zona || '').toLowerCase();
+            if (sel.includes('pequeñ') || sel === 'automóvil' || sel === 'automovil') {
+                return tipo.includes('pequeñ') || zona.includes('pequeñ') || tipo === 'automóvil' || tipo === 'automovil';
+            }
+            if (sel.includes('grand') || sel === 'camioneta') {
+                return tipo.includes('grand') || zona.includes('grand') || tipo === 'camioneta';
+            }
+            if (sel.includes('moto')) {
+                return tipo.includes('moto') || zona.includes('moto');
+            }
+            if (sel.includes('bici')) {
+                return tipo.includes('bici') || zona.includes('bici');
+            }
+            return tipo.includes(sel) || zona.includes(sel);
+        });
     }
 
     function filterClientBaysByCategory(category) {
@@ -6874,63 +6904,57 @@ html, body {
         renderClientCategorizedMap();
     }
 
-    // Filtrar bahías dentro del formulario de Registro de Vehículo
-    function filterEntryBaysByCategory(category) {
-        currentEntryCategoryFilter = category;
-
-        const btns = {
-            'ALL': 'entryCatBtnAll',
-            'Automóviles pequeños': 'entryCatBtnAP',
-            'Automóviles grandes': 'entryCatBtnAG',
-            'Motocicletas': 'entryCatBtnMoto',
-            'Bicicletas': 'entryCatBtnBici',
-            'Automóvil': 'entryCatBtnAP',
-            'Camioneta': 'entryCatBtnAG',
-            'Motocicleta': 'entryCatBtnMoto',
-            'Bicicleta': 'entryCatBtnBici'
-        };
-
-        const activeId = btns[category] || 'entryCatBtnAll';
-        ['entryCatBtnAll', 'entryCatBtnAP', 'entryCatBtnAG', 'entryCatBtnMoto', 'entryCatBtnBici'].forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                if (id === activeId) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            }
-        });
-
-        renderEntryBaysMap();
+    // Filtrar bahías dentro del formulario de Registro de Vehículo al hacer clic en pestañas
+    function filterEntryBaysByCategory(type) {
+        const selfType = document.getElementById('clientSelfType');
+        if (selfType) selfType.value = type;
+        onClientVehicleTypeChange(type);
     }
 
-    // Renderizar Mapa de Bahías dentro de Registro de Vehículo
+    // Renderizar Mapa de Bahías dentro de Registro de Vehículo (Solo muestra el tipo seleccionado)
     function renderEntryBaysMap() {
         const container = document.getElementById('entryBaysMatrixContainer');
         if (!container) return;
 
-        let spotsList = saasState.spots || [];
-        if (currentEntryCategoryFilter !== 'ALL') {
-            const filter = currentEntryCategoryFilter.toLowerCase();
-            spotsList = spotsList.filter(s => {
-                const tipo = (s.tipoPermitido || '').toLowerCase();
-                const zona = (s.zona || '').toLowerCase();
-                return tipo === filter || tipo.includes(filter) || filter.includes(tipo) || zona.includes(filter);
-            });
-        }
+        const typeSelect = document.getElementById('clientSelfType');
+        const selectedType = typeSelect ? typeSelect.value : (currentEntryCategoryFilter || 'Automóviles pequeños');
 
-        const countAll = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE').length;
+        // Filtrar estrictamente solo las bahías del tipo seleccionado
+        const spotsList = getSpotsForVehicleType(selectedType);
+
+        // Actualizar tabs de categoría activas en Registro
+        const catMap = {
+            'Automóviles pequeños': 'entryCatBtnAP',
+            'Automóviles grandes': 'entryCatBtnAG',
+            'Motocicletas': 'entryCatBtnMoto',
+            'Bicicletas': 'entryCatBtnBici'
+        };
+        ['entryCatBtnAP', 'entryCatBtnAG', 'entryCatBtnMoto', 'entryCatBtnBici'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.classList.remove('active');
+        });
+        const activeBtnId = catMap[selectedType] || 'entryCatBtnAP';
+        const activeBtn = document.getElementById(activeBtnId);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        // Contadores por categoría
         const countAP = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('pequeñ') || (s.zona || '').toLowerCase().includes('pequeñ') || s.tipoPermitido === 'Automóvil')).length;
         const countAG = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('grand') || (s.zona || '').toLowerCase().includes('grand') || s.tipoPermitido === 'Camioneta')).length;
         const countMoto = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('moto') || (s.zona || '').toLowerCase().includes('moto'))).length;
         const countBici = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('bici') || (s.zona || '').toLowerCase().includes('bici'))).length;
 
-        const elAll = document.getElementById('entryCatCountAll'); if (elAll) elAll.textContent = countAll;
         const elAP = document.getElementById('entryCatCountAP'); if (elAP) elAP.textContent = countAP;
         const elAG = document.getElementById('entryCatCountAG'); if (elAG) elAG.textContent = countAG;
         const elMoto = document.getElementById('entryCatCountMoto'); if (elMoto) elMoto.textContent = countMoto;
         const elBici = document.getElementById('entryCatCountBici'); if (elBici) elBici.textContent = countBici;
+
+        // Nombre del tipo de vehículo filtrado y resumen de cantidad
+        const typeNameEl = document.getElementById('entryCurrentTypeName');
+        if (typeNameEl) typeNameEl.textContent = selectedType;
+
+        const freeCount = spotsList.filter(s => s.estado === 'DISPONIBLE').length;
+        const summaryEl = document.getElementById('entryBaysCountSummary');
+        if (summaryEl) summaryEl.textContent = `${spotsList.length} bahías exclusivas · ${freeCount} libres`;
 
         // Actualizar indicador de espacio seleccionado
         const codeDisplay = document.getElementById('entrySelectedBayCodeDisplay');
@@ -6964,15 +6988,13 @@ html, body {
         }
 
         if (spotsList.length === 0) {
-            container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:2rem; color:var(--text-muted);">No hay bahías para este filtro.</div>`;
+            container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:2rem; color:var(--text-muted);">No hay bahías configuradas para ${selectedType}.</div>`;
             return;
         }
 
         container.innerHTML = spotsList.map(s => {
             const isAvailable = (s.estado === 'DISPONIBLE');
             const isReserved = (s.estado === 'RESERVADO');
-            const isOccupied = (s.estado === 'OCUPADO');
-
             const stateClass = isAvailable ? 'bay-disponible' : isReserved ? 'bay-reservado' : 'bay-ocupado';
             const isSelected = (selectedClientBayCode === s.codigo);
 
@@ -7009,63 +7031,57 @@ html, body {
         }
     }
 
-    // Filtrar bahías dentro del formulario de Reservas Anticipadas
-    function filterReserveBaysByCategory(category) {
-        currentReserveCategoryFilter = category;
-
-        const btns = {
-            'ALL': 'reserveCatBtnAll',
-            'Automóviles pequeños': 'reserveCatBtnAP',
-            'Automóviles grandes': 'reserveCatBtnAG',
-            'Motocicletas': 'reserveCatBtnMoto',
-            'Bicicletas': 'reserveCatBtnBici',
-            'Automóvil': 'reserveCatBtnAP',
-            'Camioneta': 'reserveCatBtnAG',
-            'Motocicleta': 'reserveCatBtnMoto',
-            'Bicicleta': 'reserveCatBtnBici'
-        };
-
-        const activeId = btns[category] || 'reserveCatBtnAll';
-        ['reserveCatBtnAll', 'reserveCatBtnAP', 'reserveCatBtnAG', 'reserveCatBtnMoto', 'reserveCatBtnBici'].forEach(id => {
-            const btn = document.getElementById(id);
-            if (btn) {
-                if (id === activeId) {
-                    btn.classList.add('active');
-                } else {
-                    btn.classList.remove('active');
-                }
-            }
-        });
-
-        renderReserveBaysMap();
+    // Filtrar bahías dentro del formulario de Reservas Anticipadas al hacer clic en pestañas
+    function filterReserveBaysByCategory(type) {
+        const resType = document.getElementById('reserveType');
+        if (resType) resType.value = type;
+        onClientVehicleTypeChange(type);
     }
 
-    // Renderizar Mapa de Bahías dentro de Reservas Anticipadas
+    // Renderizar Mapa de Bahías dentro de Reservas Anticipadas (Solo muestra el tipo seleccionado)
     function renderReserveBaysMap() {
         const container = document.getElementById('reserveBaysMatrixContainer');
         if (!container) return;
 
-        let spotsList = saasState.spots || [];
-        if (currentReserveCategoryFilter !== 'ALL') {
-            const filter = currentReserveCategoryFilter.toLowerCase();
-            spotsList = spotsList.filter(s => {
-                const tipo = (s.tipoPermitido || '').toLowerCase();
-                const zona = (s.zona || '').toLowerCase();
-                return tipo === filter || tipo.includes(filter) || filter.includes(tipo) || zona.includes(filter);
-            });
-        }
+        const typeSelect = document.getElementById('reserveType');
+        const selectedType = typeSelect ? typeSelect.value : (currentReserveCategoryFilter || 'Automóviles pequeños');
 
-        const countAll = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE').length;
+        // Filtrar estrictamente solo las bahías del tipo seleccionado
+        const spotsList = getSpotsForVehicleType(selectedType);
+
+        // Actualizar tabs de categoría activas en Reservas
+        const catMap = {
+            'Automóviles pequeños': 'reserveCatBtnAP',
+            'Automóviles grandes': 'reserveCatBtnAG',
+            'Motocicletas': 'reserveCatBtnMoto',
+            'Bicicletas': 'reserveCatBtnBici'
+        };
+        ['reserveCatBtnAP', 'reserveCatBtnAG', 'reserveCatBtnMoto', 'reserveCatBtnBici'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.classList.remove('active');
+        });
+        const activeBtnId = catMap[selectedType] || 'reserveCatBtnAP';
+        const activeBtn = document.getElementById(activeBtnId);
+        if (activeBtn) activeBtn.classList.add('active');
+
+        // Contadores por categoría
         const countAP = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('pequeñ') || (s.zona || '').toLowerCase().includes('pequeñ') || s.tipoPermitido === 'Automóvil')).length;
         const countAG = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('grand') || (s.zona || '').toLowerCase().includes('grand') || s.tipoPermitido === 'Camioneta')).length;
         const countMoto = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('moto') || (s.zona || '').toLowerCase().includes('moto'))).length;
         const countBici = (saasState.spots || []).filter(s => s.estado === 'DISPONIBLE' && ((s.tipoPermitido || '').toLowerCase().includes('bici') || (s.zona || '').toLowerCase().includes('bici'))).length;
 
-        const elAll = document.getElementById('reserveCatCountAll'); if (elAll) elAll.textContent = countAll;
         const elAP = document.getElementById('reserveCatCountAP'); if (elAP) elAP.textContent = countAP;
         const elAG = document.getElementById('reserveCatCountAG'); if (elAG) elAG.textContent = countAG;
         const elMoto = document.getElementById('reserveCatCountMoto'); if (elMoto) elMoto.textContent = countMoto;
         const elBici = document.getElementById('reserveCatCountBici'); if (elBici) elBici.textContent = countBici;
+
+        // Nombre del tipo de vehículo filtrado y resumen de cantidad
+        const typeNameEl = document.getElementById('reserveCurrentTypeName');
+        if (typeNameEl) typeNameEl.textContent = selectedType;
+
+        const freeCount = spotsList.filter(s => s.estado === 'DISPONIBLE').length;
+        const summaryEl = document.getElementById('reserveBaysCountSummary');
+        if (summaryEl) summaryEl.textContent = `${spotsList.length} bahías exclusivas · ${freeCount} libres`;
 
         // Actualizar indicador de espacio seleccionado para reserva
         const codeDisplay = document.getElementById('reserveSelectedBayCodeDisplay');
@@ -7099,15 +7115,13 @@ html, body {
         }
 
         if (spotsList.length === 0) {
-            container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:2rem; color:var(--text-muted);">No hay bahías para este filtro.</div>`;
+            container.innerHTML = `<div style="grid-column: 1 / -1; text-align:center; padding:2rem; color:var(--text-muted);">No hay bahías configuradas para ${selectedType}.</div>`;
             return;
         }
 
         container.innerHTML = spotsList.map(s => {
             const isAvailable = (s.estado === 'DISPONIBLE');
             const isReserved = (s.estado === 'RESERVADO');
-            const isOccupied = (s.estado === 'OCUPADO');
-
             const stateClass = isAvailable ? 'bay-disponible' : isReserved ? 'bay-reservado' : 'bay-ocupado';
             const isSelected = (selectedClientBayCode === s.codigo);
 

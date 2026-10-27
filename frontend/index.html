@@ -972,23 +972,25 @@
                                     </div>
                                 </div>
 
-                                <!-- Filtros de Categoría Rápidos -->
-                                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
-                                    <button type="button" class="category-tab-btn active" id="entryCatBtnAll" onclick="filterEntryBaysByCategory('ALL')">
-                                        <span>🌐</span> Todos (<span id="entryCatCountAll">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="entryCatBtnAP" onclick="filterEntryBaysByCategory('Automóviles pequeños')">
-                                        <span>🚗</span> Aut. pequeños (<span id="entryCatCountAP">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="entryCatBtnAG" onclick="filterEntryBaysByCategory('Automóviles grandes')">
-                                        <span>🚙</span> Aut. grandes (<span id="entryCatCountAG">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="entryCatBtnMoto" onclick="filterEntryBaysByCategory('Motocicletas')">
-                                        <span>🏍️</span> Motos (<span id="entryCatCountMoto">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="entryCatBtnBici" onclick="filterEntryBaysByCategory('Bicicletas')">
-                                        <span>🚲</span> Bicis (<span id="entryCatCountBici">0</span>)
-                                    </button>
+                                <!-- Filtros Rápidos por Categoría -->
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                                    <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                        <button type="button" class="category-tab-btn active" id="entryCatBtnAP" onclick="filterEntryBaysByCategory('Automóviles pequeños')">
+                                            <span>🚗</span> Aut. pequeños (<span id="entryCatCountAP">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="entryCatBtnAG" onclick="filterEntryBaysByCategory('Automóviles grandes')">
+                                            <span>🚙</span> Aut. grandes (<span id="entryCatCountAG">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="entryCatBtnMoto" onclick="filterEntryBaysByCategory('Motocicletas')">
+                                            <span>🏍️</span> Motos (<span id="entryCatCountMoto">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="entryCatBtnBici" onclick="filterEntryBaysByCategory('Bicicletas')">
+                                            <span>🚲</span> Bicis (<span id="entryCatCountBici">0</span>)
+                                        </button>
+                                    </div>
+                                    <div style="font-size:0.75rem; color:var(--primary); font-weight:700;">
+                                        Bahías exclusivas para: <span id="entryCurrentTypeName">Automóviles pequeños</span>
+                                    </div>
                                 </div>
 
                                 <!-- Leyenda de colores -->
@@ -1004,7 +1006,7 @@
                                             <span style="width:10px; height:10px; border-radius:50%; background:var(--amber); display:inline-block;"></span> Reservado
                                         </span>
                                     </div>
-                                    <span style="color:var(--text-muted); font-size:0.72rem;">130 Bahías en Tiempo Real</span>
+                                    <span id="entryBaysCountSummary" style="color:var(--text-muted); font-size:0.72rem;">Cargando bahías...</span>
                                 </div>
 
                                 <!-- Matriz Visual de Bahías con scroll elegante -->
@@ -1166,23 +1168,25 @@
                                     </div>
                                 </div>
 
-                                <!-- Filtros de Categoría Rápidos -->
-                                <div style="display:flex; gap:0.4rem; flex-wrap:wrap; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
-                                    <button type="button" class="category-tab-btn active" id="reserveCatBtnAll" onclick="filterReserveBaysByCategory('ALL')">
-                                        <span>🌐</span> Todos (<span id="reserveCatCountAll">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="reserveCatBtnAP" onclick="filterReserveBaysByCategory('Automóviles pequeños')">
-                                        <span>🚗</span> Aut. pequeños (<span id="reserveCatCountAP">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="reserveCatBtnAG" onclick="filterReserveBaysByCategory('Automóviles grandes')">
-                                        <span>🚙</span> Aut. grandes (<span id="reserveCatCountAG">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="reserveCatBtnMoto" onclick="filterReserveBaysByCategory('Motocicletas')">
-                                        <span>🏍️</span> Motos (<span id="reserveCatCountMoto">0</span>)
-                                    </button>
-                                    <button type="button" class="category-tab-btn" id="reserveCatBtnBici" onclick="filterReserveBaysByCategory('Bicicletas')">
-                                        <span>🚲</span> Bicis (<span id="reserveCatCountBici">0</span>)
-                                    </button>
+                                <!-- Filtros Rápidos por Categoría -->
+                                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; border-bottom:1px solid var(--border); padding-bottom:0.75rem;">
+                                    <div style="display:flex; gap:0.4rem; flex-wrap:wrap;">
+                                        <button type="button" class="category-tab-btn active" id="reserveCatBtnAP" onclick="filterReserveBaysByCategory('Automóviles pequeños')">
+                                            <span>🚗</span> Aut. pequeños (<span id="reserveCatCountAP">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="reserveCatBtnAG" onclick="filterReserveBaysByCategory('Automóviles grandes')">
+                                            <span>🚙</span> Aut. grandes (<span id="reserveCatCountAG">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="reserveCatBtnMoto" onclick="filterReserveBaysByCategory('Motocicletas')">
+                                            <span>🏍️</span> Motos (<span id="reserveCatCountMoto">0</span>)
+                                        </button>
+                                        <button type="button" class="category-tab-btn" id="reserveCatBtnBici" onclick="filterReserveBaysByCategory('Bicicletas')">
+                                            <span>🚲</span> Bicis (<span id="reserveCatCountBici">0</span>)
+                                        </button>
+                                    </div>
+                                    <div style="font-size:0.75rem; color:var(--amber); font-weight:700;">
+                                        Bahías exclusivas para: <span id="reserveCurrentTypeName">Automóviles pequeños</span>
+                                    </div>
                                 </div>
 
                                 <!-- Leyenda de colores -->
@@ -1198,7 +1202,7 @@
                                             <span style="width:10px; height:10px; border-radius:50%; background:var(--amber); display:inline-block;"></span> Reservado
                                         </span>
                                     </div>
-                                    <span style="color:var(--text-muted); font-size:0.72rem;">130 Bahías en Tiempo Real</span>
+                                    <span id="reserveBaysCountSummary" style="color:var(--text-muted); font-size:0.72rem;">Cargando bahías...</span>
                                 </div>
 
                                 <!-- Matriz Visual de Bahías con scroll elegante -->
