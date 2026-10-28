@@ -109,11 +109,13 @@ html, body {
         }
 
         .brand-plan {
-            font-size: 0.68rem;
+            font-size: 0.6rem;
             color: var(--primary);
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.03em;
+            line-height: 1.25;
+            max-width: 175px;
         }
 
         /* Nav Section */

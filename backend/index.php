@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ParkFlow SaaS — Enterprise Smart Parking Cloud</title>
+    <title>ParkFlow — Sistema Inteligente de Parqueaderos</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -119,11 +119,13 @@ html, body {
         }
 
         .brand-plan {
-            font-size: 0.68rem;
+            font-size: 0.6rem;
             color: var(--primary);
             font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.03em;
+            line-height: 1.25;
+            max-width: 175px;
         }
 
         /* Nav Section */
@@ -2023,7 +2025,7 @@ html, body {
                         <div class="showcase-brand-icon">🅿️</div>
                         <div class="showcase-brand-text">
                             <span class="sb-name">ParkFlow</span>
-                            <span class="sb-badge">Sistema Inteligente de Parqueadero</span>
+                            <span class="sb-badge">Sistema Inteligente de Parqueaderos</span>
                         </div>
                     </div>
                 </div>
@@ -2236,7 +2238,7 @@ html, body {
                 <div class="brand-icon">P</div>
                 <div class="brand-text">
                     <span class="brand-name">ParkFlow</span>
-                    <span class="brand-plan">SaaS Enterprise</span>
+                    <span class="brand-plan">Sistema Inteligente de Parqueaderos</span>
                 </div>
             </a>
             <button type="button" class="btn btn-secondary btn-sm mobile-toggle" onclick="toggleMobileSidebar()">✕</button>
