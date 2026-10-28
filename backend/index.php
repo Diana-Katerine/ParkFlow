@@ -2091,7 +2091,7 @@ html, body {
                         <span>🔒</span> Acceso Restringido · Autenticación Obligatoria
                     </div>
                     <h3 class="console-title">Acceso al Sistema</h3>
-                    <p class="console-sub">Sistema Inteligente de Gestión de Parqueaderos</p>
+                    <p class="console-sub">Sistema Inteligente de Parqueaderos</p>
                 </div>
 
                 <!-- Error message container -->
