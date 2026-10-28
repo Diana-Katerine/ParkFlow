@@ -1382,12 +1382,27 @@ html, body {
 /* RIGHT: Interactive Console Panel */
 .auth-console-panel {
     flex: 1.15;
-    padding: 2.25rem 2rem;
+    padding: 2.25rem 2.25rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 0.85rem;
     background: rgba(11, 17, 32, 0.95);
+}
+.console-body-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+    margin: auto 0;
+    width: 100%;
+}
+.console-footer {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 .console-top {
     text-align: left;
@@ -1459,8 +1474,8 @@ html, body {
 .auth-field {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
-    margin-bottom: 0.65rem;
+    gap: 0.35rem;
+    margin-bottom: 0.95rem;
 }
 .auth-field-label {
     display: flex;
@@ -1494,9 +1509,9 @@ html, body {
     background: var(--bg-surface-elevated);
     border: 1px solid var(--border);
     color: var(--text-heading);
-    padding: 0.6rem 2.4rem 0.6rem 2.3rem;
+    padding: 0.65rem 2.4rem 0.65rem 2.3rem;
     border-radius: var(--radius-md);
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     outline: none;
     transition: all 0.2s;
     font-family: inherit;
@@ -1528,18 +1543,18 @@ html, body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.72rem;
+    padding: 0.82rem;
     border-radius: var(--radius-md);
     background: linear-gradient(135deg, #00f5ff, #0284c7);
     color: #060911;
     font-weight: 800;
-    font-size: 0.86rem;
+    font-size: 0.88rem;
     border: none;
     cursor: pointer;
     transition: all 0.2s;
     box-shadow: 0 4px 18px rgba(0, 245, 255, 0.25);
     font-family: inherit;
-    margin-top: 0.25rem;
+    margin-top: 0.35rem;
 }
 .btn-auth-submit:hover {
     transform: translateY(-1px);
@@ -1551,14 +1566,14 @@ html, body {
 .auth-aux-row {
     display: flex;
     justify-content: flex-end;
-    margin-top: -0.25rem;
-    margin-bottom: 0.4rem;
+    margin-top: 0.2rem;
+    margin-bottom: 0.85rem;
 }
 .link-forgot-pass {
     background: none;
     border: none;
     color: var(--primary);
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;

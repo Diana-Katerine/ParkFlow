@@ -1392,12 +1392,27 @@ html, body {
 /* RIGHT: Interactive Console Panel */
 .auth-console-panel {
     flex: 1.15;
-    padding: 2.25rem 2rem;
+    padding: 2.25rem 2.25rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 0.85rem;
     background: rgba(11, 17, 32, 0.95);
+}
+.console-body-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 1.35rem;
+    margin: auto 0;
+    width: 100%;
+}
+.console-footer {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
 .console-top {
     text-align: left;
@@ -1469,8 +1484,8 @@ html, body {
 .auth-field {
     display: flex;
     flex-direction: column;
-    gap: 0.3rem;
-    margin-bottom: 0.65rem;
+    gap: 0.35rem;
+    margin-bottom: 0.95rem;
 }
 .auth-field-label {
     display: flex;
@@ -1504,9 +1519,9 @@ html, body {
     background: var(--bg-surface-elevated);
     border: 1px solid var(--border);
     color: var(--text-heading);
-    padding: 0.6rem 2.4rem 0.6rem 2.3rem;
+    padding: 0.65rem 2.4rem 0.65rem 2.3rem;
     border-radius: var(--radius-md);
-    font-size: 0.82rem;
+    font-size: 0.84rem;
     outline: none;
     transition: all 0.2s;
     font-family: inherit;
@@ -1538,18 +1553,18 @@ html, body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    padding: 0.72rem;
+    padding: 0.82rem;
     border-radius: var(--radius-md);
     background: linear-gradient(135deg, #00f5ff, #0284c7);
     color: #060911;
     font-weight: 800;
-    font-size: 0.86rem;
+    font-size: 0.88rem;
     border: none;
     cursor: pointer;
     transition: all 0.2s;
     box-shadow: 0 4px 18px rgba(0, 245, 255, 0.25);
     font-family: inherit;
-    margin-top: 0.25rem;
+    margin-top: 0.35rem;
 }
 .btn-auth-submit:hover {
     transform: translateY(-1px);
@@ -1561,14 +1576,14 @@ html, body {
 .auth-aux-row {
     display: flex;
     justify-content: flex-end;
-    margin-top: -0.25rem;
-    margin-bottom: 0.4rem;
+    margin-top: 0.2rem;
+    margin-bottom: 0.85rem;
 }
 .link-forgot-pass {
     background: none;
     border: none;
     color: var(--primary);
-    font-size: 0.72rem;
+    font-size: 0.74rem;
     font-weight: 600;
     cursor: pointer;
     text-decoration: none;
@@ -2094,64 +2109,70 @@ html, body {
 
             <!-- Right Panel: Interactive Console -->
             <div class="auth-console-panel">
-                <div class="console-top">
-                    <div class="auth-mandatory-badge">
-                        <span>🔒</span> Acceso Restringido · Autenticación Obligatoria
+                <div class="console-body-wrapper">
+                    <div class="console-top">
+                        <div class="auth-mandatory-badge">
+                            <span>🔒</span> Acceso Restringido · Autenticación Obligatoria
+                        </div>
+                        <h3 class="console-title">Acceso al Sistema</h3>
+                        <p class="console-sub">Sistema Inteligente de Parqueaderos</p>
                     </div>
-                    <h3 class="console-title">Acceso al Sistema</h3>
-                    <p class="console-sub">Sistema Inteligente de Parqueaderos</p>
+
+                    <!-- Error message container -->
+                    <div id="authErrorMsg" class="auth-error-box" style="display:none;"></div>
+
+                    <!-- Main Login Form -->
+                    <form id="authLoginForm" onsubmit="event.preventDefault(); handleAuthSubmit(event);">
+                        <div class="auth-field">
+                            <label class="auth-field-label" for="authInputRole">ROL CON EL QUE DESEAS INGRESAR</label>
+                            <div class="auth-input-wrapper">
+                                <span class="input-leading-icon">👑</span>
+                                <select id="authInputRole" class="auth-select-field" onchange="syncRoleSelection(this.value)">
+                                    <option value="Administrador">👑 Administrador (Acceso Total y Configuración)</option>
+                                    <option value="Operador">👷 Operador (Entradas, Salidas y Bahías)</option>
+                                    <option value="Cliente">👤 Cliente / Conductor (Portal Ciudadano)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="auth-field">
+                            <label class="auth-field-label" for="authInputEmail">
+                                <span>Usuario o Correo</span>
+                                <span class="field-hint-text" id="authEmailHint">Diana Katerine Pérez</span>
+                            </label>
+                            <div class="auth-input-wrapper">
+                                <span class="input-leading-icon">✉️</span>
+                                <input type="text" id="authInputEmail" class="auth-text-input" placeholder="Correo o usuario..." value="admin@parkflow.co">
+                            </div>
+                        </div>
+
+                        <div class="auth-field">
+                            <label class="auth-field-label" for="authInputPassword">
+                                <span>Contraseña de Seguridad</span>
+                                <span class="field-hint-text" id="authPassHint">Obligatoria para Admin y Operador</span>
+                            </label>
+                            <div class="auth-input-wrapper">
+                                <span class="input-leading-icon">🔒</span>
+                                <input type="password" id="authInputPassword" class="auth-text-input" placeholder="Ingresa contraseña requerida..." autocomplete="current-password">
+                                <button type="button" class="btn-toggle-eye" onclick="toggleAuthPasswordVisibility()" title="Mostrar u ocultar contraseña">👁️</button>
+                            </div>
+                        </div>
+
+                        <div class="auth-aux-row">
+                            <button type="button" class="link-forgot-pass" onclick="openPasswordRecoveryModal()">
+                                ¿Olvidaste tu contraseña? Recuperar clave
+                            </button>
+                        </div>
+
+                        <button type="button" class="btn btn-primary btn-auth-submit" onclick="handleAuthSubmit(event)">
+                            🚀 Ingresar al Sistema ParkFlow →
+                        </button>
+                    </form>
                 </div>
 
-                <!-- Error message container -->
-                <div id="authErrorMsg" class="auth-error-box" style="display:none;"></div>
-
-                <!-- Main Login Form -->
-                <form id="authLoginForm" onsubmit="event.preventDefault(); handleAuthSubmit(event);">
-                    <div class="auth-field">
-                        <label class="auth-field-label" for="authInputRole">ROL CON EL QUE DESEAS INGRESAR</label>
-                        <div class="auth-input-wrapper">
-                            <span class="input-leading-icon">👑</span>
-                            <select id="authInputRole" class="auth-select-field" onchange="syncRoleSelection(this.value)">
-                                <option value="Administrador">👑 Administrador (Acceso Total y Configuración)</option>
-                                <option value="Operador">👷 Operador (Entradas, Salidas y Bahías)</option>
-                                <option value="Cliente">👤 Cliente / Conductor (Portal Ciudadano)</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="auth-field">
-                        <label class="auth-field-label" for="authInputEmail">
-                            <span>Usuario o Correo</span>
-                            <span class="field-hint-text" id="authEmailHint">Diana Katerine Pérez</span>
-                        </label>
-                        <div class="auth-input-wrapper">
-                            <span class="input-leading-icon">✉️</span>
-                            <input type="text" id="authInputEmail" class="auth-text-input" placeholder="Correo o usuario..." value="admin@parkflow.co">
-                        </div>
-                    </div>
-
-                    <div class="auth-field">
-                        <label class="auth-field-label" for="authInputPassword">
-                            <span>Contraseña de Seguridad</span>
-                            <span class="field-hint-text" id="authPassHint">Obligatoria para Admin y Operador</span>
-                        </label>
-                        <div class="auth-input-wrapper">
-                            <span class="input-leading-icon">🔒</span>
-                            <input type="password" id="authInputPassword" class="auth-text-input" placeholder="Ingresa contraseña requerida..." autocomplete="current-password">
-                            <button type="button" class="btn-toggle-eye" onclick="toggleAuthPasswordVisibility()" title="Mostrar u ocultar contraseña">👁️</button>
-                        </div>
-                    </div>
-
-                    <div class="auth-aux-row">
-                        <button type="button" class="link-forgot-pass" onclick="openPasswordRecoveryModal()">
-                            ¿Olvidaste tu contraseña? Recuperar clave
-                        </button>
-                    </div>
-
-                    <button type="button" class="btn btn-primary btn-auth-submit" onclick="handleAuthSubmit(event)">
-                        🚀 Ingresar al Sistema ParkFlow →
-                    </button>
-                </form>
+                <div class="console-footer">
+                    <span>🛡️ Acceso Seguro · Cifrado TLS 1.3</span>
+                </div>
             </div>
         </div>
 
