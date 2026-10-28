@@ -2023,7 +2023,7 @@ html, body {
                         <div class="showcase-brand-icon">🅿️</div>
                         <div class="showcase-brand-text">
                             <span class="sb-name">ParkFlow</span>
-                            <span class="sb-badge">Gestión Inteligente</span>
+                            <span class="sb-badge">Sistema Inteligente de Parqueadero</span>
                         </div>
                     </div>
                     <div class="showcase-status-badge">
