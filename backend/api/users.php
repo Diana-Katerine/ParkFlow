@@ -89,7 +89,7 @@ if ($method === 'POST') {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
         $aud->execute([
             'AUD-' . uniqid(),
-            $input['adminEmail'] ?? 'admin@parkpulse.co',
+            $input['adminEmail'] ?? 'admin@parkflow.co',
             'Administrador',
             'USER_CREATED',
             'USUARIOS',

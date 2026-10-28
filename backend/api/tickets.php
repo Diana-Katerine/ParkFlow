@@ -91,7 +91,7 @@ if ($method === 'POST') {
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
             $audStmt->execute([
                 'AUD-' . uniqid(),
-                $input['operadorEmail'] ?? 'operador@parkpulse.co',
+                $input['operadorEmail'] ?? 'operador@parkflow.co',
                 'Operador',
                 'MIDNIGHT_CROSSING_SIMULATION',
                 'TARIFAS',
@@ -110,7 +110,7 @@ if ($method === 'POST') {
     $tipoVehiculo = $input['tipoVehiculo'] ?? '';
     $spotCodigo = trim($input['spotCodigo'] ?? '');
     $operadorEntrada = $input['operadorEntrada'] ?? 'Operador de Turno';
-    $operadorEmail = $input['operadorEmail'] ?? 'operador@parkpulse.co';
+    $operadorEmail = $input['operadorEmail'] ?? 'operador@parkflow.co';
     $propietarioNombre = $input['propietarioNombre'] ?? null;
 
     if (empty($placa) || empty($tipoVehiculo) || empty($spotCodigo)) {
@@ -233,7 +233,7 @@ if ($method === 'PUT') {
     $cruzoMedianoche = !empty($input['cruzoMedianoche']);
     $fechaSalida = $input['fechaSalidaISO'] ?? gmdate('Y-m-d\TH:i:s\Z');
     $operadorSalida = $input['operadorSalida'] ?? 'Operador de Turno';
-    $operadorEmail = $input['operadorEmail'] ?? 'operador@parkpulse.co';
+    $operadorEmail = $input['operadorEmail'] ?? 'operador@parkflow.co';
 
     if (!$logId) {
         sendResponse(false, null, 'Falta el ID del ticket', 400);

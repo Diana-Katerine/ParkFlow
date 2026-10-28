@@ -2123,7 +2123,7 @@ html, body {
                         </label>
                         <div class="auth-input-wrapper">
                             <span class="input-leading-icon">✉️</span>
-                            <input type="text" id="authInputEmail" class="auth-text-input" placeholder="Correo o usuario..." value="admin@parkpulse.co">
+                            <input type="text" id="authInputEmail" class="auth-text-input" placeholder="Correo o usuario..." value="admin@parkflow.co">
                         </div>
                     </div>
 
@@ -2165,7 +2165,7 @@ html, body {
                         <div class="recovery-input-group">
                             <div class="auth-input-wrapper recovery-input-wrapper">
                                 <span class="input-leading-icon">✉️</span>
-                                <input type="email" id="authRecoveryEmail" class="auth-text-input" placeholder="Correo registrado (ej: admin@parkpulse.co)..." onkeydown="if(event.key==='Enter') executePasswordRecovery()">
+                                <input type="email" id="authRecoveryEmail" class="auth-text-input" placeholder="Correo registrado (ej: admin@parkflow.co)..." onkeydown="if(event.key==='Enter') executePasswordRecovery()">
                             </div>
                             <button type="button" class="btn-recovery-submit" id="btnRecoverySubmit" onclick="executePasswordRecovery()">
                                 Recuperar →
@@ -4481,14 +4481,14 @@ html, body {
     // =========================================================================
     const REGISTERED_ACCOUNTS = [
         {
-            email: 'admin@parkpulse.co',
+            email: 'admin@parkflow.co',
             password: 'admin',
             nombre: 'Alejandro Vargas',
             rol: 'Administrador',
             placa: null
         },
         {
-            email: 'operador@parkpulse.co',
+            email: 'operador@parkflow.co',
             password: 'oper',
             nombre: 'Camila Mendoza',
             rol: 'Operador',
@@ -4567,11 +4567,11 @@ html, body {
         const passInput = document.getElementById('authInputPassword');
 
         if (role === 'Administrador') {
-            if (emailInput) emailInput.value = 'admin@parkpulse.co';
+            if (emailInput) emailInput.value = 'admin@parkflow.co';
             if (emailHint) emailHint.textContent = 'Diana Katerine Pérez (Única Admin)';
             if (passHint) passHint.textContent = 'Obligatoria · Contraseña Maestra';
         } else if (role === 'Operador') {
-            if (emailInput) emailInput.value = 'operador@parkpulse.co';
+            if (emailInput) emailInput.value = 'operador@parkflow.co';
             if (emailHint) emailHint.textContent = 'Carlos Mendoza (Operador)';
             if (passHint) passHint.textContent = 'Obligatoria · Clave de Turno';
         } else if (role === 'Cliente') {
@@ -4732,7 +4732,7 @@ html, body {
         if (!email) {
             const recoveryInp = document.getElementById('authRecoveryEmail');
             const mainEmailInp = document.getElementById('authInputEmail');
-            email = (recoveryInp && recoveryInp.value.trim()) || (mainEmailInp && mainEmailInp.value.trim()) || 'admin@parkpulse.co';
+            email = (recoveryInp && recoveryInp.value.trim()) || (mainEmailInp && mainEmailInp.value.trim()) || 'admin@parkflow.co';
         }
 
         if (!code) {
@@ -4829,14 +4829,14 @@ html, body {
                 if (passInput) passInput.focus();
                 return;
             }
-            if (!email) email = 'admin@parkpulse.co';
+            if (!email) email = 'admin@parkflow.co';
         } else if (role === 'Operador') {
             if (!password) {
                 showAuthError('🔒 Acceso Restringido: La contraseña de Operador es obligatoria.');
                 if (passInput) passInput.focus();
                 return;
             }
-            if (!email) email = 'operador@parkpulse.co';
+            if (!email) email = 'operador@parkflow.co';
         } else if (role === 'Cliente') {
             if (!email) {
                 showAuthError('⚠️ Por favor ingresa tus credenciales (correo electrónico o usuario).');

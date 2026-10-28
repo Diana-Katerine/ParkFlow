@@ -25,7 +25,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
   backendStatus,
   onOpenDbModal,
 }) => {
-  const [email, setEmail] = useState('operador@parkpulse.co');
+  const [email, setEmail] = useState('operador@parkflow.co');
   const [password, setPassword] = useState('••••••••••••');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +78,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
       {/* Clean 3-Zone Top Bar */}
       <header className="flex items-center justify-between px-6 lg:px-10 py-4 border-b border-white/10 bg-[#0b1120]/80 backdrop-blur-md">
         <a href="#login" className="text-xl font-bold tracking-tight text-[#e9feff]">
-          ParkPulse
+          ParkFlow
         </a>
 
         <nav className="hidden md:flex items-center gap-6 text-sm font-medium text-[#b9caca]">
@@ -320,7 +320,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="operador@parkpulse.co"
+                  placeholder="operador@parkflow.co"
                   className="cyber-input w-full px-3.5 py-2.5 rounded-lg text-sm font-mono-tabular"
                 />
               </div>
@@ -361,7 +361,7 @@ export const LoginView: React.FC<LoginViewProps> = ({
 
       {/* Clean Footer */}
       <footer className="px-6 lg:px-10 py-4 border-t border-white/10 text-xs text-[#849495] flex flex-col sm:flex-row items-center justify-between gap-2">
-        <span>ParkPulse — Sistema Inteligente de Parqueadero</span>
+        <span>ParkFlow — Sistema Inteligente de Parqueadero</span>
         <span>Control de Ocupación · Cálculo Automático de Tarifas · Auditoría RBAC</span>
       </footer>
     </div>

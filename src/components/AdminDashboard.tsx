@@ -1454,7 +1454,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   type="email"
                   value={newUserEmail}
                   onChange={(e) => setNewUserEmail(e.target.value)}
-                  placeholder="s.hernandez@parkpulse.co"
+                  placeholder="s.hernandez@parkflow.co"
                   className="cyber-input w-full px-3 py-2.5 rounded-lg font-mono-tabular"
                 />
               </div>

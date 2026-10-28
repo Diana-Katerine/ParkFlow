@@ -42,19 +42,19 @@ try {
     // 3. Sembrar Usuarios / Perfiles organizados por Roles (RBAC)
     $users = [
         // Administradores
-        ['USR-001', 'Alejandro Vargas', 'admin@parkpulse.co', 'Administrador', 1, null, '2026-10-07 15:02:40'],
+        ['USR-001', 'Alejandro Vargas', 'admin@parkflow.co', 'Administrador', 1, null, '2026-10-07 15:02:40'],
         ['USR-002', 'Diana Katerine Pérez', 'diana.admin@parkflow.co', 'Administrador', 1, null, '2026-10-07 15:10:00'],
         ['USR-003', 'Sofia Navarro', 's.navarro@parkflow.co', 'Administrador', 1, null, '2026-10-07 09:30:15'],
 
         // Operadores de Patio & Caja
-        ['USR-004', 'Camila Mendoza', 'operador@parkpulse.co', 'Operador', 1, null, '2026-10-07 14:55:12'],
-        ['USR-005', 'Mateo Restrepo', 'm.restrepo@parkpulse.co', 'Operador', 1, null, '2026-10-07 08:15:00'],
+        ['USR-004', 'Camila Mendoza', 'operador@parkflow.co', 'Operador', 1, null, '2026-10-07 14:55:12'],
+        ['USR-005', 'Mateo Restrepo', 'm.restrepo@parkflow.co', 'Operador', 1, null, '2026-10-07 08:15:00'],
         ['USR-006', 'Andrés Felipe Mora', 'a.mora@parkflow.co', 'Operador', 1, null, '2026-10-06 22:45:00'],
 
         // Clientes y Conductores Registrados
         ['USR-007', 'Carlos E. Giraldo', 'carlos.giraldo@clientes.co', 'Cliente', 1, 'MDE-314', '2026-10-07 15:00:00'],
         ['USR-008', 'Laura Castellanos', 'l.castellanos@clientes.co', 'Cliente', 1, 'BGT-902', '2026-10-06 19:42:10'],
-        ['USR-009', 'Diana K. Pérez', 'cliente@parkpulse.co', 'Cliente', 1, 'KLM-456', '2026-10-07 15:08:19'],
+        ['USR-009', 'Diana K. Pérez', 'cliente@parkflow.co', 'Cliente', 1, 'KLM-456', '2026-10-07 15:08:19'],
         ['USR-010', 'Santiago Ríos', 'santiago.rios@clientes.co', 'Cliente', 1, 'XRT-82A', '2026-10-07 14:35:10'],
         ['USR-011', 'Valeria Duque', 'valeria.duque@clientes.co', 'Cliente', 1, 'EVX-108', '2026-10-07 14:50:20'],
         ['USR-012', 'Roberto Gómez', 'roberto.gomez@empresas.co', 'Cliente', 1, 'JKL-901', '2026-10-07 13:20:00'],
@@ -197,10 +197,10 @@ try {
 
     // 7. Sembrar Auditoría inicial
     $audits = [
-        ['AUD-9001', 'admin@parkpulse.co', 'Administrador', 'SYNC_RATES_CONFIG', 'TARIFAS', 'Verificación de matriz tarifaria 2026 con soporte de cruce de medianoche', '2026-10-07 14:10:05', 'OK'],
-        ['AUD-9002', 'operador@parkpulse.co', 'Operador', 'ENTRY_REGISTERED', 'FLUJO_VEHICULAR', 'Ingreso vehículo KLM-456 asignado a bahía B-01 (Ticket TCK-2026-8842)', '2026-10-07 14:29:18', 'OK'],
-        ['AUD-9003', 'operador@parkpulse.co', 'Operador', 'DUPLICATE_PLATE_BLOCKED', 'FLUJO_VEHICULAR', 'Intento de doble ingreso bloqueado para placa activa MDE-314 en A-03', '2026-10-07 14:42:51', 'ALERTA'],
-        ['AUD-9004', 'cliente@parkpulse.co', 'Cliente', 'UNAUTHORIZED_ROUTE_ATTEMPT', 'RBAC_SECURITY', 'Bloqueo HTTP 403 Forbidden al intentar acceder a /admin/tarifas con rol Cliente', '2026-10-07 14:58:02', 'BLOQUEADO_403'],
+        ['AUD-9001', 'admin@parkflow.co', 'Administrador', 'SYNC_RATES_CONFIG', 'TARIFAS', 'Verificación de matriz tarifaria 2026 con soporte de cruce de medianoche', '2026-10-07 14:10:05', 'OK'],
+        ['AUD-9002', 'operador@parkflow.co', 'Operador', 'ENTRY_REGISTERED', 'FLUJO_VEHICULAR', 'Ingreso vehículo KLM-456 asignado a bahía B-01 (Ticket TCK-2026-8842)', '2026-10-07 14:29:18', 'OK'],
+        ['AUD-9003', 'operador@parkflow.co', 'Operador', 'DUPLICATE_PLATE_BLOCKED', 'FLUJO_VEHICULAR', 'Intento de doble ingreso bloqueado para placa activa MDE-314 en A-03', '2026-10-07 14:42:51', 'ALERTA'],
+        ['AUD-9004', 'cliente@parkflow.co', 'Cliente', 'UNAUTHORIZED_ROUTE_ATTEMPT', 'RBAC_SECURITY', 'Bloqueo HTTP 403 Forbidden al intentar acceder a /admin/tarifas con rol Cliente', '2026-10-07 14:58:02', 'BLOQUEADO_403'],
         ['AUD-9005', 'diana.admin@parkflow.co', 'Administrador', 'MYSQL_XAMPP_INIT', 'AUTH', 'Base de datos parkflow_db organizada y sincronizada con éxito en MySQL (XAMPP)', date('Y-m-d H:i:s'), 'OK']
     ];
 

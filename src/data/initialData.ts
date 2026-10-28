@@ -13,7 +13,7 @@ export const INITIAL_USERS: UserAccount[] = [
   {
     id: 'USR-001',
     nombre: 'Alejandro Vargas',
-    email: 'admin@parkpulse.co',
+    email: 'admin@parkflow.co',
     rol: 'Administrador',
     activo: true,
     ultimoAcceso: '2026-10-07 15:02:40',
@@ -38,7 +38,7 @@ export const INITIAL_USERS: UserAccount[] = [
   {
     id: 'USR-004',
     nombre: 'Camila Mendoza',
-    email: 'operador@parkpulse.co',
+    email: 'operador@parkflow.co',
     rol: 'Operador',
     activo: true,
     ultimoAcceso: '2026-10-07 14:55:12',
@@ -46,7 +46,7 @@ export const INITIAL_USERS: UserAccount[] = [
   {
     id: 'USR-005',
     nombre: 'Mateo Restrepo',
-    email: 'm.restrepo@parkpulse.co',
+    email: 'm.restrepo@parkflow.co',
     rol: 'Operador',
     activo: true,
     ultimoAcceso: '2026-10-07 08:15:00',
@@ -81,7 +81,7 @@ export const INITIAL_USERS: UserAccount[] = [
   {
     id: 'USR-009',
     nombre: 'Diana K. Pérez',
-    email: 'cliente@parkpulse.co',
+    email: 'cliente@parkflow.co',
     rol: 'Cliente',
     activo: true,
     placaAsociada: 'KLM-456',
@@ -902,7 +902,7 @@ export const INITIAL_LOGS: ParkingLog[] = [
 export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   {
     id: 'AUD-9001',
-    usuarioEmail: 'admin@parkpulse.co',
+    usuarioEmail: 'admin@parkflow.co',
     rol: 'Administrador',
     accion: 'SYNC_RATES_CONFIG',
     modulo: 'TARIFAS',
@@ -912,7 +912,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   },
   {
     id: 'AUD-9002',
-    usuarioEmail: 'operador@parkpulse.co',
+    usuarioEmail: 'operador@parkflow.co',
     rol: 'Operador',
     accion: 'ENTRY_REGISTERED',
     modulo: 'FLUJO_VEHICULAR',
@@ -922,7 +922,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   },
   {
     id: 'AUD-9003',
-    usuarioEmail: 'operador@parkpulse.co',
+    usuarioEmail: 'operador@parkflow.co',
     rol: 'Operador',
     accion: 'DUPLICATE_PLATE_BLOCKED',
     modulo: 'FLUJO_VEHICULAR',
@@ -932,7 +932,7 @@ export const INITIAL_AUDIT_LOGS: AuditLog[] = [
   },
   {
     id: 'AUD-9004',
-    usuarioEmail: 'cliente@parkpulse.co',
+    usuarioEmail: 'cliente@parkflow.co',
     rol: 'Cliente',
     accion: 'UNAUTHORIZED_ROUTE_ATTEMPT',
     modulo: 'RBAC_SECURITY',
