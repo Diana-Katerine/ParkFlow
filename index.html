@@ -2088,7 +2088,7 @@ html, body {
             <div class="auth-console-panel">
                 <div class="console-top">
                     <div class="auth-mandatory-badge">
-                        <span>🔒</span> Restricted Access · Mandatory Authentication
+                        <span>🔒</span> Acceso Restringido · Autenticación Obligatoria
                     </div>
                     <h3 class="console-title">Acceso al Sistema</h3>
                     <p class="console-sub">Sistema Inteligente de Gestión de Parqueaderos</p>
