@@ -1312,6 +1312,12 @@ html, body {
     font-weight: 800;
     color: var(--text-heading);
 }
+.sc-stat-val.text-val {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
 .sc-stat-lbl {
     font-size: 0.64rem;
     color: var(--text-muted);
@@ -2031,7 +2037,7 @@ html, body {
                 </div>
 
                 <div class="showcase-body">
-                    <h2 class="showcase-title">Control Operativo, Disponibilidad de Bahías y Gestión de Estancias</h2>
+                    <h2 class="showcase-title">Control de Parqueaderos en Tiempo Real</h2>
                     <p class="showcase-description">
                         Plataforma moderna diseñada para optimizar el flujo de entrada y salida vehicular, supervisar la ocupación de espacios en tiempo real y brindar una atención rápida, ordenada y eficiente para conductores y operadores.
                     </p>
@@ -2045,13 +2051,13 @@ html, body {
                         </div>
                         <div class="sc-stat-card">
                             <div class="sc-stat-icon">⏱️</div>
-                            <div class="sc-stat-val">Preciso</div>
-                            <div class="sc-stat-lbl">Cálculo de Estancia</div>
+                            <div class="sc-stat-val text-val">Cálculo Automático</div>
+                            <div class="sc-stat-lbl">de Tarifas</div>
                         </div>
                         <div class="sc-stat-card">
                             <div class="sc-stat-icon">🚗</div>
-                            <div class="sc-stat-val">En Vivo</div>
-                            <div class="sc-stat-lbl">Control Vehicular</div>
+                            <div class="sc-stat-val text-val">Monitoreo</div>
+                            <div class="sc-stat-lbl">en Tiempo Real</div>
                         </div>
                     </div>
 

@@ -1302,6 +1302,12 @@ html, body {
     font-weight: 800;
     color: var(--text-heading);
 }
+.sc-stat-val.text-val {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.76rem;
+    font-weight: 700;
+    line-height: 1.25;
+}
 .sc-stat-lbl {
     font-size: 0.64rem;
     color: var(--text-muted);
