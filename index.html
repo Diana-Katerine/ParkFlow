@@ -2189,23 +2189,27 @@ html, body {
                 <div class="modal-body-saas">
                     <!-- Paso 1: Solicitar Instrucciones -->
                     <div id="recoveryModalStep1">
-                        <p style="font-size: 0.88rem; color: var(--text-heading); margin-bottom: 1.1rem; line-height: 1.45; font-weight: 500;">
+                        <p style="font-size: 0.88rem; color: var(--text-heading); margin-bottom: 0.85rem; line-height: 1.45; font-weight: 500;">
                             Ingresa tu correo electrónico registrado para recibir instrucciones de recuperación
                         </p>
 
                         <div class="auth-field" style="margin-bottom: 1rem;">
                             <label class="auth-field-label" for="recoveryModalEmail">
-                                <span>Correo Electrónico Registrado</span>
+                                <span>Correo Electrónico o Usuario</span>
+                                <span class="field-hint-text">Email o Usuario</span>
                             </label>
                             <div class="auth-input-wrapper">
                                 <span class="input-leading-icon">✉️</span>
-                                <input type="email" id="recoveryModalEmail" class="auth-text-input" placeholder="ej: admin@parkflow.co" onkeydown="if(event.key==='Enter') submitPasswordRecoveryModal()">
+                                <input type="text" id="recoveryModalEmail" class="auth-text-input" placeholder="ej: admin@parkflow.co, tu correo o tu usuario..." onkeydown="if(event.key==='Enter') submitPasswordRecoveryModal()">
+                            </div>
+                            <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.4rem; line-height: 1.35;">
+                                💡 Puedes ingresar tu correo real, tu correo registrado o tu nombre de usuario.
                             </div>
                         </div>
 
                         <div id="recoveryModalFeedback" class="recovery-feedback-box" style="display:none; margin-bottom: 1rem;"></div>
 
-                        <div style="display: flex; gap: 0.65rem; justify-content: flex-end; margin-top: 1.25rem;">
+                        <div style="display: flex; gap: 0.65rem; justify-content: flex-end; margin-top: 1.15rem;">
                             <button type="button" class="btn btn-secondary" onclick="closePasswordRecoveryModal()">
                                 Cancelar
                             </button>

@@ -159,6 +159,24 @@ if ($method === 'POST') {
                 } else {
                     $clientName = ucfirst($clientEmail);
                 }
+
+                // Guardar en la base de datos MySQL para que persista y pueda recuperar clave en el futuro
+                try {
+                    $newId = 'USR-CLI-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+                    $emailToSave = filter_var($clientEmail, FILTER_VALIDATE_EMAIL) ? strtolower($clientEmail) : (strtolower($clientEmail) . '@clientes.co');
+                    $ins = $pdo->prepare("INSERT INTO `usuarios` (`id`, `nombre`, `email`, `rol`, `activo`, `placa_asociada`, `ultimo_acceso`, `created_at`) VALUES (?, ?, ?, 'Cliente', 1, ?, NOW(), NOW())");
+                    $ins->execute([$newId, $clientName, $emailToSave, $plate]);
+                    $clientUser = [
+                        'id' => $newId,
+                        'nombre' => $clientName,
+                        'email' => $emailToSave,
+                        'rol' => 'Cliente',
+                        'placa_asociada' => $plate,
+                        'activo' => 1
+                    ];
+                } catch (Exception $e) {
+                    // Si ya existía
+                }
             }
 
             $now = date('Y-m-d H:i:s');
@@ -183,21 +201,63 @@ if ($method === 'POST') {
         sendResponse(false, null, 'Rol no válido solicitado.', 400);
     }
 
-    // 4. ACCIÓN: RECUPERACIÓN SEGURA DE CONTRASEÑA
+    // 4. ACCIÓN: RECUPERACIÓN SEGURA DE CONTRASEÑA (SOPORTA EMAIL O NOMBRE DE USUARIO)
     if ($action === 'recover_password' || $action === 'forgot_password') {
-        $email = trim(strtolower($input['email'] ?? ''));
-        if (empty($email)) {
-            sendResponse(false, null, 'Por favor ingresa un correo electrónico registrado.', 400);
+        $term = trim(strtolower($input['email'] ?? $input['usuario'] ?? $input['user'] ?? ''));
+        if (empty($term)) {
+            sendResponse(false, null, 'Por favor ingresa tu correo electrónico o nombre de usuario registrado.', 400);
         }
 
-        // Buscar en la base de datos MySQL si el usuario existe
-        $stmt = $pdo->prepare("SELECT `id`, `nombre`, `email`, `rol`, `activo` FROM `usuarios` WHERE LOWER(`email`) = ? OR LOWER(`email`) LIKE ? LIMIT 1");
-        $stmt->execute([$email, "%$email%"]);
+        // 1. Buscar coincidencia exacta por correo, nombre, placa o ID
+        $stmt = $pdo->prepare("SELECT `id`, `nombre`, `email`, `rol`, `activo` FROM `usuarios` WHERE LOWER(`email`) = ? OR LOWER(`nombre`) = ? OR LOWER(`placa_asociada`) = ? OR `id` = ? LIMIT 1");
+        $stmt->execute([$term, $term, $term, $term]);
         $user = $stmt->fetch();
 
+        // 2. Si no hubo coincidencia exacta, buscar coincidencia parcial (LIKE)
         if (!$user) {
-            logAuthAudit($pdo, $email, 'Desconocido', 'RECUPERAR_CLAVE_NO_EXISTE', 'Intento de recuperación con correo no registrado', 'BLOQUEADO_403');
-            sendResponse(false, null, 'No se encontró ninguna cuenta asociada al correo proporcionado.', 404);
+            $stmt = $pdo->prepare("SELECT `id`, `nombre`, `email`, `rol`, `activo` FROM `usuarios` WHERE LOWER(`email`) LIKE ? OR LOWER(`nombre`) LIKE ? LIMIT 1");
+            $stmt->execute(["%$term%", "%$term%"]);
+            $user = $stmt->fetch();
+        }
+
+        // 3. Si aún no existe y es un correo o usuario válido, aprovisionar automáticamente como Cliente
+        if (!$user) {
+            if (filter_var($term, FILTER_VALIDATE_EMAIL)) {
+                $parts = explode('@', $term);
+                $clientName = ucfirst($parts[0]);
+                $newId = 'USR-CLI-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+                try {
+                    $pdo->prepare("INSERT INTO `usuarios` (`id`, `nombre`, `email`, `rol`, `activo`, `created_at`) VALUES (?, ?, ?, 'Cliente', 1, NOW())")
+                        ->execute([$newId, $clientName, $term]);
+                    $user = [
+                        'id' => $newId,
+                        'nombre' => $clientName,
+                        'email' => $term,
+                        'rol' => 'Cliente',
+                        'activo' => 1
+                    ];
+                } catch (Exception $e) {}
+            } else if (strlen($term) >= 2) {
+                $clientName = ucfirst($term);
+                $newEmail = strtolower($term) . '@clientes.co';
+                $newId = 'USR-CLI-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+                try {
+                    $pdo->prepare("INSERT INTO `usuarios` (`id`, `nombre`, `email`, `rol`, `activo`, `created_at`) VALUES (?, ?, ?, 'Cliente', 1, NOW())")
+                        ->execute([$newId, $clientName, $newEmail]);
+                    $user = [
+                        'id' => $newId,
+                        'nombre' => $clientName,
+                        'email' => $newEmail,
+                        'rol' => 'Cliente',
+                        'activo' => 1
+                    ];
+                } catch (Exception $e) {}
+            }
+        }
+
+        if (!$user) {
+            logAuthAudit($pdo, $term, 'Desconocido', 'RECUPERAR_CLAVE_NO_EXISTE', 'Intento de recuperación con identificador no encontrado', 'BLOQUEADO_403');
+            sendResponse(false, null, 'No se encontró ninguna cuenta asociada al correo o usuario proporcionado.', 404);
         }
 
         // Generar código de seguridad temporal y token criptográfico
@@ -209,7 +269,7 @@ if ($method === 'POST') {
             $updStmt = $pdo->prepare("UPDATE `usuarios` SET `reset_code` = ?, `reset_expiry` = DATE_ADD(NOW(), INTERVAL 30 MINUTE) WHERE `id` = ?");
             $updStmt->execute([$secCode, $user['id']]);
         } catch (Exception $e) {
-            // Continuar incluso si la columna no existiera
+            // Continuar
         }
 
         // Registrar en bitácora de auditoría
@@ -227,14 +287,14 @@ if ($method === 'POST') {
         ], $detailMsg);
     }
 
-    // 5. ACCIÓN: RESTABLECER CONTRASEÑA CON CÓDIGO DE VERIFICACIÓN
+    // 5. ACCIÓN: RESTABLECER CONTRASEÑA CON CÓDIGO DE VERIFICACIÓN (ACEPTA EMAIL O USUARIO)
     if ($action === 'reset_password' || $action === 'change_password_with_code') {
-        $email = trim(strtolower($input['email'] ?? ''));
+        $identifier = trim(strtolower($input['email'] ?? $input['usuario'] ?? ''));
         $code  = trim(strtoupper($input['codigo'] ?? $input['code'] ?? ''));
         $newPass = (string)($input['nueva_password'] ?? $input['password'] ?? '');
 
-        if (empty($email)) {
-            sendResponse(false, null, 'El correo electrónico es requerido.', 400);
+        if (empty($identifier)) {
+            sendResponse(false, null, 'El correo electrónico o usuario es requerido.', 400);
         }
         if (empty($code)) {
             sendResponse(false, null, 'Debes ingresar el código de seguridad de 6 caracteres.', 400);
@@ -243,13 +303,19 @@ if ($method === 'POST') {
             sendResponse(false, null, 'La nueva contraseña debe tener mínimo 5 caracteres.', 400);
         }
 
-        // Buscar usuario
-        $stmt = $pdo->prepare("SELECT * FROM `usuarios` WHERE LOWER(`email`) = ? LIMIT 1");
-        $stmt->execute([$email]);
+        // Buscar usuario por email, nombre o id
+        $stmt = $pdo->prepare("SELECT * FROM `usuarios` WHERE LOWER(`email`) = ? OR LOWER(`nombre`) = ? OR `id` = ? LIMIT 1");
+        $stmt->execute([$identifier, $identifier, $identifier]);
         $user = $stmt->fetch();
 
         if (!$user) {
-            sendResponse(false, null, 'Usuario no encontrado.', 404);
+            $stmt = $pdo->prepare("SELECT * FROM `usuarios` WHERE LOWER(`email`) LIKE ? OR LOWER(`nombre`) LIKE ? LIMIT 1");
+            $stmt->execute(["%$identifier%", "%$identifier%"]);
+            $user = $stmt->fetch();
+        }
+
+        if (!$user) {
+            sendResponse(false, null, 'Usuario no encontrado en el sistema.', 404);
         }
 
         // Validar código contra la columna en usuarios o contra la bitácora de auditoría
