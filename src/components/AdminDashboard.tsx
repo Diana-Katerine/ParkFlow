@@ -1728,7 +1728,7 @@ export const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="space-y-4 text-xs font-mono-tabular">
               <div className="text-center p-3 rounded-xl bg-[#070b14] border border-white/5 space-y-1">
                 <div className="text-sm font-extrabold text-[#00f5ff] tracking-wider">
-                  PARKFLOW SMART SAAS · CIERRE DE CAJA
+                  PARKFLOW · CIERRE DE CAJA
                 </div>
                 <div className="text-[11px] text-[#849495]">NIT: 901.849.201-4 · RÉGIMEN COMÚN</div>
                 <div className="text-xs font-bold text-[#10b981]">

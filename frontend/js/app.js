@@ -1323,7 +1323,7 @@
         if (container) {
             container.innerHTML = `
                 <div style="text-align:center; margin-bottom:1rem; border-bottom:1px dashed var(--border); padding-bottom:0.75rem;">
-                    <div style="font-size:1.15rem; font-weight:800; color:var(--text-heading); letter-spacing:1px;">PARKFLOW SMART SAAS</div>
+                    <div style="font-size:1.15rem; font-weight:800; color:var(--text-heading); letter-spacing:1px;">PARKFLOW</div>
                     <div style="font-size:0.75rem; color:var(--text-muted);">SISTEMA DE CONTROL DE ACCESO & LIQUIDACIÓN</div>
                     <div style="font-size:0.8rem; font-weight:700; color:var(--primary); margin-top:0.35rem; font-family:'JetBrains Mono';">COMPROBANTE OFICIAL DE CIERRE Z</div>
                     <div style="font-size:0.75rem; font-family:'JetBrains Mono'; color:var(--text-muted);">${zNumber}</div>
