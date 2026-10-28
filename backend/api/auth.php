@@ -201,63 +201,29 @@ if ($method === 'POST') {
         sendResponse(false, null, 'Rol no válido solicitado.', 400);
     }
 
-    // 4. ACCIÓN: RECUPERACIÓN SEGURA DE CONTRASEÑA (SOPORTA EMAIL O NOMBRE DE USUARIO)
+    // 4. ACCIÓN: RECUPERACIÓN SEGURA DE CONTRASEÑA (EXCLUSIVO PARA USUARIOS REGISTRADOS EN PARKFLOW)
     if ($action === 'recover_password' || $action === 'forgot_password') {
         $term = trim(strtolower($input['email'] ?? $input['usuario'] ?? $input['user'] ?? ''));
         if (empty($term)) {
             sendResponse(false, null, 'Por favor ingresa tu correo electrónico o nombre de usuario registrado.', 400);
         }
 
-        // 1. Buscar coincidencia exacta por correo, nombre, placa o ID
-        $stmt = $pdo->prepare("SELECT `id`, `nombre`, `email`, `rol`, `activo` FROM `usuarios` WHERE LOWER(`email`) = ? OR LOWER(`nombre`) = ? OR LOWER(`placa_asociada`) = ? OR `id` = ? LIMIT 1");
+        // 1. Buscar coincidencia exacta en usuarios registrados y activos por correo, nombre, placa o ID
+        $stmt = $pdo->prepare("SELECT `id`, `nombre`, `email`, `rol`, `activo` FROM `usuarios` WHERE (LOWER(`email`) = ? OR LOWER(`nombre`) = ? OR LOWER(`placa_asociada`) = ? OR `id` = ?) AND `activo` = 1 LIMIT 1");
         $stmt->execute([$term, $term, $term, $term]);
         $user = $stmt->fetch();
 
-        // 2. Si no hubo coincidencia exacta, buscar coincidencia parcial (LIKE)
+        // 2. Si no hubo coincidencia exacta, buscar coincidencia parcial en nombre o correo
         if (!$user) {
-            $stmt = $pdo->prepare("SELECT `id`, `nombre`, `email`, `rol`, `activo` FROM `usuarios` WHERE LOWER(`email`) LIKE ? OR LOWER(`nombre`) LIKE ? LIMIT 1");
+            $stmt = $pdo->prepare("SELECT `id`, `nombre`, `email`, `rol`, `activo` FROM `usuarios` WHERE (LOWER(`email`) LIKE ? OR LOWER(`nombre`) LIKE ?) AND `activo` = 1 LIMIT 1");
             $stmt->execute(["%$term%", "%$term%"]);
             $user = $stmt->fetch();
         }
 
-        // 3. Si aún no existe y es un correo o usuario válido, aprovisionar automáticamente como Cliente
+        // RESTRICCIÓN ESTRICTA: Si NO está registrado en ParkFlow, denegar terminantemente
         if (!$user) {
-            if (filter_var($term, FILTER_VALIDATE_EMAIL)) {
-                $parts = explode('@', $term);
-                $clientName = ucfirst($parts[0]);
-                $newId = 'USR-CLI-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
-                try {
-                    $pdo->prepare("INSERT INTO `usuarios` (`id`, `nombre`, `email`, `rol`, `activo`, `created_at`) VALUES (?, ?, ?, 'Cliente', 1, NOW())")
-                        ->execute([$newId, $clientName, $term]);
-                    $user = [
-                        'id' => $newId,
-                        'nombre' => $clientName,
-                        'email' => $term,
-                        'rol' => 'Cliente',
-                        'activo' => 1
-                    ];
-                } catch (Exception $e) {}
-            } else if (strlen($term) >= 2) {
-                $clientName = ucfirst($term);
-                $newEmail = strtolower($term) . '@clientes.co';
-                $newId = 'USR-CLI-' . strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
-                try {
-                    $pdo->prepare("INSERT INTO `usuarios` (`id`, `nombre`, `email`, `rol`, `activo`, `created_at`) VALUES (?, ?, ?, 'Cliente', 1, NOW())")
-                        ->execute([$newId, $clientName, $newEmail]);
-                    $user = [
-                        'id' => $newId,
-                        'nombre' => $clientName,
-                        'email' => $newEmail,
-                        'rol' => 'Cliente',
-                        'activo' => 1
-                    ];
-                } catch (Exception $e) {}
-            }
-        }
-
-        if (!$user) {
-            logAuthAudit($pdo, $term, 'Desconocido', 'RECUPERAR_CLAVE_NO_EXISTE', 'Intento de recuperación con identificador no encontrado', 'BLOQUEADO_403');
-            sendResponse(false, null, 'No se encontró ninguna cuenta asociada al correo o usuario proporcionado.', 404);
+            logAuthAudit($pdo, $term, 'Desconocido', 'RECUPERACION_DENEGADA_NO_REGISTRADO', 'Intento de recuperación denegado: El usuario no existe en ParkFlow', 'BLOQUEADO_403');
+            sendResponse(false, null, 'Acceso denegado: El correo o usuario "' . htmlspecialchars($term) . '" no se encuentra registrado en el sistema ParkFlow. Solo los usuarios registrados pueden recibir un código de recuperación.', 404);
         }
 
         // Generar código de seguridad temporal y token criptográfico

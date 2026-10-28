@@ -2196,14 +2196,14 @@ html, body {
                         <div class="auth-field" style="margin-bottom: 1rem;">
                             <label class="auth-field-label" for="recoveryModalEmail">
                                 <span>Correo Electrónico o Usuario</span>
-                                <span class="field-hint-text">Email o Usuario</span>
+                                <span class="field-hint-text">Solo registrados</span>
                             </label>
                             <div class="auth-input-wrapper">
                                 <span class="input-leading-icon">✉️</span>
-                                <input type="text" id="recoveryModalEmail" class="auth-text-input" placeholder="ej: admin@parkflow.co, tu correo o tu usuario..." onkeydown="if(event.key==='Enter') submitPasswordRecoveryModal()">
+                                <input type="text" id="recoveryModalEmail" class="auth-text-input" placeholder="ej: admin@parkflow.co o tu usuario registrado..." onkeydown="if(event.key==='Enter') submitPasswordRecoveryModal()">
                             </div>
                             <div style="font-size: 0.7rem; color: var(--text-muted); margin-top: 0.4rem; line-height: 1.35;">
-                                💡 Puedes ingresar tu correo real, tu correo registrado o tu nombre de usuario.
+                                🔒 Exclusivo para cuentas registradas en el sistema ParkFlow (Administrador, Operadores o Clientes).
                             </div>
                         </div>
 
