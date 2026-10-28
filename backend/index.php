@@ -2143,7 +2143,7 @@ html, body {
                     </div>
 
                     <div class="auth-aux-row">
-                        <button type="button" class="link-forgot-pass" onclick="focusRecoveryField()">
+                        <button type="button" class="link-forgot-pass" onclick="openPasswordRecoveryModal()">
                             ¿Olvidaste tu contraseña? Recuperar clave
                         </button>
                     </div>
@@ -2152,82 +2152,102 @@ html, body {
                         🚀 Ingresar al Sistema ParkFlow →
                     </button>
                 </form>
+            </div>
+        </div>
 
-                <!-- Panel de Recuperación Segura de Contraseña -->
-                <div class="auth-recovery-card" id="authRecoveryCard">
-                    <!-- Paso 1: Solicitar Código -->
-                    <div id="recoveryStep1">
-                        <div class="recovery-card-header">
-                            <div class="recovery-badge-icon">🔑</div>
-                            <div class="recovery-text-wrap">
-                                <div class="recovery-title">Recuperar Contraseña</div>
-                                <div class="recovery-desc">Ingresa tu correo o usuario para generar tu código seguro de acceso:</div>
+        <!-- Modal: Recuperación de Contraseña -->
+        <div id="modalPasswordRecovery" class="modal-backdrop" style="z-index: 1000005;">
+            <div class="modal-container" style="max-width: 480px; border-color: rgba(0, 245, 255, 0.35); box-shadow: 0 20px 60px rgba(0, 0, 0, 0.85);">
+                <div class="modal-header-saas">
+                    <div class="modal-title-saas">
+                        <span style="font-size:1.25rem;">🔑</span>
+                        <span>Recuperación de Contraseña</span>
+                    </div>
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closePasswordRecoveryModal()">✕</button>
+                </div>
+                <div class="modal-body-saas">
+                    <!-- Paso 1: Solicitar Instrucciones -->
+                    <div id="recoveryModalStep1">
+                        <p style="font-size: 0.88rem; color: var(--text-heading); margin-bottom: 1.1rem; line-height: 1.45; font-weight: 500;">
+                            Ingresa tu correo electrónico registrado para recibir instrucciones de recuperación
+                        </p>
+
+                        <div class="auth-field" style="margin-bottom: 1rem;">
+                            <label class="auth-field-label" for="recoveryModalEmail">
+                                <span>Correo Electrónico Registrado</span>
+                            </label>
+                            <div class="auth-input-wrapper">
+                                <span class="input-leading-icon">✉️</span>
+                                <input type="email" id="recoveryModalEmail" class="auth-text-input" placeholder="ej: admin@parkflow.co" onkeydown="if(event.key==='Enter') submitPasswordRecoveryModal()">
                             </div>
                         </div>
 
-                        <div class="recovery-input-group">
-                            <div class="auth-input-wrapper recovery-input-wrapper">
-                                <span class="input-leading-icon">✉️</span>
-                                <input type="email" id="authRecoveryEmail" class="auth-text-input" placeholder="Correo registrado (ej: admin@parkflow.co)..." onkeydown="if(event.key==='Enter') executePasswordRecovery()">
-                            </div>
-                            <button type="button" class="btn-recovery-submit" id="btnRecoverySubmit" onclick="executePasswordRecovery()">
-                                Recuperar →
+                        <div id="recoveryModalFeedback" class="recovery-feedback-box" style="display:none; margin-bottom: 1rem;"></div>
+
+                        <div style="display: flex; gap: 0.65rem; justify-content: flex-end; margin-top: 1.25rem;">
+                            <button type="button" class="btn btn-secondary" onclick="closePasswordRecoveryModal()">
+                                Cancelar
+                            </button>
+                            <button type="button" class="btn btn-primary" id="btnSubmitRecoveryModal" onclick="submitPasswordRecoveryModal()">
+                                Enviar Instrucciones →
                             </button>
                         </div>
 
-                        <div class="recovery-switch-row">
-                            <a href="javascript:void(0)" onclick="showRecoveryStep(2)" class="recovery-sublink">
-                                ¿Ya tienes tu código de seguridad? <strong>Ingresar código aquí →</strong>
+                        <div style="text-align: center; margin-top: 1rem; padding-top: 0.75rem; border-top: 1px dashed var(--border);">
+                            <a href="javascript:void(0)" onclick="showRecoveryModalStep(2)" style="font-size: 0.75rem; color: var(--primary); text-decoration: none;">
+                                ¿Ya tienes un código de seguridad? <strong>Ingresar código aquí →</strong>
                             </a>
                         </div>
                     </div>
 
                     <!-- Paso 2: Ingresar Código y Nueva Contraseña -->
-                    <div id="recoveryStep2" style="display:none;">
-                        <div class="recovery-card-header">
-                            <div class="recovery-badge-icon">🔐</div>
-                            <div class="recovery-text-wrap">
-                                <div class="recovery-step-badge">PASO 2 DE 2 · VALIDACIÓN DE CÓDIGO</div>
-                                <div class="recovery-title">Ingresa tu Código y Nueva Contraseña</div>
-                                <div class="recovery-desc">Escribe el código recibido y tu nueva contraseña para ingresar:</div>
-                            </div>
+                    <div id="recoveryModalStep2" style="display:none;">
+                        <div style="margin-bottom: 1rem;">
+                            <span style="display:inline-block; font-size:0.65rem; font-weight:700; color:var(--primary); background:rgba(0,245,255,0.1); border:1px solid rgba(0,245,255,0.25); border-radius:9999px; padding:0.2rem 0.55rem; text-transform:uppercase; margin-bottom:0.4rem;">
+                                Validación de Código
+                            </span>
+                            <h4 style="font-size: 0.95rem; font-weight: 700; color: var(--text-heading); margin: 0 0 0.35rem 0;">
+                                Crea tu Nueva Contraseña
+                            </h4>
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin: 0;">
+                                Ingresa el código recibido junto con tu nueva clave de acceso.
+                            </p>
                         </div>
 
-                        <div class="auth-field" style="margin-bottom:0.5rem;">
-                            <label class="auth-field-label" for="resetInputCode">
-                                <span>Código de Seguridad (6 dígitos)</span>
-                                <span class="field-hint-text" id="resetCodeHint">Ej: 67563D</span>
+                        <div class="auth-field" style="margin-bottom:0.75rem;">
+                            <label class="auth-field-label" for="resetModalInputCode">
+                                <span>Código de Seguridad</span>
+                                <span class="field-hint-text" id="resetModalCodeHint">6 caracteres</span>
                             </label>
                             <div class="auth-input-wrapper">
                                 <span class="input-leading-icon">🏷️</span>
-                                <input type="text" id="resetInputCode" class="auth-text-input" placeholder="Ingresa el código (ej: 67563D)..." maxlength="12" style="letter-spacing:0.1em; font-weight:700; text-transform:uppercase;">
+                                <input type="text" id="resetModalInputCode" class="auth-text-input" placeholder="Ej: 67563D" maxlength="12" style="letter-spacing:0.12em; font-weight:700; text-transform:uppercase;">
                             </div>
                         </div>
 
-                        <div class="auth-field" style="margin-bottom:0.5rem;">
-                            <label class="auth-field-label" for="resetInputNewPass">
+                        <div class="auth-field" style="margin-bottom:1rem;">
+                            <label class="auth-field-label" for="resetModalInputNewPass">
                                 <span>Nueva Contraseña Segura</span>
                                 <span class="field-hint-text">Mínimo 5 caracteres</span>
                             </label>
                             <div class="auth-input-wrapper">
                                 <span class="input-leading-icon">🔒</span>
-                                <input type="password" id="resetInputNewPass" class="auth-text-input" placeholder="Escribe tu nueva contraseña..." autocomplete="new-password">
-                                <button type="button" class="btn-toggle-eye" onclick="toggleResetPassVisibility()" title="Mostrar u ocultar">👁️</button>
+                                <input type="password" id="resetModalInputNewPass" class="auth-text-input" placeholder="Escribe tu nueva contraseña..." autocomplete="new-password">
+                                <button type="button" class="btn-toggle-eye" onclick="toggleResetModalPassVisibility()" title="Mostrar u ocultar">👁️</button>
                             </div>
                         </div>
 
-                        <button type="button" class="btn btn-primary btn-reset-submit" id="btnResetSubmit" onclick="executePasswordReset()" style="width:100%; margin-top:0.4rem;">
-                            🚀 Restablecer Contraseña e Iniciar Sesión →
-                        </button>
+                        <div id="resetModalFeedback" class="recovery-feedback-box" style="display:none; margin-bottom: 1rem;"></div>
 
-                        <div class="recovery-switch-row" style="margin-top:0.5rem;">
-                            <a href="javascript:void(0)" onclick="showRecoveryStep(1)" class="recovery-sublink">
-                                ← Volver a solicitar otro código
-                            </a>
+                        <div style="display: flex; gap: 0.65rem; justify-content: flex-end; margin-top: 1.25rem;">
+                            <button type="button" class="btn btn-secondary" onclick="showRecoveryModalStep(1)">
+                                ← Volver
+                            </button>
+                            <button type="button" class="btn btn-primary" id="btnSubmitResetModal" onclick="submitPasswordResetModal()">
+                                🚀 Restablecer Contraseña →
+                            </button>
                         </div>
                     </div>
-
-                    <div id="recoveryFeedback" class="recovery-feedback-box" style="display:none;"></div>
                 </div>
             </div>
         </div>
@@ -4589,59 +4609,64 @@ html, body {
         if (passInput) passInput.value = '';
     }
 
-    function focusRecoveryField() {
-        const card = document.getElementById('authRecoveryCard');
-        const inp = document.getElementById('authRecoveryEmail');
-        if (card) {
-            card.classList.add('highlight-focus');
-            setTimeout(() => card.classList.remove('highlight-focus'), 1800);
-        }
-        if (inp) {
-            const mainEmail = document.getElementById('authInputEmail');
-            if (mainEmail && mainEmail.value.trim() && !inp.value.trim()) {
-                inp.value = mainEmail.value.trim();
+    let activeRecoveryEmail = '';
+
+    function openPasswordRecoveryModal() {
+        const modal = document.getElementById('modalPasswordRecovery');
+        if (!modal) return;
+        modal.classList.add('open');
+        showRecoveryModalStep(1);
+
+        const emailInp = document.getElementById('recoveryModalEmail');
+        const mainEmail = document.getElementById('authInputEmail');
+        if (emailInp) {
+            if (mainEmail && mainEmail.value.trim() && !emailInp.value.trim()) {
+                emailInp.value = mainEmail.value.trim();
             }
-            inp.focus();
-            inp.select();
+            setTimeout(() => emailInp.focus(), 120);
         }
     }
 
-    let activeRecoveryEmail = '';
+    function closePasswordRecoveryModal() {
+        const modal = document.getElementById('modalPasswordRecovery');
+        if (modal) modal.classList.remove('open');
+    }
 
-    function showRecoveryStep(step) {
-        const step1 = document.getElementById('recoveryStep1');
-        const step2 = document.getElementById('recoveryStep2');
-        const box = document.getElementById('recoveryFeedback');
-        if (box) box.style.display = 'none';
+    function showRecoveryModalStep(step) {
+        const step1 = document.getElementById('recoveryModalStep1');
+        const step2 = document.getElementById('recoveryModalStep2');
+        const f1 = document.getElementById('recoveryModalFeedback');
+        const f2 = document.getElementById('resetModalFeedback');
+        if (f1) f1.style.display = 'none';
+        if (f2) f2.style.display = 'none';
 
         if (step === 2) {
             if (step1) step1.style.display = 'none';
             if (step2) step2.style.display = 'block';
-            const codeInp = document.getElementById('resetInputCode');
-            const passInp = document.getElementById('resetInputNewPass');
-            if (codeInp && !codeInp.value) {
-                codeInp.focus();
-            } else if (passInp) {
-                passInp.focus();
-            }
+            const codeInp = document.getElementById('resetModalInputCode');
+            const passInp = document.getElementById('resetModalInputNewPass');
+            setTimeout(() => {
+                if (codeInp && !codeInp.value) codeInp.focus();
+                else if (passInp) passInp.focus();
+            }, 100);
         } else {
             if (step2) step2.style.display = 'none';
             if (step1) step1.style.display = 'block';
-            const emailInp = document.getElementById('authRecoveryEmail');
-            if (emailInp) emailInp.focus();
+            const emailInp = document.getElementById('recoveryModalEmail');
+            if (emailInp) setTimeout(() => emailInp.focus(), 100);
         }
     }
 
-    function toggleResetPassVisibility() {
-        const passInput = document.getElementById('resetInputNewPass');
+    function toggleResetModalPassVisibility() {
+        const passInput = document.getElementById('resetModalInputNewPass');
         if (!passInput) return;
         passInput.type = passInput.type === 'password' ? 'text' : 'password';
     }
 
-    async function executePasswordRecovery() {
-        const inp = document.getElementById('authRecoveryEmail');
-        const btn = document.getElementById('btnRecoverySubmit');
-        const box = document.getElementById('recoveryFeedback');
+    async function submitPasswordRecoveryModal() {
+        const inp = document.getElementById('recoveryModalEmail');
+        const btn = document.getElementById('btnSubmitRecoveryModal');
+        const box = document.getElementById('recoveryModalFeedback');
         const email = inp ? inp.value.trim() : '';
 
         if (!email) {
@@ -4654,10 +4679,10 @@ html, body {
             return;
         }
 
-        const origBtnText = btn ? btn.innerHTML : '';
+        const origBtnText = btn ? btn.innerHTML : 'Enviar Instrucciones →';
         if (btn) {
             btn.disabled = true;
-            btn.innerHTML = '<span>⏳ Generando...</span>';
+            btn.innerHTML = '<span>⏳ Verificando...</span>';
         }
         if (box) box.style.display = 'none';
 
@@ -4676,42 +4701,40 @@ html, body {
 
             if (res.ok && json.success && json.data) {
                 activeRecoveryEmail = json.data.email || email;
-                
-                // Prellenar código en el Paso 2
-                const codeInp = document.getElementById('resetInputCode');
-                const codeHint = document.getElementById('resetCodeHint');
+
+                const codeInp = document.getElementById('resetModalInputCode');
+                const codeHint = document.getElementById('resetModalCodeHint');
                 if (codeInp) codeInp.value = json.data.codigo_seguridad;
                 if (codeHint) codeHint.innerText = 'Generado: ' + json.data.codigo_seguridad;
 
                 if (box) {
                     box.style.display = 'block';
                     box.className = 'recovery-feedback-box success';
-                    box.innerHTML = `✅ <strong>Código generado:</strong> <span style="font-size:1.1em; color:#00f5ff; font-weight:bold; letter-spacing:0.1em;">${json.data.codigo_seguridad}</span> para <strong>${json.data.nombre}</strong> (${json.data.rol}).<br>` +
-                        `<small style="color:var(--text-muted);">Cargando formulario de validación...</small>`;
+                    box.innerHTML = `✅ <strong>Instrucciones generadas:</strong> Tu código de seguridad temporal es <strong style="color:#00f5ff; letter-spacing:0.08em; font-size:1.1em;">${json.data.codigo_seguridad}</strong> para <strong>${json.data.nombre}</strong> (${json.data.rol}).<br><small style="color:var(--text-muted);">Abriendo pantalla de validación...</small>`;
                 }
 
-                // Transición automática al Paso 2 después de 800ms
                 setTimeout(() => {
-                    showRecoveryStep(2);
-                    if (box) {
-                        box.style.display = 'block';
-                        box.className = 'recovery-feedback-box success';
-                        box.innerHTML = `✅ Código <strong>${json.data.codigo_seguridad}</strong> verificado. Ingresa ahora tu nueva contraseña para acceder:`;
+                    showRecoveryModalStep(2);
+                    const f2 = document.getElementById('resetModalFeedback');
+                    if (f2) {
+                        f2.style.display = 'block';
+                        f2.className = 'recovery-feedback-box success';
+                        f2.innerHTML = `✅ Código <strong>${json.data.codigo_seguridad}</strong> generado exitosamente. Ingresa ahora tu nueva contraseña:`;
                     }
                 }, 900);
             } else {
                 if (box) {
                     box.style.display = 'block';
                     box.className = 'recovery-feedback-box error';
-                    box.innerHTML = '❌ ' + (json.message || 'No fue posible procesar la recuperación de contraseña.');
+                    box.innerHTML = '❌ ' + (json.message || 'No se encontró ninguna cuenta asociada a este correo.');
                 }
             }
         } catch (err) {
-            console.error('Error al recuperar contraseña:', err);
+            console.error('Error al solicitar recuperación:', err);
             if (box) {
                 box.style.display = 'block';
                 box.className = 'recovery-feedback-box error';
-                box.innerHTML = '❌ Error de comunicación con el servidor. Verifica que los servicios de Apache y MySQL estén activos.';
+                box.innerHTML = '❌ Error de comunicación con el servidor. Verifica que Apache y MySQL estén activos.';
             }
         } finally {
             if (btn) {
@@ -4721,19 +4744,18 @@ html, body {
         }
     }
 
-    async function executePasswordReset() {
-        const codeInp = document.getElementById('resetInputCode');
-        const passInp = document.getElementById('resetInputNewPass');
-        const btn = document.getElementById('btnResetSubmit');
-        const box = document.getElementById('recoveryFeedback');
+    async function submitPasswordResetModal() {
+        const codeInp = document.getElementById('resetModalInputCode');
+        const passInp = document.getElementById('resetModalInputNewPass');
+        const btn = document.getElementById('btnSubmitResetModal');
+        const box = document.getElementById('resetModalFeedback');
 
         const code = codeInp ? codeInp.value.trim().toUpperCase() : '';
         const newPass = passInp ? passInp.value.trim() : '';
 
-        // Determinar correo a restablecer
         let email = activeRecoveryEmail;
         if (!email) {
-            const recoveryInp = document.getElementById('authRecoveryEmail');
+            const recoveryInp = document.getElementById('recoveryModalEmail');
             const mainEmailInp = document.getElementById('authInputEmail');
             email = (recoveryInp && recoveryInp.value.trim()) || (mainEmailInp && mainEmailInp.value.trim()) || 'admin@parkflow.co';
         }
@@ -4758,7 +4780,7 @@ html, body {
             return;
         }
 
-        const origText = btn ? btn.innerHTML : '';
+        const origText = btn ? btn.innerHTML : '🚀 Restablecer Contraseña →';
         if (btn) {
             btn.disabled = true;
             btn.innerHTML = '<span>⏳ Validando y Actualizando...</span>';
@@ -4786,8 +4808,13 @@ html, body {
                     box.innerHTML = `🎉 <strong>¡Éxito!</strong> Contraseña actualizada correctamente. Iniciando sesión...`;
                 }
 
-                // Iniciar sesión inmediatamente con la cuenta recuperada
+                const mainPass = document.getElementById('authInputPassword');
+                const mainEmail = document.getElementById('authInputEmail');
+                if (mainPass) mainPass.value = newPass;
+                if (mainEmail && email) mainEmail.value = email;
+
                 setTimeout(() => {
+                    closePasswordRecoveryModal();
                     loginUserSuccess(json.data);
                     showRbacToast(`¡Contraseña restablecida con éxito! Bienvenido/a <strong>${json.data.nombre}</strong>.`, false);
                 }, 800);
@@ -4943,11 +4970,17 @@ html, body {
 
     // Exponer funciones globales al objeto window para llamadas inline
     window.syncRoleSelection = syncRoleSelection;
-    window.focusRecoveryField = focusRecoveryField;
-    window.showRecoveryStep = showRecoveryStep;
-    window.toggleResetPassVisibility = toggleResetPassVisibility;
-    window.executePasswordRecovery = executePasswordRecovery;
-    window.executePasswordReset = executePasswordReset;
+    window.openPasswordRecoveryModal = openPasswordRecoveryModal;
+    window.closePasswordRecoveryModal = closePasswordRecoveryModal;
+    window.showRecoveryModalStep = showRecoveryModalStep;
+    window.submitPasswordRecoveryModal = submitPasswordRecoveryModal;
+    window.submitPasswordResetModal = submitPasswordResetModal;
+    window.toggleResetModalPassVisibility = toggleResetModalPassVisibility;
+    window.focusRecoveryField = openPasswordRecoveryModal;
+    window.executePasswordRecovery = submitPasswordRecoveryModal;
+    window.executePasswordReset = submitPasswordResetModal;
+    window.showRecoveryStep = showRecoveryModalStep;
+    window.toggleResetPassVisibility = toggleResetModalPassVisibility;
     window.performServerAuth = performServerAuth;
     window.showAuthError = showAuthError;
     window.toggleAuthPasswordVisibility = toggleAuthPasswordVisibility;
